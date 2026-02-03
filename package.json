@@ -32,7 +32,8 @@
     "link-watch": "plugin-kit link-watch",
     "lint": "eslint .",
     "prepublishOnly": "npm run build",
-    "watch": "pkg-utils watch --strict"
+    "watch": "pkg-utils watch --strict",
+    "prepare": "husky"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.6.0",
@@ -61,11 +62,11 @@
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
-    "@commitlint/cli": "^17.8.1",
-    "@commitlint/config-conventional": "^17.8.1",
+    "@commitlint/cli": "^20.4.1",
+    "@commitlint/config-conventional": "^20.4.1",
     "@sanity/pkg-utils": "^7.1.1",
     "@sanity/plugin-kit": "^4.0.19",
-    "@sanity/semantic-release-preset": "^2.0.5",
+    "@sanity/semantic-release-preset": "^6.0.0",
     "@types/is-hotkey": "^0.1.10",
     "@types/lodash": "^4.17.23",
     "@types/pluralize": "^0.0.33",
@@ -81,8 +82,8 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "^7.37.4",
     "eslint-plugin-react-hooks": "^4.6.2",
-    "husky": "^8.0.2",
-    "lint-staged": "^13.0.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "prettier": "^2.8.8",
     "prettier-plugin-packagejson": "^2.5.10",
     "react": "^19.0.0",

@@ -16,7 +16,7 @@ import {
 
 import {getOrderTitle} from '../../config/orders'
 import {ORDER_OPTIONS} from '../../constants'
-import type {AssetItem, BrowserView, HttpError, MyEpic, Order} from '../../types'
+import type {AssetItem, BrowserView, HttpError, Epic, Order} from '../../types'
 import {
   buildS3FilePath,
   buildS3ImagePath,
@@ -358,7 +358,7 @@ export const assetsActions = {...assetsSlice.actions}
 
 // Epics
 
-export const assetsDeleteEpic: MyEpic = (action$, _state$, {sanityClient, s3Client}) =>
+export const assetsDeleteEpic: Epic = (action$, _state$, {sanityClient, s3Client}) =>
   action$.pipe(
     filter(assetsActions.deleteRequest.match),
     mergeMap((action) => {
@@ -420,7 +420,7 @@ export const assetsDeleteEpic: MyEpic = (action$, _state$, {sanityClient, s3Clie
     })
   )
 
-export const assetsFetchEpic: MyEpic = (action$, state$, {sanityClient}) =>
+export const assetsFetchEpic: Epic = (action$, state$, {sanityClient}) =>
   action$.pipe(
     filter(assetsActions.fetchRequest.match),
     withLatestFrom(state$),
@@ -453,7 +453,7 @@ export const assetsFetchEpic: MyEpic = (action$, state$, {sanityClient}) =>
     })
   )
 
-export const assetsFetchPageIndexEpic: MyEpic = (action$, state$) =>
+export const assetsFetchPageIndexEpic: Epic = (action$, state$) =>
   action$.pipe(
     filter(assetsActions.loadPageIndex.match),
     withLatestFrom(state$),
@@ -487,7 +487,7 @@ export const assetsFetchPageIndexEpic: MyEpic = (action$, state$) =>
     })
   )
 
-export const assetsFetchNextPageEpic: MyEpic = (action$, state$) =>
+export const assetsFetchNextPageEpic: Epic = (action$, state$) =>
   action$.pipe(
     filter(assetsActions.loadNextPage.match),
     withLatestFrom(state$),
@@ -496,7 +496,7 @@ export const assetsFetchNextPageEpic: MyEpic = (action$, state$) =>
     )
   )
 
-export const assetsFetchAfterDeleteAllEpic: MyEpic = (action$, state$) =>
+export const assetsFetchAfterDeleteAllEpic: Epic = (action$, state$) =>
   action$.pipe(
     filter(assetsActions.deleteComplete.match),
     withLatestFrom(state$),
@@ -510,7 +510,7 @@ export const assetsFetchAfterDeleteAllEpic: MyEpic = (action$, state$) =>
     })
   )
 
-export const assetsOrderSetEpic: MyEpic = (action$) =>
+export const assetsOrderSetEpic: Epic = (action$) =>
   action$.pipe(
     filter(assetsActions.orderSet.match),
     mergeMap(() => {
@@ -521,7 +521,7 @@ export const assetsOrderSetEpic: MyEpic = (action$) =>
     })
   )
 
-export const assetsSearchEpic: MyEpic = (action$) =>
+export const assetsSearchEpic: Epic = (action$) =>
   action$.pipe(
     ofType(searchActions.querySet.type),
     debounceTime(400),
@@ -533,7 +533,7 @@ export const assetsSearchEpic: MyEpic = (action$) =>
     })
   )
 
-export const assetsListenerCreateQueueEpic: MyEpic = (action$) =>
+export const assetsListenerCreateQueueEpic: Epic = (action$) =>
   action$.pipe(
     filter(assetsActions.listenerCreateQueue.match),
     bufferTime(2000),
@@ -544,7 +544,7 @@ export const assetsListenerCreateQueueEpic: MyEpic = (action$) =>
     })
   )
 
-export const assetsListenerDeleteQueueEpic: MyEpic = (action$) =>
+export const assetsListenerDeleteQueueEpic: Epic = (action$) =>
   action$.pipe(
     filter(assetsActions.listenerDeleteQueue.match),
     bufferTime(2000),
@@ -555,7 +555,7 @@ export const assetsListenerDeleteQueueEpic: MyEpic = (action$) =>
     })
   )
 
-export const assetsListenerUpdateQueueEpic: MyEpic = (action$) =>
+export const assetsListenerUpdateQueueEpic: Epic = (action$) =>
   action$.pipe(
     filter(assetsActions.listenerUpdateQueue.match),
     bufferTime(2000),
@@ -567,7 +567,7 @@ export const assetsListenerUpdateQueueEpic: MyEpic = (action$) =>
   )
 
 // Re-sort on all updates (immediate and batched listener events)
-export const assetsSortEpic: MyEpic = (action$) =>
+export const assetsSortEpic: Epic = (action$) =>
   action$.pipe(
     ofType(
       assetsActions.insertUploads.type,
@@ -577,7 +577,7 @@ export const assetsSortEpic: MyEpic = (action$) =>
     mergeMap(() => of(assetsActions.sort()))
   )
 
-export const assetsUnpickEpic: MyEpic = (action$) =>
+export const assetsUnpickEpic: Epic = (action$) =>
   action$.pipe(
     ofType(assetsActions.orderSet.type, assetsActions.viewSet.type, searchActions.querySet.type),
     mergeMap(() => {
@@ -585,7 +585,7 @@ export const assetsUnpickEpic: MyEpic = (action$) =>
     })
   )
 
-export const assetsUpdateEpic: MyEpic = (action$, state$, {sanityClient}) =>
+export const assetsUpdateEpic: Epic = (action$, state$, {sanityClient}) =>
   action$.pipe(
     filter(assetsActions.updateRequest.match),
     withLatestFrom(state$),

@@ -4,7 +4,7 @@ import {ofType} from 'redux-observable'
 import {EMPTY, of} from 'rxjs'
 import {filter, mergeMap} from 'rxjs/operators'
 
-import type {AssetItem, Dialog, MyEpic} from '../../types'
+import type {AssetItem, Dialog, Epic} from '../../types'
 import {assetsActions} from '../assets'
 
 type DialogReducerState = {
@@ -30,7 +30,7 @@ const dialogSlice = createSlice({
     },
     showConfirmDeleteAssets(
       state,
-      action: PayloadAction<{assets: AssetItem[]; closeDialogId?: string}>,
+      action: PayloadAction<{assets: AssetItem[]; closeDialogId?: string}>
     ) {
       const {assets, closeDialogId} = action.payload
 
@@ -63,13 +63,13 @@ const dialogSlice = createSlice({
 
 // Epics
 
-export const dialogClearOnAssetUpdateEpic: MyEpic = (action$) =>
+export const dialogClearOnAssetUpdateEpic: Epic = (action$) =>
   action$.pipe(
     ofType(assetsActions.deleteComplete.type, assetsActions.updateComplete.type),
     filter(
       (action: {
         payload: {closeDialogId?: string}
-      }): action is PayloadAction<{closeDialogId?: string}> => !!action?.payload?.closeDialogId,
+      }): action is PayloadAction<{closeDialogId?: string}> => !!action?.payload?.closeDialogId
     ),
     mergeMap((action) => {
       const dialogId = action?.payload?.closeDialogId
@@ -77,7 +77,7 @@ export const dialogClearOnAssetUpdateEpic: MyEpic = (action$) =>
         return of(dialogSlice.actions.remove({id: dialogId}))
       }
       return EMPTY
-    }),
+    })
   )
 
 export const dialogActions = {...dialogSlice.actions}

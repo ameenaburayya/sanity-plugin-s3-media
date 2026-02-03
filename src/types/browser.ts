@@ -76,7 +76,7 @@ export type HttpError = {
 
 export type MarkDef = {_key: string; _type: string}
 
-export type MyEpic = Epic<
+export type Epic = Epic<
   Action,
   Action,
   RootReducerState,

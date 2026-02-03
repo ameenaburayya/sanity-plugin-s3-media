@@ -4,7 +4,7 @@ import groq from 'groq'
 import {empty, merge, of, throwError} from 'rxjs'
 import {catchError, delay, filter, mergeMap, takeUntil, withLatestFrom} from 'rxjs/operators'
 
-import {HttpError, MyEpic, S3AssetType, UploadItem} from '../../types'
+import {HttpError, Epic, S3AssetType, UploadItem} from '../../types'
 import {constructFilter, generatePreviewBlobUrl$, hashFile} from '../../utils'
 import {assetsActions} from '../assets'
 import type {RootReducerState, S3AssetDocument, UploadProgressEvent} from '../../types'
@@ -105,7 +105,7 @@ export const uploadsActions = {...uploadsSlice.actions}
 
 // Epics
 
-export const uploadsAssetStartEpic: MyEpic = (action$, _state$, {sanityClient, s3Client}) =>
+export const uploadsAssetStartEpic: Epic = (action$, _state$, {sanityClient, s3Client}) =>
   action$.pipe(
     filter(uploadsActions.uploadStart.match),
     mergeMap((action) => {
@@ -177,7 +177,7 @@ export const uploadsAssetStartEpic: MyEpic = (action$, _state$, {sanityClient, s
     })
   )
 
-export const uploadsAssetUploadEpic: MyEpic = (action$, state$) =>
+export const uploadsAssetUploadEpic: Epic = (action$, state$) =>
   action$.pipe(
     filter(uploadsActions.uploadRequest.match),
     withLatestFrom(state$),
@@ -214,7 +214,7 @@ export const uploadsAssetUploadEpic: MyEpic = (action$, state$) =>
     })
   )
 
-export const uploadsCompleteQueueEpic: MyEpic = (action$) =>
+export const uploadsCompleteQueueEpic: Epic = (action$) =>
   action$.pipe(
     filter(UPLOADS_ACTIONS.uploadComplete.match),
     mergeMap((action) => {
@@ -226,7 +226,7 @@ export const uploadsCompleteQueueEpic: MyEpic = (action$) =>
     })
   )
 
-export const uploadsCheckRequestEpic: MyEpic = (action$, state$, {sanityClient}) =>
+export const uploadsCheckRequestEpic: Epic = (action$, state$, {sanityClient}) =>
   action$.pipe(
     filter(uploadsActions.checkRequest.match),
     withLatestFrom(state$),

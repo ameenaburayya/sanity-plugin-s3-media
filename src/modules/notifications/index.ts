@@ -5,7 +5,7 @@ import {of} from 'rxjs'
 import {filter, mergeMap} from 'rxjs/operators'
 
 import type {S3ImageAsset} from '../../types'
-import type {MyEpic} from '../../types'
+import type {Epic} from '../../types'
 import {assetsActions} from '../assets'
 import {uploadsActions} from '../uploads'
 
@@ -40,7 +40,7 @@ const notificationsSlice = createSlice({
 
 // Epics
 
-export const notificationsAssetsDeleteCompleteEpic: MyEpic = (action$) =>
+export const notificationsAssetsDeleteCompleteEpic: Epic = (action$) =>
   action$.pipe(
     filter(assetsActions.deleteComplete.match),
     mergeMap((action) => {
@@ -55,7 +55,7 @@ export const notificationsAssetsDeleteCompleteEpic: MyEpic = (action$) =>
     })
   )
 
-export const notificationsAssetsDeleteErrorEpic: MyEpic = (action$) =>
+export const notificationsAssetsDeleteErrorEpic: Epic = (action$) =>
   action$.pipe(
     filter(assetsActions.deleteError.match),
     mergeMap((action) => {
@@ -73,7 +73,7 @@ export const notificationsAssetsDeleteErrorEpic: MyEpic = (action$) =>
     })
   )
 
-export const notificationsAssetsDeleteSkippedEpic: MyEpic = (action$) =>
+export const notificationsAssetsDeleteSkippedEpic: Epic = (action$) =>
   action$.pipe(
     filter(assetsActions.deleteSkipped.match),
     mergeMap((action) => {
@@ -88,7 +88,7 @@ export const notificationsAssetsDeleteSkippedEpic: MyEpic = (action$) =>
     })
   )
 
-export const notificationsAssetsUploadCompleteEpic: MyEpic = (action$) =>
+export const notificationsAssetsUploadCompleteEpic: Epic = (action$) =>
   action$.pipe(
     filter(uploadsActions.checkComplete.match),
     mergeMap((action) => {
@@ -104,7 +104,7 @@ export const notificationsAssetsUploadCompleteEpic: MyEpic = (action$) =>
     })
   )
 
-export const notificationsGenericErrorEpic: MyEpic = (action$) =>
+export const notificationsGenericErrorEpic: Epic = (action$) =>
   action$.pipe(
     ofType(
       assetsActions.fetchError.type,

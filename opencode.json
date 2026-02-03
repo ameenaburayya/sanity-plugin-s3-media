@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "sanity": {
+      "type": "remote",
+      "url": "https://mcp.sanity.io",
+      "oauth": {}
+    }
+  }
+}

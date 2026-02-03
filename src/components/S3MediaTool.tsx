@@ -1,7 +1,11 @@
-import React, { type FC } from 'react';
-import { VendorConfiguration } from '../types';
-import { S3ClientContextProvider } from '../contexts';
+import type {FC} from 'react'
+import {MediaBrowser} from './MediaBrowser'
+import {Flex} from '@sanity/ui'
 
-export const S3MediaTool: FC<VendorConfiguration> = (props) => {
-  return <S3ClientContextProvider vendorConfig={props}>s3 media</S3ClientContextProvider>;
-};
+export const S3MediaTool: FC = () => {
+  return (
+    <Flex direction="column" height="fill" flex={1}>
+      <MediaBrowser />
+    </Flex>
+  )
+}

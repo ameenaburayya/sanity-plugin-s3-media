@@ -1,7 +1,7 @@
 # sanity-plugin-s3-media
 
 Sanity Studio plugin that adds an S3-backed media browser, asset sources, and
-schema types for files and images stored in AWS S3 (or a CloudFront domain).
+schema types for files and images stored in AWS S3.
 
 ## Features
 
@@ -56,7 +56,6 @@ export const product = defineType({
       name: 'heroImage',
       type: 's3Image',
       options: {
-        accept: 'image/*',
         storeOriginalFilename: true,
       },
     }),

@@ -5,6 +5,10 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## <small>1.1.1 (2026-02-04)</small>
+
+- fix: imports ([6a4ca79](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/6a4ca79))
+
 ## 1.1.0 (2026-02-04)
 
 - fix: vitest ([492ef32](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/492ef32))

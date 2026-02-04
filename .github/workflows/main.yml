@@ -127,7 +127,7 @@ jobs:
           cache: pnpm
           node-version: lts/*
       - run: pnpm install --frozen-lockfile
-      - run: pnpm audit --audit-level=high
+      - run: pnpm audit --omit=dev --audit-level=high
         # Branches that will release new versions are defined in .releaserc.json
         # @TODO remove --dry-run after verifying everything is good to go
       - run: npx semantic-release --dry-run

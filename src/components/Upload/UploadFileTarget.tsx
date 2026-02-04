@@ -255,6 +255,7 @@ export function UploadFileTarget<ComponentProps>(Component: ComponentType<Compon
           onDrop={disabled ? undefined : handleDrop}
           {...fileTargetDataAttribute}
         />
+
         {!disabled && showPasteInput && (
           <div contentEditable onPaste={handlePaste} ref={pasteInput} style={PASTE_INPUT_STYLE} />
         )}

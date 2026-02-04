@@ -4,10 +4,9 @@ name: CI & Release
 # Workflow name based on selected inputs. Fallback to default Github naming when expression evaluates to empty string
 run-name: >-
   ${{
-    inputs.release && inputs.test && format('Build {0} ➤ Test ➤ Publish to NPM', github.ref_name)  ||
-    inputs.release && !inputs.test && format('Build {0} ➤ Skip Tests ➤ Publish to NPM', github.ref_name) ||
     github.event_name == 'workflow_dispatch' && inputs.test && format('Build {0} ➤ Test', github.ref_name) ||
     github.event_name == 'workflow_dispatch' && !inputs.test && format('Build {0} ➤ Skip Tests', github.ref_name) ||
+    github.event_name == 'push' && format('Build {0} ➤ Test ➤ Publish to NPM', github.ref_name) ||
     ''
   }}
 
@@ -24,11 +23,6 @@ on:
         description: Run tests
         required: true
         default: true
-        type: boolean
-      release:
-        description: Release new version
-        required: true
-        default: false
         type: boolean
 
 concurrency:
@@ -59,37 +53,16 @@ jobs:
 
   test:
     needs: build
-    # The test matrix can be skipped, in case a new release needs to be fast-tracked and tests are already passing on main
+    # The test suite can be skipped via workflow_dispatch
     if: github.event.inputs.test != 'false'
-    runs-on: ${{ matrix.os }}
-    name: Node.js ${{ matrix.node }} / ${{ matrix.os }}
-    strategy:
-      # A test failing on windows doesn't mean it'll fail on macos. It's useful to let all tests run to its completion to get the full picture
-      fail-fast: false
-      matrix:
-        # Run the testing suite on each major OS with the latest LTS release of Node.js
-        os: [macos-latest, ubuntu-latest, windows-latest]
-        node: [lts/*]
-        # It makes sense to also test the oldest, and latest, versions of Node.js, on ubuntu-only since it's the fastest CI runner
-        include:
-          - os: ubuntu-latest
-            # Test the oldest LTS release of Node that's still receiving bugfixes and security patches, versions older than that have reached End-of-Life
-            node: lts/-1
-          - os: ubuntu-latest
-            # Test the actively developed version that will become the latest LTS release next October
-            node: current
+    runs-on: ubuntu-latest
+    name: Node.js lts/* / ubuntu-latest
     steps:
-      # It's only necessary to do this for windows, as mac and ubuntu are sane OS's that already use LF
-      - name: Set git to use LF
-        if: matrix.os == 'windows-latest'
-        run: |
-          git config --global core.autocrlf false
-          git config --global core.eol lf
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           cache: npm
-          node-version: ${{ matrix.node }}
+          node-version: lts/*
       - run: npm install
       - run: npm test --if-present
 
@@ -100,8 +73,8 @@ jobs:
       pull-requests: write # to be able to comment on released pull requests
       id-token: write # to enable use of OIDC for npm provenance
     needs: [build, test]
-    # only run if opt-in during workflow_dispatch
-    if: always() && github.event.inputs.release == 'true' && needs.build.result != 'failure' && needs.test.result != 'failure' && needs.test.result != 'cancelled'
+    # release automatically on push to main
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.build.result == 'success' && (needs.test.result == 'success' || needs.test.result == 'skipped')
     runs-on: ubuntu-latest
     name: Semantic release
     steps:

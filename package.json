@@ -16,7 +16,34 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
+    "./asset-utils": {
+      "source": "./src/asset-utils.ts",
+      "import": "./dist/asset-utils.js",
+      "default": "./dist/asset-utils.js"
+    },
+    "./client": {
+      "source": "./src/client.ts",
+      "import": "./dist/client.js",
+      "default": "./dist/client.js"
+    },
     "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "default": "./dist/index.js"
+      },
+      "./asset-utils": {
+        "import": "./dist/asset-utils.js",
+        "default": "./dist/asset-utils.js"
+      },
+      "./client": {
+        "import": "./dist/client.js",
+        "default": "./dist/client.js"
+      },
+      "./package.json": "./package.json"
+    }
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

@@ -6,18 +6,11 @@ import {S3MediaContextProvider, S3MediaOptionsContextProvider} from './contexts'
 import {s3File, s3FileAsset, s3Image, s3ImageAsset} from './schema'
 import type {S3MediaPluginOptions} from './types'
 
-const tool = {
-  icon: ImageIcon,
-  name: 's3media',
-  title: 'S3 Media',
-  component: S3MediaTool,
-} satisfies SanityTool
-
 /**
  * Sanity plugin for managing media assets in AWS S3
  * @public
  */
-export const s3Media = definePlugin<S3MediaPluginOptions>((options) => ({
+export const s3Media = definePlugin<S3MediaPluginOptions | void>((options) => ({
   name: 's3Media',
   studio: {
     components: {
@@ -32,6 +25,14 @@ export const s3Media = definePlugin<S3MediaPluginOptions>((options) => ({
     types: [s3File, s3FileAsset, s3Image, s3ImageAsset],
   },
   tools: (prev) => {
-    return [...prev, tool]
+    return [
+      ...prev,
+      {
+        icon: ImageIcon,
+        name: 's3media',
+        title: options?.title || 'S3 Media',
+        component: S3MediaTool,
+      } satisfies SanityTool,
+    ]
   },
 }))

@@ -1,14 +1,14 @@
 import {get} from 'lodash'
 import {type FC, useCallback, useMemo} from 'react'
 import type {Observable} from 'rxjs'
-import {type AssetFromSource, type AssetSourceComponentAction,useTranslation} from 'sanity'
+import {type AssetFromSource, type AssetSourceComponentAction, useTranslation} from 'sanity'
 
 import {WithReferencedAsset} from '../../../components'
 import {type S3AssetSource, S3AssetType, type S3FileAsset} from '../../../types'
 import type {S3FileInputProps} from '../types'
 import {S3FileSkeleton} from './S3FileSkeleton'
 
-type S3FileAssetSourceProps = Pick<S3FileInputProps, 'value' | 'schemaType'> & {
+type S3FileInputAssetSourceProps = Pick<S3FileInputProps, 'value' | 'schemaType'> & {
   isUploading: boolean
   observeAsset: (id: string) => Observable<S3FileAsset>
   setSelectedAssetSource: (assetSource: S3AssetSource | null) => void
@@ -16,7 +16,7 @@ type S3FileAssetSourceProps = Pick<S3FileInputProps, 'value' | 'schemaType'> & {
   selectedAssetSource: S3AssetSource | null
 }
 
-export const S3FileAssetSource: FC<S3FileAssetSourceProps> = (props) => {
+export const S3FileInputAssetSource: FC<S3FileInputAssetSourceProps> = (props) => {
   const {
     isUploading,
     observeAsset,

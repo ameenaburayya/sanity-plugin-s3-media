@@ -9,6 +9,8 @@ function observeAssetDoc(documentPreviewStore: DocumentPreviewStore, id: string)
     'url',
     'metadata',
     'size',
+    'mimeType',
+    'extension',
   ])
 }
 

@@ -1,12 +1,15 @@
 import {useToast} from '@sanity/ui'
 import {type FC, useCallback, useEffect, useMemo, useState} from 'react'
-import {  type AssetFromSource,
-type AssetSourceUploader, DEFAULT_STUDIO_CLIENT_OPTIONS,   MemberField,
+import {
+  type AssetFromSource,
+  type AssetSourceUploader,
+  DEFAULT_STUDIO_CLIENT_OPTIONS,
+  MemberField,
   PatchEvent,
   set,
   setIfMissing,
   unset,
-useClient,
+  useClient,
   useDocumentPreviewStore,
   useTranslation,
 } from 'sanity'
@@ -17,8 +20,8 @@ import {createS3FileAssetSource} from '../../../lib'
 import type {S3AssetSource} from '../../../types'
 import {createInitialUploadPatches, observeFileAsset} from '../../../utils'
 import type {S3FileInputProps} from '../types'
-import {S3FileAsset as S3FileAssetComponent} from './S3FileAsset'
-import {S3FileAssetSource} from './S3FileAssetSource'
+import {S3FileInputAsset} from './S3FileInputAsset'
+import {S3FileInputAssetSource} from './S3FileInputAssetSource'
 
 export const S3FileInput: FC<S3FileInputProps> = (props) => {
   const {
@@ -31,6 +34,7 @@ export const S3FileInput: FC<S3FileInputProps> = (props) => {
     renderPreview,
     schemaType,
     value,
+    readOnly,
     changed,
     id,
     path,
@@ -183,11 +187,12 @@ export const S3FileInput: FC<S3FileInputProps> = (props) => {
 
   const renderAsset = useCallback(() => {
     return (
-      <S3FileAssetComponent
+      <S3FileInputAsset
         path={path}
         observeAsset={observeAsset}
         elementProps={elementProps}
         id={id}
+        readOnly={readOnly}
         value={value}
         changed={changed}
         schemaType={schemaType}
@@ -210,6 +215,7 @@ export const S3FileInput: FC<S3FileInputProps> = (props) => {
     handleStaleUpload,
     observeAsset,
     schemaType,
+    readOnly,
     assetSources,
     isStale,
     isUploading,
@@ -241,9 +247,8 @@ export const S3FileInput: FC<S3FileInputProps> = (props) => {
 
         return null
       })}
-
       {selectedAssetSource && (
-        <S3FileAssetSource
+        <S3FileInputAssetSource
           value={value}
           schemaType={schemaType}
           isUploading={isUploading}
@@ -252,7 +257,7 @@ export const S3FileInput: FC<S3FileInputProps> = (props) => {
           selectedAssetSource={selectedAssetSource}
           setSelectedAssetSource={setSelectedAssetSource}
         />
-      )}
+      )}{' '}
     </>
   )
 }

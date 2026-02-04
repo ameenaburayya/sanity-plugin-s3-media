@@ -1,7 +1,7 @@
 /** @public */
 export type S3MediaPluginOptions = {
   directUploads?: boolean
-  maxSize?: number
+  title?: string
 }
 
 /** @public */

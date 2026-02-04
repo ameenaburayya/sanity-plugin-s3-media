@@ -12,7 +12,7 @@ export function resolveUploaderBySchemaType(
     uploaders.find((uploader) => {
       return (
         _isType(schemaType, uploader.schemaTypeName) &&
-        accepts(file, uploader.accepts) &&
+        accepts(file, uploader.accept) &&
         accepts(file, schemaType.options?.accept || '')
       )
     }) || null

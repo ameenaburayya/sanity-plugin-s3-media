@@ -1,6 +1,6 @@
 import {WarningOutlineIcon} from '@sanity/icons'
 import {Text} from '@sanity/ui'
-import {type FC, useCallback, useState} from 'react'
+import {type FC, memo, useCallback, useState} from 'react'
 import {LoadingBlock, useTranslation} from 'sanity'
 
 import {useS3MediaContext} from '../../../contexts'
@@ -37,7 +37,7 @@ const AccessWarningOverlay = () => {
 
 type S3ImageInputPreviewProps = Pick<S3ImageInputProps, 'readOnly' | 'value'>
 
-export const S3ImageInputPreview: FC<S3ImageInputPreviewProps> = (props) => {
+export const S3ImageInputPreview: FC<S3ImageInputPreviewProps> = memo((props) => {
   const {readOnly, value} = props
 
   const {t} = useTranslation()
@@ -80,4 +80,6 @@ export const S3ImageInputPreview: FC<S3ImageInputPreviewProps> = (props) => {
       )}
     </RatioBox>
   )
-}
+})
+
+S3ImageInputPreview.displayName = 'S3ImageInputPreview'

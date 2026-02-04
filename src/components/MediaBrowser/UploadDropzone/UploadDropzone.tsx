@@ -58,7 +58,7 @@ async function filterFiles(fileList: FileList) {
 export const UploadDropzone: FC<PropsWithChildren> = (props) => {
   const {children} = props
 
-  const {directUploads, maxSize} = useS3MediaOptionsContext()
+  const {directUploads} = useS3MediaOptionsContext()
 
   const {onSelect} = useAssetSourceActions()
 
@@ -135,7 +135,6 @@ export const UploadDropzone: FC<PropsWithChildren> = (props) => {
     // (This is currently due to Sanity's native image input taking precedence with drag and drop)
     noDrag: !!onSelect,
     onDrop: handleDrop,
-    maxSize,
     onDropRejected: handleDropRejected,
     disabled: !directUploads,
   })

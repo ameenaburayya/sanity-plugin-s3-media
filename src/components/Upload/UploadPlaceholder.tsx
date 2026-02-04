@@ -58,7 +58,7 @@ export const UploadPlaceholder: FC<UploadPlaceholderProps> = (props) => {
     [onUpload],
   )
 
-  const accept = get(schemaType, 'options.accept', '')
+  const accept = get(schemaType, 'options.accept', isFileType ? '' : 'image/*')
 
   const uploadButton = useMemo(() => {
     switch (assetSourcesWithUpload.length) {
@@ -106,15 +106,15 @@ export const UploadPlaceholder: FC<UploadPlaceholderProps> = (props) => {
 
   const messageText = useMemo(() => {
     if (directUploads === false) {
-      return t('inputs.files.common.placeholder.upload-not-supported')
+      return "Can't upload files here"
     }
 
     if (readOnly) {
-      return t('inputs.files.common.placeholder.read-only')
+      return 'Read only'
     }
 
-    return t('inputs.files.common.placeholder.drag-or-paste-to-upload', {context: type})
-  }, [directUploads, readOnly, t, type])
+    return isFileType ? 'Drag or paste file here' : 'Drag or paste image here'
+  }, [directUploads, readOnly, isFileType])
 
   return assetSourcesWithUpload.length === 0 ? null : (
     <Flex

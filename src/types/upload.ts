@@ -17,7 +17,7 @@ export type S3Uploader = (options: {
 export type S3UploaderDefinition = {
   assetType: S3AssetType
   schemaTypeName: 's3Image' | 's3File'
-  accepts: string
+  accept: string
   upload: S3Uploader
 }
 

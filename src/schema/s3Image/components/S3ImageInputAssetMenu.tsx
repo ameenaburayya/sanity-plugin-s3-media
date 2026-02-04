@@ -151,6 +151,7 @@ export const S3ImageInputAssetMenu: FC<S3ImageInputAssetMenuProps> = (props) => 
   const {t} = useTranslation()
 
   const accept = useMemo(() => get(schemaType, 'options.accept', 'image/*'), [schemaType])
+
   const asset = value?.asset
 
   if (!asset) {

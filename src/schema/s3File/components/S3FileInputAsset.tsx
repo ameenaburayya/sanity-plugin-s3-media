@@ -15,11 +15,11 @@ import {type S3AssetSource, S3AssetType, type S3FileAsset as S3FileAssetType} fr
 import {isS3FileSource} from '../../../utils'
 import {type S3FileInputProps} from '../types'
 import {InvalidFileWarning} from './InvalidFileWarning'
-import {S3FilePreview} from './S3FilePreview'
+import {S3FileInputPreview} from './S3FileInputPreview'
 
 const ASSET_FIELD_PATH = ['asset']
 
-type S3FileAssetProps = Pick<
+type S3FileInputAssetProps = Pick<
   S3FileInputProps,
   'elementProps' | 'changed' | 'readOnly' | 'schemaType' | 'path' | 'value' | 'focused' | 'id'
 > & {
@@ -35,7 +35,7 @@ type S3FileAssetProps = Pick<
   setSelectedAssetSource: (assetSource: S3AssetSource | null) => void
 }
 
-export const S3FileAsset: FC<S3FileAssetProps> = (props) => {
+export const S3FileInputAsset: FC<S3FileInputAssetProps> = (props) => {
   const {
     id,
     assetSources,
@@ -151,7 +151,7 @@ export const S3FileAsset: FC<S3FileAssetProps> = (props) => {
               )}
 
               {!value?._upload && value?.asset && (
-                <S3FilePreview
+                <S3FileInputPreview
                   value={value}
                   readOnly={readOnly}
                   schemaType={schemaType}

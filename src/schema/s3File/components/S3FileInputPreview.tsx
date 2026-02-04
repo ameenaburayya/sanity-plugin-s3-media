@@ -17,7 +17,7 @@ import {type S3FileInputProps} from '../types'
 import {S3FileActionsMenu} from './S3FileActionsMenu'
 import {S3FileSkeleton} from './S3FileSkeleton'
 
-type S3FilePreviewContentProps = Pick<S3FileInputProps, 'readOnly' | 'value'> & {
+type S3FileInputPreviewContentProps = Pick<S3FileInputProps, 'readOnly' | 'value'> & {
   browseMenuItem: ReactNode
   clearField: () => void
   fileAsset: S3FileAsset
@@ -26,7 +26,7 @@ type S3FilePreviewContentProps = Pick<S3FileInputProps, 'readOnly' | 'value'> & 
   uploadMenuItem: ReactNode
 }
 
-const S3FilePreviewContent: FC<S3FilePreviewContentProps> = (props) => {
+const S3FileInputPreviewContent: FC<S3FileInputPreviewContentProps> = (props) => {
   const {
     browseMenuItem,
     clearField,
@@ -37,18 +37,15 @@ const S3FilePreviewContent: FC<S3FilePreviewContentProps> = (props) => {
     uploadMenuItem,
   } = props
 
-  const {originalFilename, extension, size} = fileAsset
-  const filename = originalFilename || `download.${extension}`
-
   const {buildAssetUrl} = useS3MediaContext()
 
   const url = buildAssetUrl({assetId: fileAsset._id, assetType: S3AssetType.FILE})
 
   return (
     <S3FileActionsMenu
-      size={size}
-      originalFilename={filename}
+      fileAsset={fileAsset}
       muted={!readOnly}
+      disabled={readOnly}
       onMenuOpen={setIsMenuOpen}
       isMenuOpen={isMenuOpen}
     >
@@ -63,7 +60,7 @@ const S3FilePreviewContent: FC<S3FilePreviewContentProps> = (props) => {
   )
 }
 
-type S3FilePreviewProps = Pick<S3FileInputProps, 'readOnly' | 'schemaType' | 'value'> & {
+type S3FileInputPreviewProps = Pick<S3FileInputProps, 'readOnly' | 'schemaType' | 'value'> & {
   assetSources: S3AssetSource[]
   observeAsset: (id: string) => Observable<S3FileAsset>
   clearField: () => void
@@ -71,7 +68,7 @@ type S3FilePreviewProps = Pick<S3FileInputProps, 'readOnly' | 'schemaType' | 'va
   setSelectedAssetSource: (assetSource: S3AssetSource | null) => void
 }
 
-export const S3FilePreview: FC<S3FilePreviewProps> = (props) => {
+export const S3FileInputPreview: FC<S3FileInputPreviewProps> = (props) => {
   const {
     assetSources,
     clearField,
@@ -202,7 +199,7 @@ export const S3FilePreview: FC<S3FilePreviewProps> = (props) => {
       waitPlaceholder={<S3FileSkeleton />}
     >
       {(fileAsset) => (
-        <S3FilePreviewContent
+        <S3FileInputPreviewContent
           browseMenuItem={browseMenuItem}
           clearField={clearField}
           fileAsset={fileAsset}

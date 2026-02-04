@@ -1,8 +1,8 @@
 import {BinaryDocumentIcon} from '@sanity/icons'
 import {
-  Box,
   Card,
   Flex,
+  Inline,
   Menu,
   Popover,
   Stack,
@@ -12,14 +12,25 @@ import {
 } from '@sanity/ui'
 import {type FC, type ReactNode, useCallback, useEffect, useState} from 'react'
 import {ContextMenuButton, useTranslation} from 'sanity'
+import {styled} from 'styled-components'
 
+import {useS3MediaContext} from '../../../contexts'
+import {S3AssetType, type S3FileAsset} from '../../../types'
 import {formatBytes} from '../../../utils'
+
+const MenuActionsWrapper = styled(Inline)<{$isAbsolute?: boolean}>`
+  ${({$isAbsolute}) =>
+    $isAbsolute &&
+    `
+    position: absolute;
+    top: 0;
+    right: 0;
+  `}
+`
 
 type S3FileActionsMenuProps = {
   children: ReactNode
-  size: number
-  originalFilename: string
-  onClick?: () => void
+  fileAsset: S3FileAsset
   muted?: boolean
   disabled?: boolean
   isMenuOpen: boolean
@@ -27,9 +38,13 @@ type S3FileActionsMenuProps = {
 }
 
 export const S3FileActionsMenu: FC<S3FileActionsMenuProps> = (props) => {
-  const {originalFilename, size, children, muted, disabled, onClick, isMenuOpen, onMenuOpen} = props
+  const {children, muted, disabled, fileAsset, isMenuOpen, onMenuOpen} = props
   const [menuElement, setMenuElement] = useState<HTMLDivElement | null>(null)
   const [buttonElement, setButtonElement] = useState<HTMLButtonElement | null>(null)
+
+  const {originalFilename, extension, _id: assetId, size, mimeType} = fileAsset
+
+  const filename = originalFilename || `${assetId}.${extension}`
 
   const handleClick = useCallback(() => onMenuOpen(true), [onMenuOpen])
 
@@ -70,14 +85,41 @@ export const S3FileActionsMenu: FC<S3FileActionsMenuProps> = (props) => {
 
   const {t} = useTranslation()
 
-  return (
-    <Flex wrap="nowrap" justify="space-between" align="center">
+  const {buildAssetUrl} = useS3MediaContext()
+
+  const assetUrl = buildAssetUrl({assetType: S3AssetType.FILE, assetId})
+
+  const isAudioFile = mimeType.search('audio') === 0
+  const isVideoFile = mimeType.search('video') === 0
+
+  const renderPreview = useCallback(() => {
+    if (isVideoFile || isAudioFile) {
+      return (
+        <Flex align="center" justify="center" style={{height: '300px', width: '100%'}}>
+          {isVideoFile ? (
+            <video
+              controls
+              autoPlay
+              loop
+              src={assetUrl}
+              style={{
+                height: '100%',
+                width: '100%',
+              }}
+            />
+          ) : null}
+
+          {isAudioFile ? <audio controls src={assetUrl} style={{width: '100%'}} /> : null}
+        </Flex>
+      )
+    }
+
+    return (
       <Card
         as={muted || disabled ? undefined : 'button'}
         radius={2}
         padding={2}
         tone="inherit"
-        onClick={onClick}
         flex={1}
       >
         <Flex wrap="nowrap" align="center">
@@ -86,36 +128,40 @@ export const S3FileActionsMenu: FC<S3FileActionsMenuProps> = (props) => {
               <BinaryDocumentIcon />
             </Text>
           </Card>
+
           <Stack flex={1} space={2} marginLeft={3}>
             <Text size={1} textOverflow="ellipsis" muted={muted} weight="medium">
-              {originalFilename}
+              {filename}
             </Text>
+
             <Text size={1} muted>
               {formatBytes(size)}
             </Text>
           </Stack>
         </Flex>
       </Card>
+    )
+  }, [disabled, filename, isVideoFile, isAudioFile, muted, size, assetUrl])
 
-      <Box padding={2}>
-        <Flex justify="center" gap={2}>
-          {/* Using a customized Popover instead of MenuButton because a MenuButton will close on click
-     and break replacing an uploaded file. */}
-          <Popover
-            content={<Menu ref={setMenuElement}>{children}</Menu>}
-            id="file-actions-menu"
-            portal
-            open={isMenuOpen}
-            constrainSize
-          >
-            <ContextMenuButton
-              aria-label={t('inputs.file.actions-menu.file-options.aria-label')}
-              onClick={handleClick}
-              ref={setOptionsButtonRef}
-            />
-          </Popover>
-        </Flex>
-      </Box>
+  return (
+    <Flex wrap="nowrap" justify="space-between" align="center">
+      {renderPreview()}
+
+      <MenuActionsWrapper padding={2} $isAbsolute={isAudioFile || isVideoFile}>
+        <Popover
+          content={<Menu ref={setMenuElement}>{children}</Menu>}
+          id="file-actions-menu"
+          portal
+          open={isMenuOpen}
+          constrainSize
+        >
+          <ContextMenuButton
+            aria-label={t('inputs.file.actions-menu.file-options.aria-label')}
+            onClick={handleClick}
+            ref={setOptionsButtonRef}
+          />
+        </Popover>
+      </MenuActionsWrapper>
     </Flex>
   )
 }

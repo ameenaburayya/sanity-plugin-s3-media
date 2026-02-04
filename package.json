@@ -49,7 +49,6 @@
     "date-fns": "^4.0.0",
     "exif-component": "^1.0.1",
     "filesize": "^11.0.13",
-    "sanity": "^5.6.0",
     "groq": "^3.0.0",
     "is-hotkey": "^0.2.0",
     "lodash": "^4.17.23",
@@ -61,7 +60,8 @@
     "react-virtuoso": "^4.12.5",
     "redux": "^5.0.1",
     "redux-observable": "3.0.0-rc.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "sanity": "^5"
   },
   "devDependencies": {
     "@babel/parser": "^7.29.0",
@@ -71,6 +71,7 @@
     "@sanity/pkg-utils": "^10.4.4",
     "@sanity/plugin-kit": "^4.0.20",
     "@sanity/semantic-release-preset": "^6.0.0",
+    "@semantic-release/github": "^12.0.3",
     "@types/is-hotkey": "^0.1.10",
     "@types/lodash": "^4.17.23",
     "@types/node": "^25.2.0",

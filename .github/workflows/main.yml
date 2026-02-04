@@ -56,10 +56,10 @@ jobs:
           node-version: lts/*
       - run: pnpm install --frozen-lockfile
         # Linting can be skipped
-      - run: pnpm run lint --if-present
+      - run: pnpm run lint
         if: github.event.inputs.test != 'false'
         # But not the build script, as semantic-release will crash if this command fails so it makes sense to test it early
-      - run: pnpm run prepublishOnly --if-present
+      - run: pnpm run prepublishOnly
 
   test:
     needs: build

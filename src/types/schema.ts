@@ -94,10 +94,3 @@ export type S3ImageMetaData = {
   _type: 's3ImageMetadata'
   dimensions: S3ImageDimensions
 }
-
-declare module 'sanity' {
-  export interface IntrinsicDefinitions {
-    s3File: S3FileDefinition
-    s3Image: S3ImageDefinition
-  }
-}

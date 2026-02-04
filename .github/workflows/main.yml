@@ -83,6 +83,7 @@ jobs:
           # Need to fetch entire commit history to
           # analyze every commit since last release
           fetch-depth: 0
+          fetch-tags: true
       - uses: actions/setup-node@v4
         with:
           cache: npm

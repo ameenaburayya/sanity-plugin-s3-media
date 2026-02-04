@@ -58,6 +58,7 @@
     "format": "prettier --write --cache --ignore-unknown .",
     "link-watch": "plugin-kit link-watch",
     "lint": "eslint .",
+    "test": "vitest run",
     "prepare": "husky",
     "prepublishOnly": "npm run build",
     "watch": "pkg-utils watch --strict"
@@ -129,7 +130,8 @@
     "rimraf": "^3.0.2",
     "standard-version": "^9.5.0",
     "styled-components": "^6.3.8",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.9"
   },
   "peerDependencies": {
     "react": "^19",

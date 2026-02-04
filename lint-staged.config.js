@@ -1,4 +1,4 @@
 export default {
-  '**/*.{js,jsx}': ['eslint'],
-  '**/*.{ts,tsx}': ['eslint', () => 'tsc --build'],
+  '**/*.{js,jsx}': ['eslint --fix'],
+  '**/*.{ts,tsx}': ['eslint --fix', () => 'tsc --build'],
 }

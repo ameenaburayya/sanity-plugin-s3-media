@@ -1,6 +1,6 @@
 {
   "name": "sanity-plugin-s3-media",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "Adding the ability to have s3 bucket stored media",
   "keywords": [
     "sanity",

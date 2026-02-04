@@ -5,6 +5,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 1.1.0 (2026-02-04)
+
+- fix: vitest ([492ef32](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/492ef32))
+- feat: add getS3AssetExtension ([44465ee](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/44465ee))
+- build: use react compiler ([10def7f](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/10def7f))
+
 ## <small>1.0.3 (2026-02-04)</small>
 
 - fix: types ([50f89ee](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/50f89ee))

@@ -5,6 +5,15 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## <small>1.0.1 (2026-02-04)</small>
+
+- chore(ci): fetch tags for release ([f3ec5e1](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/f3ec5e1))
+- chore(release): 1.0.0 [skip ci] ([ec2257f](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/ec2257f))
+- chore(release): 1.0.0 [skip ci] ([86844a5](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/86844a5))
+- test: add unit tests for utils ([bbe5b3d](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/bbe5b3d))
+- fix: file and image preview ([df3c56f](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/df3c56f))
+- fix: tsconfig ([269bdde](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/269bdde))
+
 ## 1.0.0 (2026-02-04)
 
 - test: add unit tests for utils ([bbe5b3d](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/bbe5b3d))

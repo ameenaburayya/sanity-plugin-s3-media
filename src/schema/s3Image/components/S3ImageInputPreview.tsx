@@ -44,7 +44,9 @@ export const S3ImageInputPreview: FC<S3ImageInputPreviewProps> = (props) => {
 
   const {buildAssetUrl} = useS3MediaContext()
 
-  const url = buildAssetUrl({assetId: value?.asset?._ref!, assetType: S3AssetType.IMAGE})
+  const url = value?.asset?._ref
+    ? buildAssetUrl({assetId: value?.asset?._ref, assetType: S3AssetType.IMAGE})
+    : null
 
   const [isLoaded, setLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)

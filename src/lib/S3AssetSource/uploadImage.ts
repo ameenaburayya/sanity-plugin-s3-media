@@ -18,8 +18,7 @@ export const uploadImage: S3Uploader = (props) => {
     sanityClient,
     assetType: S3AssetType.IMAGE,
   }).pipe(
-    // @ts-expect-error
-    filter((event) => event.stage !== 'download'),
+    filter((event) => (event.type === 'progress' ? event.stage !== 'download' : true)),
     map((event) => ({
       ...event,
       progress: event.type === 'progress' ? 2 + (event.percent / 100) * 98 : 0,

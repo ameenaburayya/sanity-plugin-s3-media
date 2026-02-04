@@ -47,7 +47,7 @@ export const FileInputMenuItem: FC<
         onSelect(Array.from(event.target.files))
       }
     },
-    [onSelect],
+    [onSelect]
   )
 
   const renderMenuItem = useCallback(
@@ -67,7 +67,7 @@ export const FileInputMenuItem: FC<
         />
       </div>
     ),
-    [accept, capture, disabled, handleChange, id, multiple],
+    [accept, capture, disabled, handleChange, id, multiple]
   )
 
   return (

@@ -1,5 +1,5 @@
 import type {ThemeColorSchemeKey} from '@sanity/ui'
-import React, {type MouseEvent} from 'react'
+import {type MouseEvent} from 'react'
 import {css, styled} from 'styled-components'
 
 import {getSchemeColor} from '../../../utils'
@@ -9,7 +9,6 @@ type Props = {
   $showCheckerboard?: boolean
   $scheme?: ThemeColorSchemeKey
   src: string
-  style?: React.CSSProperties
 }
 
 export const Image: any = styled.img<Props>`

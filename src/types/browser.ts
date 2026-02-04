@@ -1,13 +1,9 @@
 import type {Action} from '@reduxjs/toolkit'
-import type {SanityAssetDocument, SanityClient, SanityImageAssetDocument} from '@sanity/client'
-import type {Epic} from 'redux-observable'
+import type {SanityClient} from '@sanity/client'
+import type {Epic as BaseEpic} from 'redux-observable'
 
 import type {S3Asset, S3AssetType, RootReducerState} from '.'
 import type {S3Client} from '../lib'
-
-export type MediaToolOptions = {
-  maximumUploadSize?: number
-}
 
 export type AssetItem = {
   _type: 'asset'
@@ -17,16 +13,7 @@ export type AssetItem = {
   updating: boolean
 }
 
-export type Block = {
-  _type: string
-  _key: string
-  children: Span[]
-  markDefs: MarkDef[]
-}
-
 export type BrowserView = 'grid' | 'table'
-
-export type ButtonVariant = 'danger' | 'default' | 'secondary'
 
 export type CardAssetData = {
   id: string
@@ -47,7 +34,7 @@ export type DialogAssetEditProps = {
 
 export type DialogConfirmProps = {
   closeDialogId?: string
-  confirmCallbackAction: Action // TODO: reconsider
+  confirmCallbackAction: Action
   confirmText: string
   description?: string
   headerTitle: string
@@ -59,24 +46,12 @@ export type DialogConfirmProps = {
 
 export type Dialog = DialogAssetEditProps | DialogConfirmProps
 
-export type Document = {
-  _createdAt: string
-  _id: string
-  _rev: string
-  _type: string
-  _updatedAt: string
-  name?: string
-  title?: string
-}
-
 export type HttpError = {
   message: string
   statusCode: number
 }
 
-export type MarkDef = {_key: string; _type: string}
-
-export type Epic = Epic<
+export type Epic = BaseEpic<
   Action,
   Action,
   RootReducerState,
@@ -91,34 +66,6 @@ type OrderDirection = 'asc' | 'desc'
 export type Order = {
   direction: OrderDirection
   field: string
-}
-
-export type SanityReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-}
-
-export type SanityUploadCompleteEvent = {
-  asset: SanityAssetDocument | SanityImageAssetDocument
-  id: string
-  type: 'complete'
-}
-
-export type SanityUploadResponseEvent = {
-  body: {document: Partial<SanityAssetDocument | SanityImageAssetDocument>}
-  headers: Record<string, string>
-  method: string
-  statusCode: number
-  statusMessage: string
-  type: 'response'
-  url: string
-}
-
-export type Span = {
-  _key: string
-  text: string
-  marks: string[]
 }
 
 export type UploadItem = {

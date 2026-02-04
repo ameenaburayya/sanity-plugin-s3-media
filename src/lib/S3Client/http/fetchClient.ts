@@ -1,9 +1,10 @@
+/* eslint-disable consistent-return */
 import {Observable} from 'rxjs'
 
 import type {Any, HttpRequestEvent} from '../types'
 import {ClientError, ServerError} from './errors'
 
-interface FetchOptions extends RequestInit {
+interface FetchOptions extends globalThis.RequestInit {
   url?: string
   timeout?: number
   retries?: number
@@ -30,7 +31,7 @@ export const createFetchClient = () => {
           const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
 
           // Prepare fetch options
-          const fetchOptions: RequestInit = {
+          const fetchOptions: globalThis.RequestInit = {
             method: options.method || 'GET',
             headers: {
               ...(options.headers || {}),
@@ -41,8 +42,7 @@ export const createFetchClient = () => {
           // Only add Content-Type for requests with body
           if (options.body) {
             fetchOptions.body = JSON.stringify(options.body)
-            ;(fetchOptions.headers as Record<string, string>)['Content-Type'] =
-              'application/json'
+            ;(fetchOptions.headers as Record<string, string>)['Content-Type'] = 'application/json'
           }
 
           // Make fetch request
@@ -79,6 +79,7 @@ export const createFetchClient = () => {
           } else if (response.status >= 400) {
             // Retry rate limiting
             const maxRetries = options.maxRetries !== undefined ? options.maxRetries : 3
+
             if (response.status === 429 && attemptNumber < maxRetries) {
               const delay = (options.retryDelay || 1000) * Math.pow(2, attemptNumber)
               await new Promise((resolve) => setTimeout(resolve, delay))

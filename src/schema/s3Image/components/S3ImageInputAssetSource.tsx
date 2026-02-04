@@ -1,11 +1,7 @@
 import {get} from 'lodash'
 import {type FC, useCallback, useMemo} from 'react'
 import type {Observable} from 'rxjs'
-import {
-  type AssetFromSource,
-  type AssetSourceComponentAction,
-  type AssetSourceUploader,
-} from 'sanity'
+import {type AssetFromSource, type AssetSourceComponentAction} from 'sanity'
 
 import {WithReferencedAsset} from '../../../components'
 import {S3AssetType, type S3AssetSource, type S3ImageAsset} from '../../../types'

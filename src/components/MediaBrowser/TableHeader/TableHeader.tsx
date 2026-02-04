@@ -87,7 +87,7 @@ export const TableHeader: FC = () => {
             checked={!fetching && allSelected}
             readOnly
             style={{
-              pointerEvents: 'none', // TODO: consider alternative for usability
+              pointerEvents: 'none',
               transform: 'scale(0.8)',
             }}
           />

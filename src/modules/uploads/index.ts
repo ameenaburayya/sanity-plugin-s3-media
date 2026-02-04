@@ -34,6 +34,7 @@ const uploadsSlice = createSlice({
       })
   },
   reducers: {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     checkRequest(_state, _action: PayloadAction<{assets: S3AssetDocument[]}>) {
       //
     },
@@ -82,6 +83,7 @@ const uploadsSlice = createSlice({
       }
       delete state.byIds[hash]
     },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     uploadRequest(_state, _action: PayloadAction<{file: File; forceAsAssetType?: S3AssetType}>) {
       //
     },

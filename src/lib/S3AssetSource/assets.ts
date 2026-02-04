@@ -46,7 +46,7 @@ const getImageDimensions = (file: File): Observable<ImageDimensions | null> => {
     return of(null)
   }
 
-  return new Observable((subscriber) => {
+  return new Observable<ImageDimensions>((subscriber) => {
     const img = new Image()
     const url = URL.createObjectURL(file)
 
@@ -64,7 +64,6 @@ const getImageDimensions = (file: File): Observable<ImageDimensions | null> => {
     }
 
     img.src = url
-    // @ts-expect-error
   }).pipe(catchError(() => of(null)))
 }
 
@@ -197,12 +196,9 @@ const uploadAsset = ({
             storeOriginalFilename
           )
 
-          return (
-            sanityClient.observable
-              // @ts-expect-error
-              .create(document)
-              .pipe(map((asset) => createCompleteEvent({asset})))
-          )
+          return sanityClient.observable
+            .create<S3Asset>(document)
+            .pipe(map((asset) => createCompleteEvent({asset})))
         })
       )
     })

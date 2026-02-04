@@ -589,7 +589,7 @@ export const assetsUpdateEpic: Epic = (action$, state$, {sanityClient}) =>
   action$.pipe(
     filter(assetsActions.updateRequest.match),
     withLatestFrom(state$),
-    mergeMap(([action, state]) => {
+    mergeMap(([action]) => {
       const {asset, closeDialogId, formData} = action.payload
 
       return of(action).pipe(

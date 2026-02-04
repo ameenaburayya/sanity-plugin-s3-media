@@ -64,9 +64,9 @@ export const S3ImageActionsMenu: FC<S3ImageActionsMenuProps> = (props) => {
   const setOptionsButtonRef = useCallback(
     (el: HTMLButtonElement | null) => {
       // Pass the button element to the parent component so that it can focus it when e.g. closing dialogs
-      // setMenuButtonElement(el)
+      setMenuButtonElement(el)
       // Set focus back on the button when closing the menu
-      // setButtonElement(el)
+      setButtonElement(el)
     },
     [setMenuButtonElement]
   )

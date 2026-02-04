@@ -212,7 +212,7 @@ const BaseTableRowAsset: FC<TableRowAssetProps> = (props) => {
             checked={picked}
             readOnly
             style={{
-              pointerEvents: 'none', // TODO: consider alternative for usability
+              pointerEvents: 'none',
               transform: 'scale(0.8)',
             }}
           />

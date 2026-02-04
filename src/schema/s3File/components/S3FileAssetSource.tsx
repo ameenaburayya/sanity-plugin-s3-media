@@ -1,4 +1,4 @@
-import {type AssetSourceComponentAction, type AssetSourceUploader} from 'sanity'
+import {type AssetSourceComponentAction} from 'sanity'
 import {get} from 'lodash'
 import {type FC, useCallback, useMemo} from 'react'
 import type {Observable} from 'rxjs'

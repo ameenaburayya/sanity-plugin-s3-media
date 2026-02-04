@@ -14,9 +14,6 @@ export interface ResponseEvent {
 export type HttpRequestEvent = ResponseEvent | UploadEvent
 
 /** @public */
-export type Requester = (options: RequestOptions) => Observable<HttpRequestEvent>
-
-/** @public */
 export interface RequestOptions {
   url?: string
   timeout?: number
@@ -29,6 +26,9 @@ export interface RequestOptions {
   signal?: AbortSignal
   maxRetries?: number
 }
+
+/** @public */
+export type Requester = (options: RequestOptions) => Observable<HttpRequestEvent>
 
 /** @internal */
 export type Any = any

@@ -170,7 +170,6 @@ const BaseCardAsset: FC<CardAssetProps> = (props) => {
                 $showCheckerboard
                 src={buildAssetUrl({assetId: asset._id, assetType: S3AssetType.IMAGE})}
                 style={{
-                  draggable: false,
                   transition: 'opacity 1000ms',
                 }}
               />

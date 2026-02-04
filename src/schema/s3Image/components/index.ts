@@ -1,1 +1,1 @@
-export * from './S3ImageInput';
+export * from './S3ImageInput'

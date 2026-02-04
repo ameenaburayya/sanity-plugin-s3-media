@@ -1,18 +1,10 @@
-import type {MutationEvent} from '@sanity/client'
 import {Box, Button, Card, Flex, Heading, Text} from '@sanity/ui'
-import groq from 'groq'
-import {type FC, type PropsWithChildren, useCallback, useEffect, useState} from 'react'
+import {type FC, type PropsWithChildren, useCallback} from 'react'
 import {useDispatch} from 'react-redux'
-import {
-  DEFAULT_STUDIO_CLIENT_OPTIONS,
-  useClient,
-  useColorSchemeValue,
-  useDocumentStore,
-  WithReferringDocuments,
-} from 'sanity'
+import {useColorSchemeValue, useDocumentStore, WithReferringDocuments} from 'sanity'
 
 import {useTypedSelector} from '../../../hooks'
-import {S3AssetType, type S3Asset} from '../../../types'
+import {S3AssetType} from '../../../types'
 import {isS3FileAsset, isS3ImageAsset, getUniqueDocuments} from '../../../utils'
 import {AssetMetadata} from '../AssetMetadata'
 import {Dialog} from '../Dialog'
@@ -29,7 +21,6 @@ export const DialogAssetEdit: FC<PropsWithChildren<{dialog: DialogAssetEditProps
     dialog: {assetId, id},
   } = props
 
-  const sanityClient = useClient(DEFAULT_STUDIO_CLIENT_OPTIONS)
   const scheme = useColorSchemeValue()
 
   const documentStore = useDocumentStore()
@@ -37,12 +28,9 @@ export const DialogAssetEdit: FC<PropsWithChildren<{dialog: DialogAssetEditProps
   const {buildAssetUrl} = useS3MediaContext()
 
   const dispatch = useDispatch()
-  const assetItem = useTypedSelector((state) => selectAssetById(state, String(assetId))) // TODO: check casting
+  const assetItem = useTypedSelector((state) => selectAssetById(state, String(assetId)))
 
-  // Generate a snapshot of the current asset
-  const [assetSnapshot, setAssetSnapshot] = useState(assetItem?.asset)
-
-  const currentAsset = assetItem ? assetItem?.asset : assetSnapshot
+  const currentAsset = assetItem ? assetItem?.asset : null
 
   const formUpdating = !assetItem || assetItem?.updating
 
@@ -62,30 +50,6 @@ export const DialogAssetEdit: FC<PropsWithChildren<{dialog: DialogAssetEditProps
       })
     )
   }, [assetItem, dispatch])
-
-  const handleAssetUpdate = useCallback((update: MutationEvent) => {
-    const {result, transition} = update
-    if (result && transition === 'update') {
-      // Regenerate asset snapshot
-      setAssetSnapshot(result as S3Asset)
-    }
-  }, [])
-
-  // Listen for asset mutations and update snapshot
-  useEffect(() => {
-    if (!assetItem?.asset) {
-      return undefined
-    }
-
-    // Remember that Sanity listeners ignore joins, order clauses and projections
-    const subscriptionAsset = sanityClient
-      .listen(groq`*[_id == $id]`, {id: assetItem?.asset._id})
-      .subscribe(handleAssetUpdate)
-
-    return () => {
-      subscriptionAsset?.unsubscribe()
-    }
-  }, [assetItem?.asset, sanityClient, handleAssetUpdate])
 
   if (!currentAsset) {
     return null

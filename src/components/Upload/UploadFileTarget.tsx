@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 /* eslint-disable react-hooks/rules-of-hooks */
 import {
   type ClipboardEvent,

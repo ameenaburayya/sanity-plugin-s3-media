@@ -46,16 +46,20 @@ jobs:
     name: Lint & Build
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.16.1
+          run_install: false
       - uses: actions/setup-node@v4
         with:
-          cache: npm
+          cache: pnpm
           node-version: lts/*
-      - run: npm clean-install
+      - run: pnpm install --frozen-lockfile
         # Linting can be skipped
-      - run: npm run lint --if-present
+      - run: pnpm run lint --if-present
         if: github.event.inputs.test != 'false'
         # But not the build script, as semantic-release will crash if this command fails so it makes sense to test it early
-      - run: npm run prepublishOnly --if-present
+      - run: pnpm run prepublishOnly --if-present
 
   test:
     needs: build
@@ -86,12 +90,16 @@ jobs:
           git config --global core.autocrlf false
           git config --global core.eol lf
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.16.1
+          run_install: false
       - uses: actions/setup-node@v4
         with:
-          cache: npm
+          cache: pnpm
           node-version: ${{ matrix.node }}
-      - run: npm install
-      - run: npm test --if-present
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test --if-present
 
   release:
     permissions:
@@ -110,12 +118,16 @@ jobs:
           # Need to fetch entire commit history to
           # analyze every commit since last release
           fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.16.1
+          run_install: false
       - uses: actions/setup-node@v4
         with:
-          cache: npm
+          cache: pnpm
           node-version: lts/*
-      - run: npm clean-install
-      - run: npm audit signatures
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm audit --audit-level=high
         # Branches that will release new versions are defined in .releaserc.json
         # @TODO remove --dry-run after verifying everything is good to go
       - run: npx semantic-release --dry-run

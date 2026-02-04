@@ -1,9 +1,11 @@
 {
   "root": true,
   "env": {
+    "es2020": true,
     "node": true,
-    "browser": true,
+    "browser": true
   },
+  "parser": "@typescript-eslint/parser",
   "extends": [
     "sanity",
     "sanity/typescript",
@@ -11,10 +13,20 @@
     "plugin:react-hooks/recommended",
     "plugin:prettier/recommended",
     "plugin:react/jsx-runtime",
+    "plugin:@typescript-eslint/recommended"
   ],
   "rules": {
     "no-void": "off",
     "no-nested-ternary": "off",
     "react/jsx-no-bind": "off",
-  },
+    "no-shadow": "off",
+    "no-negated-condition": "off",
+    "@typescript-eslint/no-shadow": "error",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {"ignoreRestSiblings": true, "argsIgnorePattern": "^_"}
+    ],
+    "react/require-default-props": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off"
+  }
 }

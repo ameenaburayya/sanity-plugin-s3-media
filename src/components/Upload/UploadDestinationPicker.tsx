@@ -2,8 +2,8 @@ import {Box, Flex, Stack, Text, useGlobalKeyDown} from '@sanity/ui'
 import {type FC, type MouseEvent, useCallback} from 'react'
 import {isValidElementType} from 'react-is'
 
-import {Button, Dialog} from '../UI'
 import type {S3AssetSource} from '../../types'
+import {Button, Dialog} from '../UI'
 
 interface UploadDestinationPickerProps {
   assetSources: S3AssetSource[]
@@ -26,7 +26,7 @@ export const UploadDestinationPicker: FC<UploadDestinationPickerProps> = (props)
         onSelectAssetSource(assetSource)
       }
     },
-    [assetSources, onSelectAssetSource]
+    [assetSources, onSelectAssetSource],
   )
 
   useGlobalKeyDown((event) => {

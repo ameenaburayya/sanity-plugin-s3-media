@@ -20,7 +20,8 @@ import {
 import {BrowserButton, UploadPlaceholder, UploadProgress} from '../../../components'
 import {UPLOAD_STATUS_KEY} from '../../../constants'
 import {useS3MediaContext, useS3MediaOptionsContext} from '../../../contexts'
-import {S3AssetType, type S3AssetSource} from '../../../types'
+import {createS3ImageAssetSource} from '../../../lib'
+import {type S3AssetSource, S3AssetType} from '../../../types'
 import {
   createInitialUploadPatches,
   isInProgressUpload,
@@ -33,7 +34,6 @@ import {S3ImageInputAsset} from './S3ImageInputAsset'
 import {S3ImageInputAssetMenu} from './S3ImageInputAssetMenu'
 import {S3ImageInputAssetSource} from './S3ImageInputAssetSource'
 import {S3ImageInputPreview} from './S3ImageInputPreview'
-import {createS3ImageAssetSource} from '../../../lib'
 
 export const S3ImageInput: FC<S3ImageInputProps> = (props) => {
   const {
@@ -62,14 +62,14 @@ export const S3ImageInput: FC<S3ImageInputProps> = (props) => {
 
   const assetSources = useMemo(
     () => [createS3ImageAssetSource({sanityClient, s3Client, title: 'S3 Image'})],
-    [sanityClient, s3Client]
+    [sanityClient, s3Client],
   )
 
   const documentPreviewStore = useDocumentPreviewStore()
 
   const observeAsset = useCallback(
     (assetId: string) => observeImageAsset(documentPreviewStore, assetId),
-    [documentPreviewStore]
+    [documentPreviewStore],
   )
 
   const [selectedAssetSource, setSelectedAssetSource] = useState<S3AssetSource | null>(null)
@@ -116,7 +116,7 @@ export const S3ImageInput: FC<S3ImageInputProps> = (props) => {
   const handleRemoveButtonClick = useCallback(() => {
     const allKeys = Object.keys(value || {})
     const remainingKeys = allKeys.filter(
-      (key) => !['_type', '_key', '_upload', 'asset'].includes(key)
+      (key) => !['_type', '_key', '_upload', 'asset'].includes(key),
     )
 
     const isEmpty = remainingKeys.length === 0
@@ -134,7 +134,7 @@ export const S3ImageInput: FC<S3ImageInputProps> = (props) => {
       }
 
       const asset = assetsFromSource.find(
-        (assetFromSource) => assetFromSource.kind === 'assetDocumentId' && assetFromSource.value
+        (assetFromSource) => assetFromSource.kind === 'assetDocumentId' && assetFromSource.value,
       )
 
       if (!asset) {
@@ -149,7 +149,7 @@ export const S3ImageInput: FC<S3ImageInputProps> = (props) => {
       setSelectedAssetSource(null)
       setIsUploading(false) // This function is also called on after a successful upload completion though an asset source, so reset that state here.
     },
-    [onChange, schemaType]
+    [onChange, schemaType],
   )
 
   const handleCancelUpload = useCallback(() => {
@@ -182,7 +182,7 @@ export const S3ImageInput: FC<S3ImageInputProps> = (props) => {
                     PatchEvent.from([
                       set(Math.max(2, event.progress), [UPLOAD_STATUS_KEY, 'progress']),
                       set(new Date().toISOString(), [UPLOAD_STATUS_KEY, 'updatedAt']),
-                    ])
+                    ]),
                   )
                   break
                 case 'error':
@@ -226,7 +226,7 @@ export const S3ImageInput: FC<S3ImageInputProps> = (props) => {
         }
       }
     },
-    [assetSourceUploader, onChange, push, schemaType, t]
+    [assetSourceUploader, onChange, push, schemaType, t],
   )
 
   // Abort asset source uploads and unsubscribe from the uploader is the component unmounts
@@ -325,7 +325,7 @@ export const S3ImageInput: FC<S3ImageInputProps> = (props) => {
         />
       )
     },
-    [handleCancelUpload, handleStaleUpload, isUploading]
+    [handleCancelUpload, handleStaleUpload, isUploading],
   )
 
   const renderAsset = useCallback(
@@ -373,7 +373,7 @@ export const S3ImageInput: FC<S3ImageInputProps> = (props) => {
       schemaType,
       selectedAssetSource,
       value,
-    ]
+    ],
   )
 
   const renderAssetSource = useCallback(() => {

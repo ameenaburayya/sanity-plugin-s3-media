@@ -11,7 +11,7 @@ import {
   UploadWarning,
 } from '../../../components'
 import {useS3MediaOptionsContext} from '../../../contexts'
-import {S3AssetType, type S3AssetSource, type S3FileAsset as S3FileAssetType} from '../../../types'
+import {type S3AssetSource, S3AssetType, type S3FileAsset as S3FileAssetType} from '../../../types'
 import {isS3FileSource} from '../../../utils'
 import {type S3FileInputProps} from '../types'
 import {InvalidFileWarning} from './InvalidFileWarning'
@@ -74,7 +74,7 @@ export const S3FileAsset: FC<S3FileAssetProps> = (props) => {
         elementProps.onFocus(event)
       }
     },
-    [elementProps]
+    [elementProps],
   )
 
   const handleSelectFiles = useCallback(
@@ -83,7 +83,7 @@ export const S3FileAsset: FC<S3FileAssetProps> = (props) => {
         onSelectFiles(assetSource, files)
       }
     },
-    [directUploads, onSelectFiles, readOnly]
+    [directUploads, onSelectFiles, readOnly],
   )
 
   const hasValueOrUpload = Boolean(value?._upload || value?.asset)

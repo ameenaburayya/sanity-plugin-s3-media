@@ -16,15 +16,15 @@ import {useDispatch} from 'react-redux'
 import {useColorSchemeValue} from 'sanity'
 import {css, styled} from 'styled-components'
 
+import {useS3MediaContext} from '../../../contexts'
 import {useAssetSourceActions} from '../../../contexts/S3AssetSourceDispatchContext'
 import {useKeyPress, useTypedSelector} from '../../../hooks'
-import {isS3FileAsset, isS3ImageAsset, getSchemeColor} from '../../../utils'
+import {assetsActions, dialogActions, selectAssetById} from '../../../modules'
+import {S3AssetType} from '../../../types'
+import {getSchemeColor, isS3FileAsset, isS3ImageAsset} from '../../../utils'
 import {PANEL_HEIGHT} from '../constants'
 import {FileIcon} from '../FileIcon'
 import {Image} from '../Image'
-import {assetsActions, selectAssetById, dialogActions} from '../../../modules'
-import {useS3MediaContext} from '../../../contexts'
-import {S3AssetType} from '../../../types'
 
 type CardAssetProps = {
   id: string
@@ -39,47 +39,49 @@ const CardWrapper = styled(Flex)`
   width: 100%;
 `
 
-const CardContainer = styled(Flex)<{$picked?: boolean; theme: Theme; $updating?: boolean}>(
-  ({$picked, theme, $updating}) => {
-    return css`
-      border: 1px solid transparent;
-      height: 100%;
-      pointer-events: ${$updating ? 'none' : 'auto'};
-      position: relative;
-      transition: all 300ms;
-      user-select: none;
-      width: 100%;
+const CardContainer = styled(Flex)<{$picked?: boolean; theme: Theme; $updating?: boolean}>(({
+  $picked,
+  theme,
+  $updating,
+}) => {
+  return css`
+    border: 1px solid transparent;
+    height: 100%;
+    pointer-events: ${$updating ? 'none' : 'auto'};
+    position: relative;
+    transition: all 300ms;
+    user-select: none;
+    width: 100%;
 
-      border: ${$picked
-        ? `1px solid ${theme.sanity.color.spot.orange} !important`
-        : '1px solid inherit'};
+    border: ${$picked
+      ? `1px solid ${theme.sanity.color.spot.orange} !important`
+      : '1px solid inherit'};
 
-      ${!$updating &&
-      css`
-        @media (hover: hover) and (pointer: fine) {
-          &:hover {
-            border: 1px solid var(--card-border-color);
-          }
-        }
-      `}
-    `
-  }
-)
-
-const ContextActionContainer = styled<typeof Flex, {$scheme: ThemeColorSchemeKey}>(Flex)(
-  ({$scheme}) => {
-    return css`
-      cursor: pointer;
-      height: ${PANEL_HEIGHT}px;
-      transition: all 300ms;
+    ${!$updating &&
+    css`
       @media (hover: hover) and (pointer: fine) {
         &:hover {
-          background: ${getSchemeColor($scheme, 'bg')};
+          border: 1px solid var(--card-border-color);
         }
       }
-    `
-  }
-)
+    `}
+  `
+})
+
+const ContextActionContainer = styled<typeof Flex, {$scheme: ThemeColorSchemeKey}>(Flex)(({
+  $scheme,
+}) => {
+  return css`
+    cursor: pointer;
+    height: ${PANEL_HEIGHT}px;
+    transition: all 300ms;
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        background: ${getSchemeColor($scheme, 'bg')};
+      }
+    }
+  `
+})
 
 const BaseCardAsset: FC<CardAssetProps> = (props) => {
   const {id, selected} = props

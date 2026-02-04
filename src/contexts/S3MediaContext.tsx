@@ -1,14 +1,5 @@
 import {SettingsView, useSecrets} from '@sanity/studio-secrets'
-import {
-  createContext,
-  type FC,
-  PropsWithChildren,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import {createContext, type FC, PropsWithChildren, useCallback, useContext, useState} from 'react'
 
 import {createS3Client, type S3Client} from '../lib'
 import {S3AssetType, type S3Credentials} from '../types'
@@ -41,20 +32,26 @@ const S3MediaContext = createContext<IS3MediaContext>({} as IS3MediaContext)
 export const S3MediaContextProvider: FC<PropsWithChildren> = (props) => {
   const {children} = props
 
-  const [isCredentialsDialogOpen, setIsCredentialsDialogOpen] = useState(false)
+  const [isCredentialsDialogDismissed, setIsCredentialsDialogDismissed] = useState(false)
   const {secrets: credentials, loading: isCredentialsLoading} =
     useSecrets<S3Credentials>(credentialsNamespace)
 
   const {bucketRegion, bucketKey, getSignedUrlEndpoint, deleteEndpoint, cloudfrontDomain, secret} =
     credentials || {}
 
-  const s3AssetBaseUrl = useMemo(
-    () =>
-      cloudfrontDomain || (bucketRegion && bucketKey)
-        ? cloudfrontDomain || `https://s3.${bucketRegion}.amazonaws.com/${bucketKey}`
-        : null,
-    [cloudfrontDomain, bucketRegion, bucketKey]
-  )
+  const s3AssetBaseUrl =
+    cloudfrontDomain || (bucketRegion && bucketKey)
+      ? cloudfrontDomain || `https://s3.${bucketRegion}.amazonaws.com/${bucketKey}`
+      : null
+
+  const isCredentialsDialogOpen =
+    !isCredentialsDialogDismissed &&
+    !isCredentialsLoading &&
+    (!credentials ||
+      !credentials.bucketKey ||
+      !credentials.bucketRegion ||
+      !credentials.getSignedUrlEndpoint ||
+      !credentials.secret)
 
   const s3Client = createS3Client({
     bucketRegion,
@@ -85,24 +82,8 @@ export const S3MediaContextProvider: FC<PropsWithChildren> = (props) => {
 
       throw new Error('')
     },
-    [s3AssetBaseUrl]
+    [s3AssetBaseUrl],
   )
-
-  useEffect(() => {
-    if (!isCredentialsLoading) {
-      if (
-        !credentials ||
-        !credentials.bucketKey ||
-        !credentials.bucketRegion ||
-        !credentials.getSignedUrlEndpoint ||
-        !credentials.secret
-      ) {
-        setIsCredentialsDialogOpen(true)
-      } else {
-        setIsCredentialsDialogOpen(false)
-      }
-    }
-  }, [credentials, isCredentialsLoading])
 
   return (
     <S3MediaContext.Provider value={{s3Client, buildAssetUrl}}>
@@ -114,7 +95,7 @@ export const S3MediaContextProvider: FC<PropsWithChildren> = (props) => {
           namespace={credentialsNamespace}
           keys={pluginConfigKeys}
           onClose={() => {
-            setIsCredentialsDialogOpen(false)
+            setIsCredentialsDialogDismissed(true)
           }}
         />
       ) : null}

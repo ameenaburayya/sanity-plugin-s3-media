@@ -1,3 +1,4 @@
+/* eslint-disable no-empty */
 import {white} from '@sanity/color'
 import {Flex, Text} from '@sanity/ui'
 import {type FC, type PropsWithChildren} from 'react'
@@ -48,9 +49,7 @@ async function filterFiles(fileList: FileList) {
     try {
       await file.slice(0, 1).arrayBuffer()
       filteredFiles.push(file)
-    } catch (err) {
-      // do nothing: file is a package or folder
-    }
+    } catch {}
   }
 
   return filteredFiles
@@ -76,8 +75,8 @@ export const UploadDropzone: FC<PropsWithChildren> = (props) => {
         uploadsActions.uploadRequest({
           file,
           forceAsAssetType: assetTypes.length === 1 ? assetTypes[0] : undefined,
-        })
-      )
+        }),
+      ),
     )
   }
 
@@ -89,7 +88,7 @@ export const UploadDropzone: FC<PropsWithChildren> = (props) => {
         notificationsActions.add({
           status: 'error',
           title: 'One or more files exceed the maximum upload size.',
-        })
+        }),
       )
     }
   }
@@ -120,7 +119,7 @@ export const UploadDropzone: FC<PropsWithChildren> = (props) => {
         notificationsActions.add({
           status: 'error',
           title: `Unable to upload some items (folders and packages aren't supported)`,
-        })
+        }),
       )
     }
 

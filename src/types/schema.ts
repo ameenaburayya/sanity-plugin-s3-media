@@ -64,15 +64,19 @@ export type S3AssetObjectStub = S3ImageObjectStub | S3FileObjectStub
 export type S3AssetUploadStub = S3ImageUploadStub | S3FileUploadStub
 
 /** @public */
-export interface S3FileDefinition
-  extends Omit<ObjectDefinition, 'type' | 'fields' | 'options' | 'groups'> {
+export interface S3FileDefinition extends Omit<
+  ObjectDefinition,
+  'type' | 'fields' | 'options' | 'groups'
+> {
   type: 's3File'
   options?: S3FileOptions
 }
 
 /** @public */
-export interface S3ImageDefinition
-  extends Omit<ObjectDefinition, 'type' | 'fields' | 'options' | 'groups'> {
+export interface S3ImageDefinition extends Omit<
+  ObjectDefinition,
+  'type' | 'fields' | 'options' | 'groups'
+> {
   type: 's3Image'
   options?: S3ImageOptions
 }

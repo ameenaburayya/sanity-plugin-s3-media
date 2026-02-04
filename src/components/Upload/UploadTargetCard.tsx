@@ -2,8 +2,7 @@ import {AccessDeniedIcon, UploadIcon} from '@sanity/icons'
 import {Box, Card, type CardTone, Flex, Inline, Layer, Text, useToast} from '@sanity/ui'
 import {uniqBy} from 'lodash'
 import {type FC, type ReactNode, useCallback, useMemo, useRef, useState} from 'react'
-import {type SchemaType} from 'sanity'
-import {type FileLike, type InputOnSelectFileFunctionProps, useTranslation} from 'sanity'
+import {type FileLike, type InputOnSelectFileFunctionProps, type SchemaType,useTranslation} from 'sanity'
 import {styled} from 'styled-components'
 
 import type {FileInfo, S3AssetSource, S3FileSchemaType, S3ImageSchemaType} from '../../types'
@@ -44,7 +43,7 @@ const Sticky = styled(Box)`
 
 const fileMatchesSchema = (
   file: FileLike,
-  schemaType: S3FileSchemaType | S3ImageSchemaType
+  schemaType: S3FileSchemaType | S3ImageSchemaType,
 ): boolean => {
   const accept = schemaType.options?.accept
 
@@ -98,7 +97,7 @@ type UploadTargetCardProps = Parameters<typeof Card>['0'] & {
   isReadOnly?: boolean
   onSetHoveringFiles?: (files: FileInfo[]) => void
   onSelectFile?: (
-    props: Omit<InputOnSelectFileFunctionProps, 'assetSource'> & {assetSource: S3AssetSource}
+    props: Omit<InputOnSelectFileFunctionProps, 'assetSource'> & {assetSource: S3AssetSource},
   ) => void
   pasteTarget?: HTMLElement
   children?: ReactNode
@@ -124,7 +123,7 @@ export const UploadTargetCard: FC<UploadTargetCardProps> = (props) => {
 
   const assetSourcesWithUpload = useMemo(
     () => assetSources.filter((source) => Boolean(source.Uploader)),
-    [assetSources]
+    [assetSources],
   )
 
   const FileTarget = UploadFileTarget(StyledCard)
@@ -135,7 +134,7 @@ export const UploadTargetCard: FC<UploadTargetCardProps> = (props) => {
   const [filesToUpload, setFilesToUpload] = useState<File[]>([])
   const [showAssetSourceDestinationPicker, setShowAssetSourceDestinationPicker] = useState(false)
   const [tone, setTone] = useState<CardTone>(
-    toneFromProps || (isReadOnly ? 'transparent' : 'default')
+    toneFromProps || (isReadOnly ? 'transparent' : 'default'),
   )
 
   const assetSourceDestinationName = useRef<string | null>(null)
@@ -161,7 +160,7 @@ export const UploadTargetCard: FC<UploadTargetCardProps> = (props) => {
         )),
       })
     },
-    [pushToast, t]
+    [pushToast, t],
   )
 
   // This is called after the user has dropped or pasted files and selected an asset source destination (if applicable)
@@ -192,7 +191,7 @@ export const UploadTargetCard: FC<UploadTargetCardProps> = (props) => {
         })
       }
     },
-    [directUploads, schemaType, assetSources, onSelectFile, alertRejectedFiles]
+    [directUploads, schemaType, assetSources, onSelectFile, alertRejectedFiles],
   )
 
   // This is called when files are dropped or pasted onto the upload target. It may show the asset source destination picker if needed.
@@ -235,7 +234,7 @@ export const UploadTargetCard: FC<UploadTargetCardProps> = (props) => {
       assetSourcesWithUpload,
       handleUploadFiles,
       alertRejectedFiles,
-    ]
+    ],
   )
 
   const [hoveringFiles, setHoveringFiles] = useState<FileInfo[]>([])
@@ -263,7 +262,7 @@ export const UploadTargetCard: FC<UploadTargetCardProps> = (props) => {
         onSetHoveringFiles(files)
       }
     },
-    [isReadOnly, onSetHoveringFiles, schemaType]
+    [isReadOnly, onSetHoveringFiles, schemaType],
   )
 
   const handleFilesOut = useCallback(() => {
@@ -291,7 +290,7 @@ export const UploadTargetCard: FC<UploadTargetCardProps> = (props) => {
       setShowAssetSourceDestinationPicker(false)
       assetSourceDestinationName.current = null
     },
-    [filesToUpload, handleUploadFiles]
+    [filesToUpload, handleUploadFiles],
   )
 
   const handleUploadDestinationPickerClose = useCallback(() => {
@@ -305,7 +304,7 @@ export const UploadTargetCard: FC<UploadTargetCardProps> = (props) => {
     'inputs.files.common.placeholder.select-asset-source-upload-destination',
     {
       context: schemaType.name,
-    }
+    },
   )
 
   const acceptedFiles = hoveringFiles.filter((file) => fileMatchesSchema(file, schemaType))
@@ -355,7 +354,7 @@ export const UploadTargetCard: FC<UploadTargetCardProps> = (props) => {
                             'inputs.files.common.drop-message.drop-to-upload.rejected-file-message',
                             {
                               count: rejectedFilesCount,
-                            }
+                            },
                           )}
                         </Text>
                       </Inline>

@@ -3,17 +3,17 @@ import {type FC, type PropsWithChildren, useCallback} from 'react'
 import {useDispatch} from 'react-redux'
 import {useColorSchemeValue, useDocumentStore, WithReferringDocuments} from 'sanity'
 
+import {useS3MediaContext} from '../../../contexts'
 import {useTypedSelector} from '../../../hooks'
+import {dialogActions, selectAssetById} from '../../../modules'
 import {S3AssetType} from '../../../types'
-import {isS3FileAsset, isS3ImageAsset, getUniqueDocuments} from '../../../utils'
+import type {DialogAssetEditProps} from '../../../types/browser'
+import {getUniqueDocuments, isS3FileAsset, isS3ImageAsset} from '../../../utils'
 import {AssetMetadata} from '../AssetMetadata'
 import {Dialog} from '../Dialog'
 import {DocumentList} from '../DocumentList'
 import {FileAssetPreview} from '../FileAssetPreview'
 import {Image} from '../Image'
-import {selectAssetById, dialogActions} from '../../../modules'
-import type {DialogAssetEditProps} from '../../../types/browser'
-import {useS3MediaContext} from '../../../contexts'
 
 export const DialogAssetEdit: FC<PropsWithChildren<{dialog: DialogAssetEditProps}>> = (props) => {
   const {
@@ -47,7 +47,7 @@ export const DialogAssetEdit: FC<PropsWithChildren<{dialog: DialogAssetEditProps
       dialogActions.showConfirmDeleteAssets({
         assets: [assetItem],
         closeDialogId: assetItem?.asset._id,
-      })
+      }),
     )
   }, [assetItem, dispatch])
 

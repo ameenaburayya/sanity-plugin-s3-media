@@ -4,7 +4,7 @@ import type {Observable} from 'rxjs'
 import {type AssetFromSource, type AssetSourceComponentAction} from 'sanity'
 
 import {WithReferencedAsset} from '../../../components'
-import {S3AssetType, type S3AssetSource, type S3ImageAsset} from '../../../types'
+import {type S3AssetSource, S3AssetType, type S3ImageAsset} from '../../../types'
 import {type S3ImageInputProps} from '../types'
 
 type S3ImageInputAssetSourceProps = Pick<S3ImageInputProps, 'value' | 'schemaType'> & {
@@ -31,7 +31,7 @@ export const S3ImageInputAssetSource: FC<S3ImageInputAssetSourceProps> = (props)
   // Determine the action based on state - derived from props
   const action: AssetSourceComponentAction = useMemo(
     () => (isUploading ? 'upload' : 'select'),
-    [isUploading]
+    [isUploading],
   )
 
   const handleClose = useCallback(() => {

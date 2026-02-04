@@ -3,10 +3,10 @@ import {Box, Button, Flex, Inline, Stack, Text} from '@sanity/ui'
 import {filesize} from 'filesize'
 import {type FC, type ReactNode} from 'react'
 
-import {type S3Asset, type AssetItem, S3AssetType} from '../../../types'
-import {isS3ImageAsset, getAssetResolution} from '../../../utils'
-import {ButtonAssetCopy} from '../ButtonAssetCopy'
 import {useS3MediaContext} from '../../../contexts'
+import {type AssetItem, type S3Asset, S3AssetType} from '../../../types'
+import {getAssetResolution, isS3ImageAsset} from '../../../utils'
+import {ButtonAssetCopy} from '../ButtonAssetCopy'
 
 type AssetMetadataProps = {
   asset: S3Asset
@@ -62,7 +62,7 @@ export const AssetMetadata: FC<AssetMetadataProps> = (props) => {
         <Stack space={3}>
           <Row label="Size" value={filesize(asset?.size, {base: 10, round: 0})} />
           <Row label="MIME type" value={asset?.mimeType} />
-          <Row label="Extension" value={(asset?.extension).toUpperCase()} />
+          <Row label="Extension" value={asset.extension.toUpperCase()} />
           {isS3ImageAsset(asset) && <Row label="Dimensions" value={getAssetResolution(asset)} />}
         </Stack>
       </Box>

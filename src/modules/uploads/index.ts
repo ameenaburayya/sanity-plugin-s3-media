@@ -4,12 +4,12 @@ import groq from 'groq'
 import {empty, merge, of, throwError} from 'rxjs'
 import {catchError, delay, filter, mergeMap, takeUntil, withLatestFrom} from 'rxjs/operators'
 
-import {HttpError, Epic, S3AssetType, UploadItem} from '../../types'
+import {uploadS3Asset} from '../../lib'
+import type {RootReducerState, S3AssetDocument, UploadProgressEvent} from '../../types'
+import {Epic, HttpError, S3AssetType, UploadItem} from '../../types'
 import {constructFilter, generatePreviewBlobUrl$, hashFile} from '../../utils'
 import {assetsActions} from '../assets'
-import type {RootReducerState, S3AssetDocument, UploadProgressEvent} from '../../types'
 import {UPLOADS_ACTIONS} from './actions'
-import {uploadS3Asset} from '../../lib'
 
 type UploadsReducerState = {
   allIds: string[]
@@ -34,7 +34,6 @@ const uploadsSlice = createSlice({
       })
   },
   reducers: {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     checkRequest(_state, _action: PayloadAction<{assets: S3AssetDocument[]}>) {
       //
     },
@@ -83,7 +82,7 @@ const uploadsSlice = createSlice({
       }
       delete state.byIds[hash]
     },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     uploadRequest(_state, _action: PayloadAction<{file: File; forceAsAssetType?: S3AssetType}>) {
       //
     },
@@ -122,21 +121,21 @@ export const uploadsAssetStartEpic: Epic = (action$, _state$, {sanityClient, s3C
               uploadsActions.previewReady({
                 blobUrl: url,
                 hash: uploadItem.hash,
-              })
+              }),
             )
-          })
+          }),
         ),
         // Upload asset and receive progress / complete events
         of(null).pipe(
           // delay(500000), // debug uploads
           mergeMap(() =>
-            uploadS3Asset({assetType: uploadItem.assetType, s3Client, sanityClient, file})
+            uploadS3Asset({assetType: uploadItem.assetType, s3Client, sanityClient, file}),
           ),
           takeUntil(
             action$.pipe(
               filter(uploadsActions.uploadCancel.match),
-              filter((v) => v.payload.hash === uploadItem.hash)
-            )
+              filter((v) => v.payload.hash === uploadItem.hash),
+            ),
           ),
           mergeMap((event) => {
             if (event?.type === 'complete') {
@@ -150,7 +149,7 @@ export const uploadsAssetStartEpic: Epic = (action$, _state$, {sanityClient, s3C
               return of(
                 UPLOADS_ACTIONS.uploadComplete({
                   asset: event.asset,
-                })
+                }),
               )
             }
             if (event?.type === 'progress' && event?.stage === 'upload') {
@@ -158,7 +157,7 @@ export const uploadsAssetStartEpic: Epic = (action$, _state$, {sanityClient, s3C
                 uploadsActions.uploadProgress({
                   event,
                   uploadHash: uploadItem.hash,
-                })
+                }),
               )
             }
             return empty()
@@ -171,12 +170,12 @@ export const uploadsAssetStartEpic: Epic = (action$, _state$, {sanityClient, s3C
                   statusCode: error?.statusCode || 500,
                 },
                 hash: uploadItem.hash,
-              })
-            )
-          )
-        )
+              }),
+            ),
+          ),
+        ),
       )
-    })
+    }),
   )
 
 export const uploadsAssetUploadEpic: Epic = (action$, state$) =>
@@ -211,9 +210,9 @@ export const uploadsAssetUploadEpic: Epic = (action$, state$) =>
           } as UploadItem
 
           return of(uploadsActions.uploadStart({file, uploadItem}))
-        })
+        }),
       )
-    })
+    }),
   )
 
 export const uploadsCompleteQueueEpic: Epic = (action$) =>
@@ -223,9 +222,9 @@ export const uploadsCompleteQueueEpic: Epic = (action$) =>
       return of(
         uploadsActions.checkRequest({
           assets: [action.payload.asset],
-        })
+        }),
       )
-    })
+    }),
   )
 
 export const uploadsCheckRequestEpic: Epic = (action$, state$, {sanityClient}) =>
@@ -257,11 +256,11 @@ export const uploadsCheckRequestEpic: Epic = (action$, state$, {sanityClient}) =
 
           return of(
             uploadsActions.checkComplete({results: checkedResults}), //
-            assetsActions.insertUploads({results: checkedResults})
+            assetsActions.insertUploads({results: checkedResults}),
           )
-        })
+        }),
       )
-    })
+    }),
   )
 
 export const selectUploadById = createSelector(
@@ -269,7 +268,7 @@ export const selectUploadById = createSelector(
     (state: RootReducerState) => state.uploads.byIds,
     (_state: RootReducerState, uploadId: string) => uploadId,
   ],
-  (byIds, uploadId) => byIds[uploadId]
+  (byIds, uploadId) => byIds[uploadId],
 )
 
 export const uploadsReducer = uploadsSlice.reducer

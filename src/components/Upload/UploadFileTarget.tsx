@@ -29,21 +29,20 @@ type CamelToKebab<S extends string> = S extends `${infer P1}${infer P2}`
 
 type DataAttribute<S extends string> = `data-${CamelToKebab<S>}`
 
-const fileTargetAttributeName = 'isFileTarget'
-const fileTargetDataAttribute: Record<DataAttribute<typeof fileTargetAttributeName>, 'true'> = {
+const fileTargetDataAttribute: Record<DataAttribute<'isFileTarget'>, 'true'> = {
   'data-is-file-target': 'true',
 }
 
 // this is a hack for Safari that reads pasted image(s) from an ContentEditable div instead of the onpaste event
 const convertImagesToFilesAndClearContentEditable = (
   element: HTMLElement,
-  targetFormat = 'image/jpeg'
+  targetFormat = 'image/jpeg',
 ): Promise<File[]> => {
   if (!element.isContentEditable) {
     return Promise.reject(
       new Error(
-        `Expected element to be contentEditable="true". Instead found a non contenteditable ${element.tagName}`
-      )
+        `Expected element to be contentEditable="true". Instead found a non contenteditable ${element.tagName}`,
+      ),
     )
   }
   return new Promise((resolve) => setTimeout(resolve, 10)) // add a delay so the paste event can finish
@@ -54,7 +53,7 @@ const convertImagesToFilesAndClearContentEditable = (
     })
     .then((images) => Promise.all(images.map((img) => imageUrlToBlob(img.src))))
     .then((imageBlobs) =>
-      imageBlobs.map((blob) => new File([blob!], 'pasted-image.jpg', {type: targetFormat}))
+      imageBlobs.map((blob) => new File([blob!], 'pasted-image.jpg', {type: targetFormat})),
     )
 }
 
@@ -100,7 +99,7 @@ export function UploadFileTarget<ComponentProps>(Component: ComponentType<Compon
       (files: File[]) => {
         onFiles?.(files)
       },
-      [onFiles]
+      [onFiles],
     )
 
     const handleKeyDown = useCallback(
@@ -114,7 +113,7 @@ export function UploadFileTarget<ComponentProps>(Component: ComponentType<Compon
           setShowPasteInput(true)
         }
       },
-      [pasteTarget]
+      [pasteTarget],
     )
 
     const handlePaste = useCallback(
@@ -140,7 +139,7 @@ export function UploadFileTarget<ComponentProps>(Component: ComponentType<Compon
             }
           })
       },
-      [emitFiles, pasteTarget]
+      [emitFiles, pasteTarget],
     )
 
     useEffect(() => {
@@ -152,7 +151,7 @@ export function UploadFileTarget<ComponentProps>(Component: ComponentType<Compon
           const hasText = !!event.clipboardData?.getData('text/plain')
           if (hasHtml && hasText) {
             console.warn(
-              'Clipboard contains both text and HTML, ignoring additional file data on the clipboard.'
+              'Clipboard contains both text and HTML, ignoring additional file data on the clipboard.',
             )
             return
           }
@@ -183,7 +182,7 @@ export function UploadFileTarget<ComponentProps>(Component: ComponentType<Compon
         }
         onFilesOut?.()
       },
-      [emitFiles, onFiles, onFilesOut]
+      [emitFiles, onFiles, onFilesOut],
     )
 
     const handleDragOver = useCallback(
@@ -193,7 +192,7 @@ export function UploadFileTarget<ComponentProps>(Component: ComponentType<Compon
           event.stopPropagation()
         }
       },
-      [onFiles]
+      [onFiles],
     )
 
     const handleDragEnter = useCallback(
@@ -215,7 +214,7 @@ export function UploadFileTarget<ComponentProps>(Component: ComponentType<Compon
           onFilesOver(fileTypes)
         }
       },
-      [onFilesOver]
+      [onFilesOver],
     )
 
     const handleDragLeave = useCallback(
@@ -229,7 +228,7 @@ export function UploadFileTarget<ComponentProps>(Component: ComponentType<Compon
           onFilesOut?.()
         }
       },
-      [onFilesOut]
+      [onFilesOut],
     )
 
     const prevShowPasteInput = useRef(false)

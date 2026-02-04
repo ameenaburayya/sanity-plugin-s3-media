@@ -6,12 +6,12 @@ import {useDispatch} from 'react-redux'
 import {useColorSchemeValue} from 'sanity'
 
 import {useTypedSelector} from '../../../hooks'
+import {selectUploadById, uploadsActions} from '../../../modules'
+import {S3AssetType} from '../../../types'
 import {getSchemeColor} from '../../../utils'
 import {GRID_TEMPLATE_COLUMNS} from '../constants'
 import {FileIcon} from '../FileIcon'
 import {Image} from '../Image'
-import {selectUploadById, uploadsActions} from '../../../modules'
-import {S3AssetType} from '../../../types'
 
 type TableRowUploadProps = {
   id: string

@@ -3,9 +3,9 @@ import {map} from 'rxjs/operators'
 import {set} from 'sanity'
 
 import {UPLOAD_STATUS_KEY} from '../../constants'
-import {uploadS3Asset} from './assets'
-import {CLEANUP_EVENT, createInitialUploadEvent, createUploadEvent} from '../../utils'
 import {S3AssetType, type S3Uploader} from '../../types'
+import {CLEANUP_EVENT, createInitialUploadEvent, createUploadEvent} from '../../utils'
+import {uploadS3Asset} from './assets'
 
 export const uploadFile: S3Uploader = (props) => {
   const {s3Client, sanityClient, file, options} = props
@@ -29,7 +29,7 @@ export const uploadFile: S3Uploader = (props) => {
         set(event.percent, [UPLOAD_STATUS_KEY, 'progress']),
         set(new Date().toISOString(), [UPLOAD_STATUS_KEY, 'updated']),
       ])
-    })
+    }),
   )
 
   return concat(of(createInitialUploadEvent(file)), upload$, of(CLEANUP_EVENT))

@@ -3,8 +3,9 @@ import {type FC, type MouseEvent} from 'react'
 import type {DefaultExtensionType} from 'react-file-icon'
 import {defaultStyles, FileIcon as ReactFileIcon} from 'react-file-icon'
 import {styled} from 'styled-components'
-import {S3AssetType, type S3FileAsset} from '../../../types'
+
 import {useS3MediaContext} from '../../../contexts'
+import {S3AssetType, type S3FileAsset} from '../../../types'
 
 type FileIconProps = {
   extension?: string

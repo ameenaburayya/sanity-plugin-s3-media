@@ -1,6 +1,6 @@
+import {S3AssetType, type S3UploaderDefinition} from '../../types'
 import {uploadFile} from './uploadFile'
 import {uploadImage} from './uploadImage'
-import {S3AssetType, type S3UploaderDefinition} from '../../types'
 
 const UPLOAD_IMAGE: S3UploaderDefinition = {
   schemaTypeName: 's3Image',

@@ -1,11 +1,11 @@
-import {useEffect, useState, type FC, type SyntheticEvent} from 'react'
-
-import {MediaBrowser} from '..'
-import type {S3AssetSourceComponentProps} from '../../types'
-import {useFormValue} from 'sanity'
-import type {SanityDocument} from 'sanity'
-import {useKeyPress} from '../../hooks'
 import {Box, Portal, PortalProvider, useLayer} from '@sanity/ui'
+import {type FC, type SyntheticEvent, useEffect, useState} from 'react'
+import type {SanityDocument} from 'sanity'
+import {useFormValue} from 'sanity'
+
+import {useKeyPress} from '../../hooks'
+import type {S3AssetSourceComponentProps} from '../../types'
+import {MediaBrowser} from '..'
 
 const useRootPortalElement = () => {
   const [container] = useState(() => document.createElement('div'))

@@ -1,25 +1,24 @@
-import {DEFAULT_STUDIO_CLIENT_OPTIONS, useClient, type AssetSourceUploader} from 'sanity'
 import {useToast} from '@sanity/ui'
 import {type FC, useCallback, useEffect, useMemo, useState} from 'react'
-import {
-  MemberField,
+import {  type AssetFromSource,
+type AssetSourceUploader, DEFAULT_STUDIO_CLIENT_OPTIONS,   MemberField,
   PatchEvent,
   set,
   setIfMissing,
   unset,
+useClient,
   useDocumentPreviewStore,
   useTranslation,
-  type AssetFromSource,
 } from 'sanity'
 
 import {UPLOAD_STATUS_KEY} from '../../../constants'
+import {useS3MediaContext} from '../../../contexts'
+import {createS3FileAssetSource} from '../../../lib'
 import type {S3AssetSource} from '../../../types'
-import {observeFileAsset, createInitialUploadPatches} from '../../../utils'
+import {createInitialUploadPatches, observeFileAsset} from '../../../utils'
 import type {S3FileInputProps} from '../types'
 import {S3FileAsset as S3FileAssetComponent} from './S3FileAsset'
 import {S3FileAssetSource} from './S3FileAssetSource'
-import {createS3FileAssetSource} from '../../../lib'
-import {useS3MediaContext} from '../../../contexts'
 
 export const S3FileInput: FC<S3FileInputProps> = (props) => {
   const {
@@ -44,14 +43,14 @@ export const S3FileInput: FC<S3FileInputProps> = (props) => {
 
   const assetSources = useMemo(
     () => [createS3FileAssetSource({sanityClient, s3Client, title: 'S3 File'})],
-    [sanityClient, s3Client]
+    [sanityClient, s3Client],
   )
 
   const documentPreviewStore = useDocumentPreviewStore()
 
   const observeAsset = useCallback(
     (assetId: string) => observeFileAsset(documentPreviewStore, assetId),
-    [documentPreviewStore]
+    [documentPreviewStore],
   )
 
   const {push} = useToast()
@@ -91,7 +90,7 @@ export const S3FileInput: FC<S3FileInputProps> = (props) => {
       }
 
       const asset = assetsFromSource.find(
-        (assetFromSource) => assetFromSource.kind === 'assetDocumentId' && assetFromSource.value
+        (assetFromSource) => assetFromSource.kind === 'assetDocumentId' && assetFromSource.value,
       )
 
       if (!asset) {
@@ -106,7 +105,7 @@ export const S3FileInput: FC<S3FileInputProps> = (props) => {
       setSelectedAssetSource(null)
       setIsUploading(false) // This function is also called on after a successful upload completion though an asset source, so reset that state here.
     },
-    [onChange, schemaType]
+    [onChange, schemaType],
   )
 
   const handleSelectFilesToUpload = useCallback(
@@ -128,7 +127,7 @@ export const S3FileInput: FC<S3FileInputProps> = (props) => {
                     PatchEvent.from([
                       set(Math.max(2, event.progress), [UPLOAD_STATUS_KEY, 'progress']),
                       set(new Date().toISOString(), [UPLOAD_STATUS_KEY, 'updatedAt']),
-                    ])
+                    ]),
                   )
                   break
                 case 'error':
@@ -167,7 +166,7 @@ export const S3FileInput: FC<S3FileInputProps> = (props) => {
         }
       }
     },
-    [assetSourceUploader, onChange, push, schemaType, t]
+    [assetSourceUploader, onChange, push, schemaType, t],
   )
 
   // Abort asset source uploads and unsubscribe from the uploader is the component unmounts

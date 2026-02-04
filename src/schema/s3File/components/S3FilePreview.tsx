@@ -12,7 +12,7 @@ import {
   WithReferencedAsset,
 } from '../../../components'
 import {useS3MediaContext, useS3MediaOptionsContext} from '../../../contexts'
-import {S3AssetType, type S3AssetSource, type S3FileAsset} from '../../../types'
+import {type S3AssetSource, S3AssetType, type S3FileAsset} from '../../../types'
 import {type S3FileInputProps} from '../types'
 import {S3FileActionsMenu} from './S3FileActionsMenu'
 import {S3FileSkeleton} from './S3FileSkeleton'
@@ -102,11 +102,11 @@ export const S3FilePreview: FC<S3FilePreviewProps> = (props) => {
         setSelectedAssetSource(assetSource)
       } else {
         console.warn(
-          `No asset source found for the selected asset source name '${assetSourceNameData}'`
+          `No asset source found for the selected asset source name '${assetSourceNameData}'`,
         )
       }
     },
-    [assetSources, setSelectedAssetSource]
+    [assetSources, setSelectedAssetSource],
   )
 
   const handleSelectFilesFromAssetSource = useCallback(
@@ -114,14 +114,14 @@ export const S3FilePreview: FC<S3FilePreviewProps> = (props) => {
       setIsMenuOpen(false)
       onSelectFiles(assetSource, files)
     },
-    [onSelectFiles]
+    [onSelectFiles],
   )
 
   const handleSelectFilesFromAssetSourceSingle = useCallback(
     (files: File[]) => {
       handleSelectFilesFromAssetSource(assetSourcesWithUpload[0], files)
     },
-    [assetSourcesWithUpload, handleSelectFilesFromAssetSource]
+    [assetSourcesWithUpload, handleSelectFilesFromAssetSource],
   )
 
   const browseMenuItem: ReactNode = useMemo(() => {

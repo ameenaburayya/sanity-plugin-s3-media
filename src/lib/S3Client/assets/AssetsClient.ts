@@ -1,10 +1,10 @@
 import {lastValueFrom, Observable} from 'rxjs'
 import {filter} from 'rxjs/operators'
 
+import type {S3AssetType} from '../../../types'
 import type {ObservableS3Client, S3Client} from '../S3Client'
 import type {HttpRequestEvent, ResponseEvent} from '../types'
 import * as validators from '../validators'
-import type {S3AssetType} from '../../../types'
 
 const upload = ({
   file,

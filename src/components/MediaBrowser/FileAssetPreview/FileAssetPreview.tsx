@@ -1,9 +1,9 @@
 import {Flex} from '@sanity/ui'
 import type {FC} from 'react'
 
-import {S3AssetType, type S3Asset} from '../../../types'
-import {FileIcon} from '../FileIcon'
 import {useS3MediaContext} from '../../../contexts'
+import {type S3Asset, S3AssetType} from '../../../types'
+import {FileIcon} from '../FileIcon'
 
 type FileAssetPreviewProps = {
   asset: S3Asset

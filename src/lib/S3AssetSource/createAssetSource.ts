@@ -1,9 +1,9 @@
 import {DocumentsIcon, ImageIcon} from '@sanity/icons'
 
 import {S3AssetSource as S3AssetSourceComponent} from '../../components'
+import type {S3AssetSource} from '../../types'
 import type {CreateS3AssetSourceProps} from './types'
 import {createS3Uploader} from './uploader'
-import type {S3AssetSource} from '../../types'
 
 const sourceName = 's3-media'
 

@@ -30,7 +30,7 @@ const dialogSlice = createSlice({
     },
     showConfirmDeleteAssets(
       state,
-      action: PayloadAction<{assets: AssetItem[]; closeDialogId?: string}>
+      action: PayloadAction<{assets: AssetItem[]; closeDialogId?: string}>,
     ) {
       const {assets, closeDialogId} = action.payload
 
@@ -69,7 +69,7 @@ export const dialogClearOnAssetUpdateEpic: Epic = (action$) =>
     filter(
       (action: {
         payload: {closeDialogId?: string}
-      }): action is PayloadAction<{closeDialogId?: string}> => !!action?.payload?.closeDialogId
+      }): action is PayloadAction<{closeDialogId?: string}> => !!action?.payload?.closeDialogId,
     ),
     mergeMap((action) => {
       const dialogId = action?.payload?.closeDialogId
@@ -77,7 +77,7 @@ export const dialogClearOnAssetUpdateEpic: Epic = (action$) =>
         return of(dialogSlice.actions.remove({id: dialogId}))
       }
       return EMPTY
-    })
+    }),
   )
 
 export const dialogActions = {...dialogSlice.actions}

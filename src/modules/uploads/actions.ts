@@ -1,4 +1,5 @@
 import {createAction} from '@reduxjs/toolkit'
+
 import type {S3AssetDocument} from '../../types'
 
 export const UPLOADS_ACTIONS = {
@@ -8,6 +9,6 @@ export const UPLOADS_ACTIONS = {
       return {
         payload: {asset},
       }
-    }
+    },
   ),
 }

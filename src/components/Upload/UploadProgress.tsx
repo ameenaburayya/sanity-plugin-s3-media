@@ -1,7 +1,7 @@
 import {Card, Code, Flex, Inline, Stack, Text} from '@sanity/ui'
 import {type FC, useEffect} from 'react'
 import {LinearProgress, Translate, type UploadState, useTranslation} from 'sanity'
-import styled from 'styled-components'
+import {styled} from 'styled-components'
 
 import {STALE_UPLOAD_MS} from '../../constants'
 import {Button} from '../UI'

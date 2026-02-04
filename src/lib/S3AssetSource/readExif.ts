@@ -4,7 +4,7 @@ import {catchError, map} from 'rxjs/operators'
 
 function readFileAsArrayBuffer(
   file: File,
-  length: number
+  length: number,
 ): Observable<string | ArrayBuffer | null> {
   return new Observable((observer) => {
     const reader = new window.FileReader()
@@ -34,6 +34,6 @@ export const readExif = (file: File) => {
       }
 
       return observableOf({})
-    })
+    }),
   )
 }

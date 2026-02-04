@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-imports */
 import {
   Box,
   type BoxHeight,
@@ -64,7 +63,7 @@ export const Dialog = forwardRef(function Dialog(
     zOffset,
     ...props
   }: DialogProps & Pick<HTMLProps<HTMLDivElement>, 'onDragEnter' | 'onDrop'>,
-  ref: Ref<HTMLDivElement>
+  ref: Ref<HTMLDivElement>,
 ) {
   const {t} = useTranslation()
 

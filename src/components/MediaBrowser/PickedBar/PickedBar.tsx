@@ -5,9 +5,9 @@ import {useDispatch} from 'react-redux'
 import {useColorSchemeValue} from 'sanity'
 
 import {useTypedSelector} from '../../../hooks'
+import {assetsActions, dialogActions, selectAssetsPicked} from '../../../modules'
 import {getSchemeColor} from '../../../utils'
 import {PANEL_HEIGHT} from '../constants'
-import {assetsActions, selectAssetsPicked, dialogActions} from '../../../modules'
 
 export const PickedBar: FC = () => {
   const scheme = useColorSchemeValue()

@@ -7,7 +7,7 @@ import {type Reference, useTranslation} from 'sanity'
 
 import {ActionsMenu, FileInputMenuItem, MenuItem, UploadDropDownMenu} from '../../../components'
 import {useS3MediaContext, useS3MediaOptionsContext} from '../../../contexts'
-import {S3AssetType, type S3AssetSource, type S3ImageAsset} from '../../../types'
+import {type S3AssetSource, S3AssetType, type S3ImageAsset} from '../../../types'
 import {type S3ImageInputProps} from '../types'
 import {S3ImageActionsMenu, S3ImageActionsMenuWaitPlaceholder} from './S3ImageActionsMenu'
 
@@ -28,7 +28,7 @@ type S3ImageInputAssetMenuWithReferenceAssetProps = Pick<
 }
 
 const S3ImageInputAssetMenuWithReferenceAsset: FC<S3ImageInputAssetMenuWithReferenceAssetProps> = (
-  props
+  props,
 ) => {
   const {
     accept,
@@ -58,14 +58,14 @@ const S3ImageInputAssetMenuWithReferenceAsset: FC<S3ImageInputAssetMenuWithRefer
     (assetSource: S3AssetSource, files: File[]) => {
       onSelectFile(assetSource, files[0])
     },
-    [onSelectFile]
+    [onSelectFile],
   )
 
   const handleSelectFilesFromAssetSourceSingle = useCallback(
     (files: File[]) => {
       handleSelectFilesFromAssetSource(assetSourcesWithUpload[0], files)
     },
-    [assetSourcesWithUpload, handleSelectFilesFromAssetSource]
+    [assetSourcesWithUpload, handleSelectFilesFromAssetSource],
   )
 
   if (!documentId || !asset) {

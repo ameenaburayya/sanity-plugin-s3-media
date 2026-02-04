@@ -6,23 +6,23 @@ import {css, styled} from 'styled-components'
 
 import {useAssetSourceActions} from '../../../contexts'
 import {useTypedSelector} from '../../../hooks'
+import {assetsActions, selectAssetsLength, selectAssetsPickedLength} from '../../../modules'
 import {getSchemeColor} from '../../../utils'
 import {GRID_TEMPLATE_COLUMNS, PANEL_HEIGHT} from '../constants'
-import {assetsActions, selectAssetsLength, selectAssetsPickedLength} from '../../../modules'
 import {TableHeaderItem} from '../TableHeaderItem'
 
-const ContextActionContainer = styled<typeof Flex, {$scheme: ThemeColorSchemeKey}>(Flex)(
-  ({$scheme}) => {
-    return css`
-      cursor: pointer;
-      @media (hover: hover) and (pointer: fine) {
-        &:hover {
-          background: ${getSchemeColor($scheme, 'bg')};
-        }
+const ContextActionContainer = styled<typeof Flex, {$scheme: ThemeColorSchemeKey}>(Flex)(({
+  $scheme,
+}) => {
+  return css`
+    cursor: pointer;
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        background: ${getSchemeColor($scheme, 'bg')};
       }
-    `
-  }
-)
+    }
+  `
+})
 
 export const TableHeader: FC = () => {
   const scheme = useColorSchemeValue()

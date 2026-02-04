@@ -28,21 +28,21 @@ import {useDispatch} from 'react-redux'
 import {useColorSchemeValue, WithReferringDocuments} from 'sanity'
 import {css, styled} from 'styled-components'
 
+import {useS3MediaContext} from '../../../contexts'
 import {useAssetSourceActions} from '../../../contexts/S3AssetSourceDispatchContext'
 import {useKeyPress, useTypedSelector} from '../../../hooks'
+import {assetsActions, dialogActions, selectAssetById} from '../../../modules'
+import {S3AssetType} from '../../../types'
 import {
-  isS3FileAsset,
-  isS3ImageAsset,
   getAssetResolution,
   getSchemeColor,
   getUniqueDocuments,
+  isS3FileAsset,
+  isS3ImageAsset,
 } from '../../../utils'
 import {GRID_TEMPLATE_COLUMNS} from '../constants'
 import {FileIcon} from '../FileIcon'
 import {Image} from '../Image'
-import {assetsActions, selectAssetById, dialogActions} from '../../../modules'
-import {useS3MediaContext} from '../../../contexts'
-import {S3AssetType} from '../../../types'
 
 // Duration (ms) to wait before reference counts (and associated listeners) are rendered
 const REFERENCE_COUNT_VISIBILITY_DELAY = 750
@@ -75,18 +75,18 @@ const ContainerGrid = styled<
   `
 })
 
-const ContextActionContainer = styled<typeof Flex, {$scheme: ThemeColorSchemeKey}>(Flex)(
-  ({$scheme}) => {
-    return css`
-      cursor: pointer;
-      @media (hover: hover) and (pointer: fine) {
-        &:hover {
-          background: ${getSchemeColor($scheme, 'bg2')};
-        }
+const ContextActionContainer = styled<typeof Flex, {$scheme: ThemeColorSchemeKey}>(Flex)(({
+  $scheme,
+}) => {
+  return css`
+    cursor: pointer;
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        background: ${getSchemeColor($scheme, 'bg2')};
       }
-    `
-  }
-)
+    }
+  `
+})
 
 // eslint-disable-next-line complexity
 const BaseTableRowAsset: FC<TableRowAssetProps> = (props) => {
@@ -127,7 +127,7 @@ const BaseTableRowAsset: FC<TableRowAssetProps> = (props) => {
         dispatch(assetsActions.pick({assetId: asset._id, picked: !picked}))
       }
     },
-    [asset, dispatch, lastPicked, onSelect, picked, shiftPressed]
+    [asset, dispatch, lastPicked, onSelect, picked, shiftPressed],
   )
 
   const handleClick = useCallback(
@@ -147,7 +147,7 @@ const BaseTableRowAsset: FC<TableRowAssetProps> = (props) => {
         dispatch(dialogActions.showAssetEdit({assetId: asset._id}))
       }
     },
-    [asset, dispatch, lastPicked, onSelect, picked, shiftPressed]
+    [asset, dispatch, lastPicked, onSelect, picked, shiftPressed],
   )
 
   const opacityCell = updating ? 0.5 : 1
@@ -157,7 +157,7 @@ const BaseTableRowAsset: FC<TableRowAssetProps> = (props) => {
   useEffect(() => {
     refCountVisibleTimeout.current = setTimeout(
       () => setReferenceCountVisible(true),
-      REFERENCE_COUNT_VISIBILITY_DELAY
+      REFERENCE_COUNT_VISIBILITY_DELAY,
     )
     return () => {
       if (refCountVisibleTimeout.current) {

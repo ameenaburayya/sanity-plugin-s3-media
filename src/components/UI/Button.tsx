@@ -1,5 +1,3 @@
-/* eslint-disable no-restricted-imports */
-
 import {
   Button as UIButton,
   type ButtonProps as UIButtonProps,
@@ -69,7 +67,7 @@ export const Button = forwardRef(function Button(
     tooltipProps,
     ...rest
   }: ButtonProps & Omit<HTMLProps<HTMLButtonElement>, 'as' | 'size' | 'title'>,
-  ref: ForwardedRef<HTMLButtonElement>
+  ref: ForwardedRef<HTMLButtonElement>,
 ) {
   const sizeProps = size === 'default' ? DEFAULT_BUTTON_PROPS : LARGE_BUTTON_PROPS
 

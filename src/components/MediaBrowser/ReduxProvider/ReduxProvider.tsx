@@ -5,11 +5,11 @@ import {Provider} from 'react-redux'
 import {createEpicMiddleware} from 'redux-observable'
 import type {SanityDocument} from 'sanity'
 
-import {rootEpic, rootReducer, initialState as assetsInitialState} from '../../../modules'
-import {getDocumentAssetIds, isSupportedAssetType} from '../../../utils'
-import type {RootReducerState, S3AssetSourceComponentProps} from '../../../types'
 import {SUPPORTED_ASSET_TYPES} from '../../../constants'
 import type {S3Client} from '../../../lib'
+import {initialState as assetsInitialState, rootEpic, rootReducer} from '../../../modules'
+import type {RootReducerState, S3AssetSourceComponentProps} from '../../../types'
+import {getDocumentAssetIds, isSupportedAssetType} from '../../../utils'
 
 type Props = {
   assetType?: S3AssetSourceComponentProps['assetType']

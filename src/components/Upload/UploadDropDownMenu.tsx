@@ -4,8 +4,8 @@ import {startCase, uniqueId} from 'lodash'
 import {type ChangeEvent, type FC, type JSX, type MouseEvent, useCallback, useMemo} from 'react'
 import {useTranslation} from 'sanity'
 
-import {Button, MenuItem} from '../UI'
 import type {S3AssetSource} from '../../types'
+import {Button, MenuItem} from '../UI'
 
 const UPLOAD_DROP_DOWN_MENU_POPOVER: MenuButtonProps['popover'] = {portal: true} as const
 const MENU_GROUP_POPOVER: MenuGroupProps['popover'] = {
@@ -45,7 +45,7 @@ export const UploadDropDownMenu: FC<UploadDropDownMenuProps> = (props) => {
     (assetSource: S3AssetSource) => {
       return `${uniqId}-${assetSource.name}-upload-button`
     },
-    [uniqId]
+    [uniqId],
   )
 
   // Needed for keyboard navigation (arrow keys + enter/space)
@@ -62,7 +62,7 @@ export const UploadDropDownMenu: FC<UploadDropDownMenuProps> = (props) => {
         element.click()
       }
     },
-    [assetSources, createAssetSourceInputId]
+    [assetSources, createAssetSourceInputId],
   )
 
   const renderMenuItemLabel = useCallback(
@@ -74,7 +74,7 @@ export const UploadDropDownMenu: FC<UploadDropDownMenuProps> = (props) => {
       }
       return <label htmlFor={createAssetSourceInputId(assetSource)}>{menuItemContent}</label>
     },
-    [assetSources, createAssetSourceInputId]
+    [assetSources, createAssetSourceInputId],
   )
 
   const renderMenuItemForAssetSource = useCallback(
@@ -94,7 +94,7 @@ export const UploadDropDownMenu: FC<UploadDropDownMenuProps> = (props) => {
         />
       )
     },
-    [createAssetSourceInputId, handleMenuItemClick, renderMenuItemLabel, uploadsDisabled]
+    [createAssetSourceInputId, handleMenuItemClick, renderMenuItemLabel, uploadsDisabled],
   )
 
   const handleFileInputChange = useCallback(
@@ -110,7 +110,7 @@ export const UploadDropDownMenu: FC<UploadDropDownMenuProps> = (props) => {
       event.stopPropagation()
       event.preventDefault()
     },
-    [assetSources, onSelectFiles]
+    [assetSources, onSelectFiles],
   )
 
   const fileInputs = useMemo(() => {

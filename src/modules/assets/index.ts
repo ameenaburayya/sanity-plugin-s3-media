@@ -3,7 +3,7 @@ import type {ClientError} from '@sanity/client'
 import groq from 'groq'
 import type {Selector} from 'react-redux'
 import {ofType} from 'redux-observable'
-import {EMPTY, concat, forkJoin, from, of} from 'rxjs'
+import {concat, EMPTY, forkJoin, from, of} from 'rxjs'
 import {
   bufferTime,
   catchError,
@@ -16,7 +16,7 @@ import {
 
 import {getOrderTitle} from '../../config/orders'
 import {ORDER_OPTIONS} from '../../constants'
-import type {AssetItem, BrowserView, HttpError, Epic, Order} from '../../types'
+import type {AssetItem, BrowserView, Epic, HttpError, Order,RootReducerState, S3Asset, S3AssetType} from '../../types'
 import {
   buildS3FilePath,
   buildS3ImagePath,
@@ -25,7 +25,6 @@ import {
   isS3ImageAsset,
 } from '../../utils'
 import {searchActions} from '../search'
-import type {RootReducerState, S3Asset, S3AssetType} from '../../types'
 import {UPLOADS_ACTIONS} from '../uploads/actions'
 
 type ItemError = {
@@ -122,7 +121,7 @@ const assetsSlice = createSlice({
       const {assetIds, error} = action.payload
 
       const itemErrors: ItemError[] = error?.response?.body?.error?.items?.map(
-        (item: any) => item.error
+        (item: any) => item.error,
       )
 
       assetIds?.forEach((id) => {
@@ -343,7 +342,7 @@ const assetsSlice = createSlice({
         asset: S3Asset
         closeDialogId?: string
         formData: Record<string, any>
-      }>
+      }>,
     ) {
       const assetId = action.payload?.asset?._id
       state.byIds[assetId].updating = true
@@ -366,19 +365,18 @@ export const assetsDeleteEpic: Epic = (action$, _state$, {sanityClient, s3Client
       const assetIds = assets.map((asset) => asset._id)
 
       return sanityClient.observable
-        .fetch<{_id: string; referenceCount: number}[]>(
-          groq`*[_id in $assetIds]{_id, "referenceCount": count(*[references(^._id)])}`,
-          {assetIds}
-        )
+        .fetch<
+          {_id: string; referenceCount: number}[]
+        >(groq`*[_id in $assetIds]{_id, "referenceCount": count(*[references(^._id)])}`, {assetIds})
         .pipe(
           mergeMap((referenceResults) => {
             const referenceMap = new Map(
-              referenceResults.map((item) => [item._id, item.referenceCount])
+              referenceResults.map((item) => [item._id, item.referenceCount]),
             )
 
             const blockedAssets = assets.filter((asset) => (referenceMap.get(asset._id) || 0) > 0)
             const deletableAssets = assets.filter(
-              (asset) => (referenceMap.get(asset._id) || 0) === 0
+              (asset) => (referenceMap.get(asset._id) || 0) === 0,
             )
 
             const blockedIds = blockedAssets.map((asset) => asset._id)
@@ -389,7 +387,7 @@ export const assetsDeleteEpic: Epic = (action$, _state$, {sanityClient, s3Client
                   assetsActions.deleteSkipped({
                     assetIds: blockedIds,
                     reason: 'Asset has references and cannot be deleted.',
-                  })
+                  }),
                 )
               : EMPTY
 
@@ -398,26 +396,26 @@ export const assetsDeleteEpic: Epic = (action$, _state$, {sanityClient, s3Client
             }
 
             const deleteRequests = deletableAssets.map((asset) =>
-              s3Client.observable.assets.deleteAsset({fileName: buildFileName(asset)})
+              s3Client.observable.assets.deleteAsset({fileName: buildFileName(asset)}),
             )
 
             const deleteFlow$ = forkJoin(deleteRequests).pipe(
               mergeMap(() =>
                 sanityClient.observable.delete({
                   query: groq`*[_id in ${JSON.stringify(deletableIds)}]`,
-                })
+                }),
               ),
               mergeMap(() => of(assetsActions.deleteComplete({assetIds: deletableIds}))),
               catchError((error: ClientError) => {
                 return of(assetsActions.deleteError({assetIds: deletableIds, error}))
-              })
+              }),
             )
 
             return blockedIds.length ? concat(blockedActions$, deleteFlow$) : deleteFlow$
           }),
-          catchError((error: ClientError) => of(assetsActions.deleteError({assetIds, error})))
+          catchError((error: ClientError) => of(assetsActions.deleteError({assetIds, error}))),
         )
-    })
+    }),
   )
 
 export const assetsFetchEpic: Epic = (action$, state$, {sanityClient}) =>
@@ -432,7 +430,7 @@ export const assetsFetchEpic: Epic = (action$, state$, {sanityClient}) =>
         mergeMap(() =>
           sanityClient.observable.fetch<{
             items: S3Asset[]
-          }>(query, params)
+          }>(query, params),
         ),
         mergeMap((result) => {
           const {
@@ -446,11 +444,11 @@ export const assetsFetchEpic: Epic = (action$, state$, {sanityClient}) =>
             assetsActions.fetchError({
               message: error?.message || 'Internal error',
               statusCode: error?.statusCode || 500,
-            })
-          )
-        )
+            }),
+          ),
+        ),
       )
-    })
+    }),
   )
 
 export const assetsFetchPageIndexEpic: Epic = (action$, state$) =>
@@ -482,9 +480,9 @@ export const assetsFetchPageIndexEpic: Epic = (action$, state$) =>
           queryFilter: constructedFilter,
           selector: groq`[${start}...${end}]`,
           sort: groq`order(${state.assets?.order?.field} ${state.assets?.order?.direction})`,
-        })
+        }),
       )
-    })
+    }),
   )
 
 export const assetsFetchNextPageEpic: Epic = (action$, state$) =>
@@ -492,8 +490,8 @@ export const assetsFetchNextPageEpic: Epic = (action$, state$) =>
     filter(assetsActions.loadNextPage.match),
     withLatestFrom(state$),
     switchMap(([_action, state]) =>
-      of(assetsActions.loadPageIndex({pageIndex: state.assets.pageIndex + 1}))
-    )
+      of(assetsActions.loadPageIndex({pageIndex: state.assets.pageIndex + 1})),
+    ),
   )
 
 export const assetsFetchAfterDeleteAllEpic: Epic = (action$, state$) =>
@@ -507,7 +505,7 @@ export const assetsFetchAfterDeleteAllEpic: Epic = (action$, state$) =>
       }
 
       return EMPTY
-    })
+    }),
   )
 
 export const assetsOrderSetEpic: Epic = (action$) =>
@@ -516,9 +514,9 @@ export const assetsOrderSetEpic: Epic = (action$) =>
     mergeMap(() => {
       return of(
         assetsActions.clear(), //
-        assetsActions.loadPageIndex({pageIndex: 0})
+        assetsActions.loadPageIndex({pageIndex: 0}),
       )
-    })
+    }),
   )
 
 export const assetsSearchEpic: Epic = (action$) =>
@@ -528,9 +526,9 @@ export const assetsSearchEpic: Epic = (action$) =>
     mergeMap(() => {
       return of(
         assetsActions.clear(), //
-        assetsActions.loadPageIndex({pageIndex: 0})
+        assetsActions.loadPageIndex({pageIndex: 0}),
       )
-    })
+    }),
   )
 
 export const assetsListenerCreateQueueEpic: Epic = (action$) =>
@@ -541,7 +539,7 @@ export const assetsListenerCreateQueueEpic: Epic = (action$) =>
     mergeMap((actions) => {
       const assets = actions?.map((action) => action.payload.asset)
       return of(assetsActions.listenerCreateQueueComplete({assets}))
-    })
+    }),
   )
 
 export const assetsListenerDeleteQueueEpic: Epic = (action$) =>
@@ -552,7 +550,7 @@ export const assetsListenerDeleteQueueEpic: Epic = (action$) =>
     mergeMap((actions) => {
       const assetIds = actions?.map((action) => action.payload.assetId)
       return of(assetsActions.listenerDeleteQueueComplete({assetIds}))
-    })
+    }),
   )
 
 export const assetsListenerUpdateQueueEpic: Epic = (action$) =>
@@ -563,7 +561,7 @@ export const assetsListenerUpdateQueueEpic: Epic = (action$) =>
     mergeMap((actions) => {
       const assets = actions?.map((action) => action.payload.asset)
       return of(assetsActions.listenerUpdateQueueComplete({assets}))
-    })
+    }),
   )
 
 // Re-sort on all updates (immediate and batched listener events)
@@ -572,9 +570,9 @@ export const assetsSortEpic: Epic = (action$) =>
     ofType(
       assetsActions.insertUploads.type,
       assetsActions.listenerUpdateQueueComplete.type,
-      assetsActions.updateComplete.type
+      assetsActions.updateComplete.type,
     ),
-    mergeMap(() => of(assetsActions.sort()))
+    mergeMap(() => of(assetsActions.sort())),
   )
 
 export const assetsUnpickEpic: Epic = (action$) =>
@@ -582,7 +580,7 @@ export const assetsUnpickEpic: Epic = (action$) =>
     ofType(assetsActions.orderSet.type, assetsActions.viewSet.type, searchActions.querySet.type),
     mergeMap(() => {
       return of(assetsActions.pickClear())
-    })
+    }),
   )
 
 export const assetsUpdateEpic: Epic = (action$, state$, {sanityClient}) =>
@@ -600,16 +598,16 @@ export const assetsUpdateEpic: Epic = (action$, state$, {sanityClient}) =>
               .setIfMissing({opt: {}})
               .setIfMissing({'opt.media': {}})
               .set(formData)
-              .commit()
-          )
+              .commit(),
+          ),
         ),
         mergeMap((updatedAsset: any) =>
           of(
             assetsActions.updateComplete({
               asset: updatedAsset,
               closeDialogId,
-            })
-          )
+            }),
+          ),
         ),
         catchError((error: ClientError) =>
           of(
@@ -619,11 +617,11 @@ export const assetsUpdateEpic: Epic = (action$, state$, {sanityClient}) =>
                 message: error?.message || 'Internal error',
                 statusCode: error?.statusCode || 500,
               },
-            })
-          )
-        )
+            }),
+          ),
+        ),
       )
-    })
+    }),
   )
 
 // Selectors
@@ -640,23 +638,23 @@ export const selectAssetById = createSelector(
   (byIds, assetId) => {
     const asset = byIds[assetId]
     return asset ? asset : undefined
-  }
+  },
 )
 
 const selectAssets: Selector<RootReducerState, AssetItem[]> = createSelector(
   [selectAssetsByIds, selectAssetsAllIds],
-  (byIds, allIds) => allIds.map((id) => byIds[id])
+  (byIds, allIds) => allIds.map((id) => byIds[id]),
 )
 
 export const selectAssetsLength = createSelector([selectAssets], (assets) => assets.length)
 
 export const selectAssetsPicked = createSelector([selectAssets], (assets) =>
-  assets.filter((item) => item?.picked)
+  assets.filter((item) => item?.picked),
 )
 
 export const selectAssetsPickedLength = createSelector(
   [selectAssetsPicked],
-  (assetsPicked) => assetsPicked.length
+  (assetsPicked) => assetsPicked.length,
 )
 
 export const assetsReducer = assetsSlice.reducer

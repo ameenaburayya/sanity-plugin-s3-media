@@ -1,5 +1,5 @@
 import {type ChangeEvent, type FC, type HTMLProps, useCallback, useId} from 'react'
-import styled, {css} from 'styled-components'
+import {css, styled} from 'styled-components'
 
 import {Button, type ButtonProps} from '../UI'
 
@@ -33,7 +33,7 @@ const FileButton = styled(Button).attrs({forwardedAs: 'label'})(
       border: 0;
       opacity: 0;
     }
-  `
+  `,
 )
 
 export const FileInputButton: FC<
@@ -49,7 +49,7 @@ export const FileInputButton: FC<
         onSelect(Array.from(event.target.files))
       }
     },
-    [onSelect]
+    [onSelect],
   )
 
   return (

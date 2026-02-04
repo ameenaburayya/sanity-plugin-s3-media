@@ -14,7 +14,7 @@ export const useKeyPress = (hotkey: string, onPress?: () => void): RefObject<boo
         }
       }
     },
-    [hotkey, onPress]
+    [hotkey, onPress],
   )
 
   // If released key is our target key then set to false

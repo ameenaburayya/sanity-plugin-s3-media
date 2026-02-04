@@ -3,10 +3,10 @@ import type {FC} from 'react'
 import {GroupedVirtuoso} from 'react-virtuoso'
 
 import {useTypedSelector} from '../../../hooks'
+import type {CardAssetData, CardUploadData} from '../../../types/browser'
 import {TableHeader} from '../TableHeader'
 import {TableRowAsset} from '../TableRowAsset'
 import {TableRowUpload} from '../TableRowUpload'
-import type {CardAssetData, CardUploadData} from '../../../types/browser'
 
 type AssetTableVirtualizedProps = {
   items: (CardAssetData | CardUploadData)[]

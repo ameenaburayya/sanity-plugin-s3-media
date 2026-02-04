@@ -10,11 +10,11 @@ import {get} from 'lodash'
 import {type FC, type ReactNode, useCallback, useMemo, useState} from 'react'
 import {type SchemaType} from 'sanity'
 import {useTranslation} from 'sanity'
-import styled from 'styled-components'
+import {styled} from 'styled-components'
 
+import {type S3AssetSource, S3AssetType} from '../../types'
 import {FileInputButton} from '../File/FileInputButton'
 import {UploadDropDownMenu} from './UploadDropDownMenu'
-import {type S3AssetSource, S3AssetType} from '../../types'
 
 interface UploadPlaceholderProps {
   assetSources: S3AssetSource[]
@@ -55,7 +55,7 @@ export const UploadPlaceholder: FC<UploadPlaceholderProps> = (props) => {
         onUpload(assetSource, files)
       }
     },
-    [onUpload]
+    [onUpload],
   )
 
   const accept = get(schemaType, 'options.accept', '')

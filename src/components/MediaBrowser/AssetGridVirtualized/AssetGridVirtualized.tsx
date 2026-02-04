@@ -3,9 +3,9 @@ import {VirtuosoGrid} from 'react-virtuoso'
 import {styled} from 'styled-components'
 
 import {useTypedSelector} from '../../../hooks'
+import type {CardAssetData, CardUploadData} from '../../../types/browser'
 import {CardAsset} from '../CardAsset'
 import {CardUpload} from '../CardUpload'
-import type {CardAssetData, CardUploadData} from '../../../types/browser'
 
 type AssetGridVirtualizedProps = {
   items: (CardAssetData | CardUploadData)[]

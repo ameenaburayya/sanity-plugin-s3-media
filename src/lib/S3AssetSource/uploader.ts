@@ -1,4 +1,7 @@
 import {type SanityClient} from '@sanity/client'
+import {uuid} from '@sanity/uuid'
+import {get} from 'lodash'
+import {type Subscription} from 'rxjs'
 import {
   type AssetSourceUploader,
   type AssetSourceUploaderClass,
@@ -7,13 +10,10 @@ import {
   type AssetSourceUploadSubscriber,
   type SchemaType,
 } from 'sanity'
-import {uuid} from '@sanity/uuid'
-import {get} from 'lodash'
-import {type Subscription} from 'rxjs'
 
+import type {S3Client} from '../S3Client'
 import {resolveUploaderBySchemaType} from './resolveUploader'
 import {type CreateS3AssetSourceProps} from './types'
-import type {S3Client} from '../S3Client'
 
 class S3Uploader implements AssetSourceUploader {
   private files: AssetSourceUploadFile[] = []
@@ -46,7 +46,7 @@ class S3Uploader implements AssetSourceUploader {
     options?: {
       schemaType?: SchemaType
       onChange?: (patch: unknown) => void
-    }
+    },
   ): AssetSourceUploadFile[] {
     const {schemaType, onChange} = options || {}
 
@@ -114,7 +114,7 @@ class S3Uploader implements AssetSourceUploader {
                 this.updateFile(uploadFile.id, {status: 'complete'})
                 this.subscriptions.get(fileId)?.unsubscribe()
               },
-            })
+            }),
         )
       }
     }

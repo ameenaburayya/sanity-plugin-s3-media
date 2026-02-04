@@ -1,2 +1,2 @@
-export * from './WithReferencedAsset'
 export * from './S3AssetSource'
+export * from './WithReferencedAsset'

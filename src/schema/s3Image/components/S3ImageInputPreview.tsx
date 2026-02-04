@@ -1,12 +1,12 @@
 import {WarningOutlineIcon} from '@sanity/icons'
 import {Text} from '@sanity/ui'
-import {type FC, useCallback, useEffect, useState} from 'react'
+import {type FC, useCallback, useState} from 'react'
 import {LoadingBlock, useTranslation} from 'sanity'
 
-import {type S3ImageInputProps} from '../types'
-import {ErrorIconWrapper, FlexOverlay, Overlay, RatioBox} from './S3ImagePreview.styled'
 import {useS3MediaContext} from '../../../contexts'
 import {S3AssetType} from '../../../types'
+import {type S3ImageInputProps} from '../types'
+import {ErrorIconWrapper, FlexOverlay, Overlay, RatioBox} from './S3ImagePreview.styled'
 
 const LoadingOverlay = () => {
   return (
@@ -60,13 +60,6 @@ export const S3ImageInputPreview: FC<S3ImageInputPreviewProps> = (props) => {
     setHasError(true)
     setLoaded(false)
   }, [])
-
-  useEffect(() => {
-    /* set for when the src is being switched when the image input already had a image src
-    - meaning it already had an asset */
-    setLoaded(false)
-    setHasError(false)
-  }, [url])
 
   const showAccessWarning = hasError
   const showLoading = !isLoaded && !showAccessWarning

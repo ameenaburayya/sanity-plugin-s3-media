@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 import type {ComponentType, ReactNode} from 'react'
 import type {
   AssetFromSource,
@@ -6,6 +5,7 @@ import type {
   AssetSourceUploaderClass,
   SanityDocument,
 } from 'sanity'
+
 import type {S3FileSchemaType, S3ImageMetaData, S3ImageSchemaType} from './schema'
 
 /** @public */

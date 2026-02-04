@@ -4,9 +4,9 @@ import {startCase} from 'lodash'
 import {type FC, useCallback} from 'react'
 import {useTranslation} from 'sanity'
 
+import type {S3AssetSource} from '../../types'
 import {Button} from './Button'
 import {MenuItem} from './MenuItem'
-import type {S3AssetSource} from '../../types'
 
 type BrowserButtonProps = {
   id: string
@@ -23,7 +23,7 @@ export const BrowserButton: FC<BrowserButtonProps> = (props) => {
     (assetSource: S3AssetSource) => {
       setSelectedAssetSource(assetSource)
     },
-    [setSelectedAssetSource]
+    [setSelectedAssetSource],
   )
 
   if (assetSources.length === 0) return null

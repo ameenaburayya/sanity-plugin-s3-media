@@ -46,8 +46,8 @@ export const S3ImageActionsMenu: FC<S3ImageActionsMenuProps> = (props) => {
           buttonElement?.focus()
         }
       },
-      [isMenuOpen, onMenuOpen, buttonElement]
-    )
+      [isMenuOpen, onMenuOpen, buttonElement],
+    ),
   )
 
   // Close menu when clicking outside of it
@@ -58,7 +58,7 @@ export const S3ImageActionsMenu: FC<S3ImageActionsMenuProps> = (props) => {
         onMenuOpen(false)
       }
     },
-    () => [menuElement]
+    () => [menuElement],
   )
 
   const setOptionsButtonRef = useCallback(
@@ -68,7 +68,7 @@ export const S3ImageActionsMenu: FC<S3ImageActionsMenuProps> = (props) => {
       // Set focus back on the button when closing the menu
       setButtonElement(el)
     },
-    [setMenuButtonElement]
+    [setMenuButtonElement],
   )
 
   // When the popover is open, focus the menu to enable keyboard navigation

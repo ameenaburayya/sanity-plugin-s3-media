@@ -1,6 +1,5 @@
-/* eslint-disable no-dupe-class-members */
 import {AssetsClient, ObservableAssetsClient} from './assets/AssetsClient'
-import type {S3ClientConfig, HttpRequest, InitializedClientConfig} from './types'
+import type {HttpRequest, InitializedClientConfig, S3ClientConfig} from './types'
 
 /** @public */
 export class ObservableS3Client {

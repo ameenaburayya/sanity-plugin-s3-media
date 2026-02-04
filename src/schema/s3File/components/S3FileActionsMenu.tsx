@@ -41,8 +41,8 @@ export const S3FileActionsMenu: FC<S3FileActionsMenuProps> = (props) => {
           buttonElement?.focus()
         }
       },
-      [isMenuOpen, onMenuOpen, buttonElement]
-    )
+      [isMenuOpen, onMenuOpen, buttonElement],
+    ),
   )
 
   // Close menu when clicking outside of it
@@ -53,7 +53,7 @@ export const S3FileActionsMenu: FC<S3FileActionsMenuProps> = (props) => {
         onMenuOpen(false)
       }
     },
-    () => [menuElement]
+    () => [menuElement],
   )
 
   const setOptionsButtonRef = useCallback((el: HTMLButtonElement | null) => {

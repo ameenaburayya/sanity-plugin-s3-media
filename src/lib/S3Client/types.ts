@@ -1,4 +1,5 @@
 import type {Observable} from 'rxjs'
+
 import type {UploadEvent} from '../../types'
 
 /** @public */
@@ -69,7 +70,7 @@ export interface InitializedClientConfig extends S3ClientConfig {
 /** @public */
 export type HttpRequest = (
   options: RequestOptions,
-  requester?: Requester
+  requester?: Requester,
 ) => Observable<HttpRequestEvent>
 
 /** @public */

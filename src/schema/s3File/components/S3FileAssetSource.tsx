@@ -1,11 +1,10 @@
-import {type AssetSourceComponentAction} from 'sanity'
 import {get} from 'lodash'
 import {type FC, useCallback, useMemo} from 'react'
 import type {Observable} from 'rxjs'
-import {type AssetFromSource, useTranslation} from 'sanity'
+import {type AssetFromSource, type AssetSourceComponentAction,useTranslation} from 'sanity'
 
 import {WithReferencedAsset} from '../../../components'
-import {S3AssetType, type S3AssetSource, type S3FileAsset} from '../../../types'
+import {type S3AssetSource, S3AssetType, type S3FileAsset} from '../../../types'
 import type {S3FileInputProps} from '../types'
 import {S3FileSkeleton} from './S3FileSkeleton'
 
@@ -38,7 +37,7 @@ export const S3FileAssetSource: FC<S3FileAssetSourceProps> = (props) => {
 
   const action: AssetSourceComponentAction = useMemo(
     () => (isUploading ? 'upload' : 'select'),
-    [isUploading]
+    [isUploading],
   )
 
   if (!selectedAssetSource) {

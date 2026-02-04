@@ -1,6 +1,6 @@
 import {type MenuItemProps} from '@sanity/ui'
 import React, {type ChangeEvent, type FC, type HTMLProps, useCallback, useId} from 'react'
-import styled from 'styled-components'
+import {styled} from 'styled-components'
 
 import {MenuItem} from '../UI'
 
@@ -47,7 +47,7 @@ export const FileInputMenuItem: FC<
         onSelect(Array.from(event.target.files))
       }
     },
-    [onSelect]
+    [onSelect],
   )
 
   const renderMenuItem = useCallback(
@@ -67,7 +67,7 @@ export const FileInputMenuItem: FC<
         />
       </div>
     ),
-    [accept, capture, disabled, handleChange, id, multiple]
+    [accept, capture, disabled, handleChange, id, multiple],
   )
 
   return (

@@ -7,12 +7,12 @@ import {useColorSchemeValue} from 'sanity'
 import {styled} from 'styled-components'
 
 import {useTypedSelector} from '../../../hooks'
+import {selectUploadById, uploadsActions} from '../../../modules'
+import {S3AssetType} from '../../../types'
 import {getSchemeColor} from '../../../utils'
 import {PANEL_HEIGHT} from '../constants'
 import {FileIcon} from '../FileIcon'
 import {Image} from '../Image'
-import {selectUploadById, uploadsActions} from '../../../modules'
-import {S3AssetType} from '../../../types'
 
 type CardUploadProps = {
   id: string

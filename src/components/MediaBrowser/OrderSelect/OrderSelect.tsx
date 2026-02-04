@@ -3,9 +3,9 @@ import {Button, Menu, MenuButton, MenuDivider, MenuItem} from '@sanity/ui'
 import type {FC} from 'react'
 import {useDispatch} from 'react-redux'
 
-import {usePortalPopoverProps, useTypedSelector} from '../../../hooks'
 import {getOrderTitle} from '../../../config/orders'
 import {ORDER_OPTIONS} from '../../../constants'
+import {usePortalPopoverProps, useTypedSelector} from '../../../hooks'
 import {assetsActions} from '../../../modules'
 
 export const OrderSelect: FC = () => {
@@ -36,7 +36,7 @@ export const OrderSelect: FC = () => {
                     dispatch(
                       assetsActions.orderSet({
                         order: {direction: item.direction, field: item.field},
-                      })
+                      }),
                     )
                   }
                   padding={2}

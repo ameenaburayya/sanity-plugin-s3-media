@@ -1,15 +1,5 @@
 import {combineEpics} from 'redux-observable'
 
-import {dialogClearOnAssetUpdateEpic} from './dialog'
-
-import {
-  notificationsAssetsDeleteCompleteEpic,
-  notificationsAssetsDeleteErrorEpic,
-  notificationsAssetsDeleteSkippedEpic,
-  notificationsGenericErrorEpic,
-  notificationsAssetsUploadCompleteEpic,
-} from './notifications'
-
 import {
   assetsDeleteEpic,
   assetsFetchAfterDeleteAllEpic,
@@ -25,7 +15,14 @@ import {
   assetsUnpickEpic,
   assetsUpdateEpic,
 } from './assets'
-
+import {dialogClearOnAssetUpdateEpic} from './dialog'
+import {
+  notificationsAssetsDeleteCompleteEpic,
+  notificationsAssetsDeleteErrorEpic,
+  notificationsAssetsDeleteSkippedEpic,
+  notificationsAssetsUploadCompleteEpic,
+  notificationsGenericErrorEpic,
+} from './notifications'
 import {
   uploadsAssetStartEpic,
   uploadsAssetUploadEpic,
@@ -56,5 +53,5 @@ export const rootEpic = combineEpics(
   uploadsAssetStartEpic,
   uploadsAssetUploadEpic,
   uploadsCheckRequestEpic,
-  uploadsCompleteQueueEpic
+  uploadsCompleteQueueEpic,
 )

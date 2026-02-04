@@ -1,12 +1,12 @@
-import {type SchemaType, type FileLike, _isType} from 'sanity'
-import {accepts} from '../../utils'
+import {_isType, type FileLike, type SchemaType} from 'sanity'
 
-import {uploaders} from './uploaders'
 import type {S3UploaderDefinition} from '../../types'
+import {accepts} from '../../utils'
+import {uploaders} from './uploaders'
 
 export function resolveUploaderBySchemaType(
   schemaType: SchemaType,
-  file: FileLike
+  file: FileLike,
 ): S3UploaderDefinition | null {
   return (
     uploaders.find((uploader) => {

@@ -1,6 +1,6 @@
 export * from './Asset'
 export * from './File'
 export * from './MediaBrowser'
+export * from './S3MediaTool'
 export * from './UI'
 export * from './Upload'
-export * from './S3MediaTool'

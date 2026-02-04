@@ -3,9 +3,9 @@ import type {FC} from 'react'
 import {useDispatch} from 'react-redux'
 
 import {useTypedSelector} from '../../../hooks'
+import {assetsActions, selectCombinedItems} from '../../../modules'
 import {AssetGridVirtualized} from '../AssetGridVirtualized'
 import {AssetTableVirtualized} from '../AssetTableVirtualized'
-import {assetsActions, selectCombinedItems} from '../../../modules'
 
 export const Items: FC = () => {
   // Redux

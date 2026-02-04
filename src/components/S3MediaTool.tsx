@@ -1,6 +1,7 @@
-import type {FC} from 'react'
-import {MediaBrowser} from './MediaBrowser'
 import {Flex} from '@sanity/ui'
+import type {FC} from 'react'
+
+import {MediaBrowser} from './MediaBrowser'
 
 export const S3MediaTool: FC = () => {
   return (

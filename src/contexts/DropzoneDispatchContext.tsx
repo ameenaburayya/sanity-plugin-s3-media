@@ -11,7 +11,7 @@ type DropzoneDispatchProviderProps = {
 const DropzoneDispatchContext = createContext<ContextProps | undefined>(undefined)
 
 export const DropzoneDispatchProvider: FC<PropsWithChildren<DropzoneDispatchProviderProps>> = (
-  props
+  props,
 ) => {
   const {children, open} = props
 

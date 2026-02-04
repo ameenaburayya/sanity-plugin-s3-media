@@ -7,6 +7,6 @@ export const hashFile = (file: File): Observable<string> => {
         const hashArray = Array.from(new Uint8Array(hash))
         return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
       })
-    })
+    }),
   )
 }

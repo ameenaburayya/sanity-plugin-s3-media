@@ -1,9 +1,9 @@
 import type {FC} from 'react'
 
 import {useTypedSelector} from '../../../hooks'
+import type {Dialog} from '../../../types/browser'
 import {DialogAssetEdit} from '../DialogAssetEdit'
 import {DialogConfirm} from '../DialogConfirm'
-import type {Dialog} from '../../../types/browser'
 
 export const Dialogs: FC = () => {
   // Redux

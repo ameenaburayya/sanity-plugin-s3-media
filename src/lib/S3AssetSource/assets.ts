@@ -1,19 +1,19 @@
 /* eslint-disable max-params */
 import {Observable, of} from 'rxjs'
 import {catchError, map, mergeMap} from 'rxjs/operators'
-import {type UploadOptions, type SanityClient} from 'sanity'
+import {type SanityClient, type UploadOptions} from 'sanity'
 
-import {hashFile, withMaxConcurrency} from '../../utils'
-import type {S3Client} from '../S3Client'
 import {
-  S3AssetType,
   type S3Asset,
   type S3AssetDocument,
+  S3AssetType,
   type S3FileAsset,
   type S3ImageAsset,
   type UploadCompleteEvent,
   type UploadEvent,
 } from '../../types'
+import {hashFile, withMaxConcurrency} from '../../utils'
+import type {S3Client} from '../S3Client'
 
 const MAX_CONCURRENT_UPLOADS = 4
 
@@ -33,12 +33,12 @@ interface UploadAssetParams {
 const fetchExistingAsset = (
   client: SanityClient,
   assetType: S3AssetType,
-  id: string
+  id: string,
 ): Observable<S3ImageAsset | S3FileAsset | null> =>
   client.observable.fetch(
     '*[_type == $documentType && _id == $id][0]',
     {documentType: `${assetType}Asset`, id},
-    {tag: 's3Asset.find-duplicate'}
+    {tag: 's3Asset.find-duplicate'},
   )
 
 const getImageDimensions = (file: File): Observable<ImageDimensions | null> => {
@@ -72,7 +72,7 @@ const getFileExtension = (filename: string): string => filename.split('.').pop()
 const buildFileName = (
   fileId: string,
   extension: string,
-  dimensions: ImageDimensions | null
+  dimensions: ImageDimensions | null,
 ): string =>
   dimensions
     ? `${fileId}-${dimensions.width}x${dimensions.height}.${extension}`
@@ -82,7 +82,7 @@ const buildDocumentId = (
   assetType: S3AssetType,
   fileId: string,
   extension: string,
-  dimensions: ImageDimensions | null
+  dimensions: ImageDimensions | null,
 ): string =>
   assetType === S3AssetType.IMAGE && dimensions
     ? `${S3AssetType.IMAGE}-${fileId}-${dimensions.width}x${dimensions.height}-${extension}`
@@ -95,7 +95,7 @@ const buildAssetDocument = (
   documentId: string,
   hash: string | undefined,
   dimensions: ImageDimensions | null,
-  storeOriginalFilename: boolean
+  storeOriginalFilename: boolean,
 ): S3Asset => {
   const baseDocument = {
     _id: documentId,
@@ -164,7 +164,7 @@ const uploadAsset = ({
         const documentId = buildDocumentId(assetType, hash, extension, dimensions)
 
         return fetchExistingAsset(sanityClient, assetType, documentId).pipe(
-          map((existing) => ({existing, hash, dimensions, documentId}))
+          map((existing) => ({existing, hash, dimensions, documentId})),
         )
       }
 
@@ -193,15 +193,15 @@ const uploadAsset = ({
             documentId,
             hash || undefined,
             dimensions,
-            storeOriginalFilename
+            storeOriginalFilename,
           )
 
           return sanityClient.observable
             .create<S3Asset>(document)
             .pipe(map((asset) => createCompleteEvent({asset})))
-        })
+        }),
       )
-    })
+    }),
   )
 }
 

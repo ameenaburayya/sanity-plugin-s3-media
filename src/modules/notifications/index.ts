@@ -4,8 +4,7 @@ import {ofType} from 'redux-observable'
 import {of} from 'rxjs'
 import {filter, mergeMap} from 'rxjs/operators'
 
-import type {S3ImageAsset} from '../../types'
-import type {Epic} from '../../types'
+import type {Epic,S3ImageAsset} from '../../types'
 import {assetsActions} from '../assets'
 import {uploadsActions} from '../uploads'
 
@@ -50,9 +49,9 @@ export const notificationsAssetsDeleteCompleteEpic: Epic = (action$) =>
         notificationsSlice.actions.add({
           status: 'info',
           title: `${deletedCount} ${pluralize('asset', deletedCount)} deleted`,
-        })
+        }),
       )
-    })
+    }),
   )
 
 export const notificationsAssetsDeleteErrorEpic: Epic = (action$) =>
@@ -66,11 +65,11 @@ export const notificationsAssetsDeleteErrorEpic: Epic = (action$) =>
           status: 'error',
           title: `Unable to delete ${count} ${pluralize(
             'asset',
-            count
+            count,
           )}. Please review any asset errors and try again.`,
-        })
+        }),
       )
-    })
+    }),
   )
 
 export const notificationsAssetsDeleteSkippedEpic: Epic = (action$) =>
@@ -83,9 +82,9 @@ export const notificationsAssetsDeleteSkippedEpic: Epic = (action$) =>
         notificationsSlice.actions.add({
           status: 'warning',
           title: `Skipped ${count} ${pluralize('asset', count)}. ${reason}`,
-        })
+        }),
       )
-    })
+    }),
   )
 
 export const notificationsAssetsUploadCompleteEpic: Epic = (action$) =>
@@ -99,9 +98,9 @@ export const notificationsAssetsUploadCompleteEpic: Epic = (action$) =>
         notificationsSlice.actions.add({
           status: 'info',
           title: `Uploaded ${count} ${pluralize('asset', count)}`,
-        })
+        }),
       )
-    })
+    }),
   )
 
 export const notificationsGenericErrorEpic: Epic = (action$) =>
@@ -109,7 +108,7 @@ export const notificationsGenericErrorEpic: Epic = (action$) =>
     ofType(
       assetsActions.fetchError.type,
       assetsActions.updateError.type,
-      uploadsActions.uploadError.type
+      uploadsActions.uploadError.type,
     ),
     mergeMap((action: {payload: {error: {message: string}}}) => {
       const error = action.payload?.error
@@ -118,9 +117,9 @@ export const notificationsGenericErrorEpic: Epic = (action$) =>
         notificationsSlice.actions.add({
           status: 'error',
           title: `An error occured: ${error?.message}`,
-        })
+        }),
       )
-    })
+    }),
   )
 
 export const notificationsActions = {...notificationsSlice.actions}

@@ -2,8 +2,8 @@ import type {Action} from '@reduxjs/toolkit'
 import type {SanityClient} from '@sanity/client'
 import type {Epic as BaseEpic} from 'redux-observable'
 
-import type {S3Asset, S3AssetType, RootReducerState} from '.'
 import type {S3Client} from '../lib'
+import type {RootReducerState, S3Asset, S3AssetType} from '.'
 
 export type AssetItem = {
   _type: 'asset'

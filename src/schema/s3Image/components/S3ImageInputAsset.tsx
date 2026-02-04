@@ -1,13 +1,12 @@
 import {Box} from '@sanity/ui'
 import React, {type CSSProperties, type FC, type FocusEvent, useCallback, useMemo} from 'react'
-import {type UploadState} from 'sanity'
-import {ChangeIndicator, type InputOnSelectFileFunctionProps, type InputProps} from 'sanity'
+import {ChangeIndicator, type InputOnSelectFileFunctionProps, type InputProps,type UploadState} from 'sanity'
 
 import {UploadTargetCard, UploadWarning} from '../../../components'
 import {useS3MediaOptionsContext} from '../../../contexts'
-import {type S3ImageInputProps} from '../types'
 import type {S3AssetSource} from '../../../types'
 import {tryGetS3ImageDimensions} from '../../../utils'
+import {type S3ImageInputProps} from '../types'
 
 const ASSET_FIELD_PATH = ['asset'] as const
 
@@ -59,7 +58,7 @@ export const S3ImageInputAsset: FC<S3ImageInputAssetProps> = (props) => {
     }: Omit<InputOnSelectFileFunctionProps, 'assetSource'> & {assetSource: S3AssetSource}) => {
       onSelectFile(assetSource, file)
     },
-    [onSelectFile]
+    [onSelectFile],
   )
 
   const handleFileTargetFocus = useCallback(
@@ -75,7 +74,7 @@ export const S3ImageInputAsset: FC<S3ImageInputAssetProps> = (props) => {
         inputProps.elementProps.onFocus(event)
       }
     },
-    [inputProps, elementProps.ref?.current]
+    [inputProps, elementProps.ref?.current],
   )
 
   return (

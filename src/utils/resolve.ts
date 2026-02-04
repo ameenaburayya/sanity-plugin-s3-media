@@ -1,7 +1,9 @@
+import {isReference} from 'sanity'
+
 import {
-  S3AssetType,
   type S3Asset,
   type S3AssetObjectStub,
+  S3AssetType,
   type S3FileAsset,
   type S3FileSource,
   type S3FileUploadStub,
@@ -12,7 +14,6 @@ import {
 } from '../types'
 import {parseImageAssetId} from './asset/parse'
 import {isObject} from './isObject'
-import {isReference} from 'sanity'
 
 /**
  * A "safe function" is a wrapped function that would normally throw an UnresolvableError,
@@ -27,7 +28,7 @@ const idPattern = new RegExp(
     `${S3AssetType.IMAGE}-(?:[a-zA-Z0-9_]{24,40}|[a-f0-9]{40})+-\\d+x\\d+-[a-z0-9]+` +
     `|` +
     `${S3AssetType.FILE}-(?:[a-zA-Z0-9_]{24,40}|[a-f0-9]{40})+-[a-z0-9]+` +
-    `)$`
+    `)$`,
 )
 
 /**
@@ -78,7 +79,7 @@ function isUnresolvableError(err: unknown): err is UnresolvableError {
  * @internal
  */
 function getForgivingResolver<Args extends unknown[], Return>(
-  method: (...args: Args) => Return
+  method: (...args: Args) => Return,
 ): SafeFunction<Args, Return> {
   return (...args: Args): Return | undefined => {
     try {

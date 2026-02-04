@@ -1,5 +1,5 @@
-import type {Any, ErrorProps} from '../types'
 import {isObject} from '../../../utils/isObject'
+import type {Any, ErrorProps} from '../types'
 
 /**
  * Shared properties for HTTP errors (eg both ClientError and ServerError)

@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-imports */
 import {
   Badge,
   Box,
@@ -9,7 +8,7 @@ import {
   Stack,
   Text,
   Tooltip,
-  TooltipProps,
+  type TooltipProps,
 } from '@sanity/ui'
 import {
   forwardRef,
@@ -97,7 +96,7 @@ export const MenuItem = forwardRef(function MenuItem(
     ...rest
   }: MenuItemProps &
     Omit<HTMLProps<HTMLDivElement>, 'as' | 'height' | 'ref' | 'selected' | 'tabIndex' | 'size'>,
-  ref: Ref<HTMLDivElement>
+  ref: Ref<HTMLDivElement>,
 ) {
   const menuItemContent = useMemo(() => {
     return (

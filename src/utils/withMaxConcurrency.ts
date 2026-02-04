@@ -41,7 +41,7 @@ const createThrottler = <T>(concurrency: number = DEFAULT_CONCURRENCY) => {
     pendingObservables.push(observable)
     return ready$.asObservable().pipe(
       first((obs) => obs === observable),
-      mergeMap((obs) => obs) // Unwrap Observable<Observable<T>> to Observable<T>
+      mergeMap((obs) => obs), // Unwrap Observable<Observable<T>> to Observable<T>
     )
   }
 
@@ -50,7 +50,7 @@ const createThrottler = <T>(concurrency: number = DEFAULT_CONCURRENCY) => {
 
 export const withMaxConcurrency = <A extends any[], R>(
   func: (...args: A) => Observable<R>,
-  concurrency: number = DEFAULT_CONCURRENCY
+  concurrency: number = DEFAULT_CONCURRENCY,
 ): ((...args: A) => Observable<R>) => {
   const throttler = createThrottler<R>(concurrency)
   return (...args: A) => throttler(func(...args))

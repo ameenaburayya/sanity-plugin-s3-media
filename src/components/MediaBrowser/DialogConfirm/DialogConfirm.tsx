@@ -3,9 +3,9 @@ import {Box, Button, Flex, Stack, Text} from '@sanity/ui'
 import {type FC, type PropsWithChildren} from 'react'
 import {useDispatch} from 'react-redux'
 
-import {Dialog} from '../Dialog'
 import {dialogActions} from '../../../modules'
 import type {DialogConfirmProps} from '../../../types/browser'
+import {Dialog} from '../Dialog'
 
 export const DialogConfirm: FC<PropsWithChildren<{dialog: DialogConfirmProps}>> = (props) => {
   const {children, dialog} = props

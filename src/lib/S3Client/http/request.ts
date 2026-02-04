@@ -1,6 +1,6 @@
 import {tap} from 'rxjs/operators'
 
-import type {RequestOptions, Requester} from '../types'
+import type {Requester, RequestOptions} from '../types'
 import {createFetchClient} from './fetchClient'
 
 type HttpRequestConfig = {
@@ -32,10 +32,10 @@ export function defineHttpRequest(config: HttpRequestConfig = {}): Requester {
             if (shouldIgnoreWarning(msg, config)) return
 
             seen[msg] = true
-            console.warn(msg) // eslint-disable-line no-console
+            console.warn(msg)
           })
         }
-      })
+      }),
     )
   }
 }

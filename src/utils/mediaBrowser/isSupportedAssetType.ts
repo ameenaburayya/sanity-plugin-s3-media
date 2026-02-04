@@ -1,5 +1,5 @@
-import type {S3AssetType} from '../../types'
 import {SUPPORTED_ASSET_TYPES} from '../../constants'
+import type {S3AssetType} from '../../types'
 
 /**
  * Determines whether or not the provided asset type (eg 'image', 'file', 'arbitrary')

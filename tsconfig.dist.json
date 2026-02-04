@@ -1,9 +1,10 @@
 {
-  "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": ["@sanity/tsconfig/strictest", "@sanity/tsconfig/isolated-declarations"],
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["dist", "node_modules"],
-  "compilerOptions": {
-    "isolatedDeclarations": false
-  }
+  "extends": "./tsconfig.settings",
+  "include": ["./src"],
+  "exclude": [
+    "./src/**/__fixtures__",
+    "./src/**/__mocks__",
+    "./src/**/*.test.ts",
+    "./src/**/*.test.tsx"
+  ]
 }

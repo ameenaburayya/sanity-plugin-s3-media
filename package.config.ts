@@ -1,18 +1,15 @@
-import {defineConfig, type PkgConfigOptions} from '@sanity/pkg-utils'
+import {defineConfig} from '@sanity/pkg-utils'
 
 export default defineConfig({
-  extract: {enabled: false},
-  strictOptions: {
-    noImplicitBrowsersList: 'off',
-    noImplicitSideEffects: 'off',
-    noCheckTypes: 'error',
-    noPackageJsonBrowser: 'error',
-    noPackageJsonTypesVersions: 'error',
-    preferModuleType: 'error',
-    noPublishConfigExports: 'error',
-  } satisfies NonNullable<PkgConfigOptions['strictOptions']>,
-  dts: 'rolldown',
-  tsconfig: 'tsconfig.build.json',
-  babel: {reactCompiler: true},
-  reactCompilerOptions: {target: '19'},
+  dist: 'dist',
+  tsconfig: 'tsconfig.dist.json',
+
+  // Remove this block to enable strict export validation
+  extract: {
+    rules: {
+      'ae-incompatible-release-tags': 'off',
+      'ae-internal-missing-underscore': 'off',
+      'ae-missing-release-tag': 'off',
+    },
+  },
 })

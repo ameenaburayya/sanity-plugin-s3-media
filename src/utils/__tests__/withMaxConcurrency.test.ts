@@ -1,7 +1,6 @@
 import {lastValueFrom, merge, Observable, toArray} from 'rxjs'
-import {describe, expect, it} from 'vitest'
 
-import {withMaxConcurrency} from '../../src/utils/withMaxConcurrency'
+import {withMaxConcurrency} from '../withMaxConcurrency'
 
 describe('withMaxConcurrency', () => {
   it('limits concurrent observable subscriptions', async () => {

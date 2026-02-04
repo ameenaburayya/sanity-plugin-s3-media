@@ -1,7 +1,6 @@
 export * from './accepts'
 export * from './asset'
 export * from './file'
-export * from './formatBytes'
 export * from './imageUrlToBlob'
 export * from './mediaBrowser'
 export * from './observe'

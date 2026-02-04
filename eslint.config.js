@@ -12,6 +12,7 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import tseslint from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
 import unusedImports from 'eslint-plugin-unused-imports'
+import vitestPlugin from 'eslint-plugin-vitest'
 import globals from 'globals'
 
 const ignores = [
@@ -94,6 +95,19 @@ export default defineConfig([
       'react/require-default-props': 'off',
       'react-hooks/exhaustive-deps': 'warn',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
+    },
+  },
+  {
+    name: 'vitest/recommended',
+    files: ['**/__tests__/**/*.{js,jsx,ts,tsx}', '**/*.{test,spec}.{js,jsx,ts,tsx}'],
+    plugins: {
+      vitest: vitestPlugin,
+    },
+    languageOptions: {
+      ...vitestPlugin.configs.env.languageOptions,
+    },
+    rules: {
+      ...vitestPlugin.configs.recommended.rules,
     },
   },
   eslintConfigPrettier,

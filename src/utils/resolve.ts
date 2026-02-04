@@ -12,7 +12,7 @@ import {
   type S3ImageSource,
   type S3ImageUploadStub,
 } from '../types'
-import {parseImageAssetId} from './asset/parse'
+import {parseFileAssetId, parseImageAssetId} from './asset/parse'
 import {isObject} from './isObject'
 
 /**
@@ -36,6 +36,12 @@ const idPattern = new RegExp(
  * @internal
  */
 const inProgressAssetId = 'upload-in-progress-placeholder'
+
+/**
+ * Placeholder extension for in-progress uploads
+ * @internal
+ */
+const inProgressAssetExtension = 'tmp'
 
 /**
  * Error type thrown when the library fails to resolve a value, such as an asset ID,
@@ -194,6 +200,37 @@ export function getS3ImageDimensions(src: S3ImageSource): S3ImageDimensions {
  * @public
  */
 export const tryGetS3ImageDimensions = getForgivingResolver(getS3ImageDimensions)
+
+/**
+ * Returns the file extension for a given asset
+ *
+ * @param src - Input source (file/image object, asset, reference, id, url, path)
+ * @returns The file extension, if resolvable (no `.` included)
+ *
+ * @throws {@link UnresolvableError}
+ * Throws if passed asset source could not be resolved to an asset ID
+ * @public
+ */
+export function getS3AssetExtension(src: S3FileSource | S3ImageSource): string {
+  // Check if this is an in-progress upload
+  if (isInProgressUpload(src)) {
+    // Return placeholder extension for in-progress uploads
+    return inProgressAssetExtension
+  }
+
+  const assetId = getS3AssetDocumentId(src)
+
+  return isS3FileSource(src)
+    ? parseFileAssetId(assetId).extension
+    : parseImageAssetId(assetId).extension
+}
+
+/**
+ * {@inheritDoc getS3AssetExtension}
+ * @returns Returns `undefined` instead of throwing if a value cannot be resolved
+ * @public
+ */
+export const tryGetS3AssetExtension = getForgivingResolver(getS3AssetExtension)
 
 /**
  * Return whether or not the passed source is an s3 file source

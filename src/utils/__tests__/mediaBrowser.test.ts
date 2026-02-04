@@ -1,13 +1,14 @@
 import {hues} from '@sanity/color'
-import {describe, expect, it} from 'vitest'
 
-import {S3AssetType} from '../../src/types'
-import {constructFilter} from '../../src/utils/mediaBrowser/constructFilter'
-import {getAssetResolution} from '../../src/utils/mediaBrowser/getAssetResolution'
-import {getDocumentAssetIds} from '../../src/utils/mediaBrowser/getDocumentAssetIds'
-import {getSchemeColor} from '../../src/utils/mediaBrowser/getSchemeColor'
-import {getUniqueDocuments} from '../../src/utils/mediaBrowser/getUniqueDocuments'
-import {isSupportedAssetType} from '../../src/utils/mediaBrowser/isSupportedAssetType'
+import {S3AssetType} from '../../types'
+import {
+  constructFilter,
+  getAssetResolution,
+  getDocumentAssetIds,
+  getSchemeColor,
+  getUniqueDocuments,
+  isSupportedAssetType,
+} from '../mediaBrowser'
 
 const fileId = 's3File-abcdefghijklmnopqrstuvwx-pdf'
 const imageId = 's3Image-abcdefghijklmnopqrstuvwx-100x200-jpg'

@@ -2,6 +2,7 @@
   "extends": "./tsconfig.settings",
   "include": ["./src", "./package.config.ts"],
   "compilerOptions": {
-    "rootDir": "."
+    "rootDir": ".",
+    "types": ["vitest/globals"]
   }
 }

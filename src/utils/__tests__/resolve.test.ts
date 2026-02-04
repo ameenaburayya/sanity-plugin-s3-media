@@ -1,11 +1,9 @@
-import {describe, expect, it} from 'vitest'
-
 import {
   getS3AssetDocumentId,
   getS3ImageDimensions,
   isS3FileSource,
   isS3ImageSource,
-} from '../../src/utils/resolve'
+} from '../resolve'
 
 const fileId = 's3File-abcdefghijklmnopqrstuvwx-pdf'
 const imageId = 's3Image-abcdefghijklmnopqrstuvwx-100x200-jpg'

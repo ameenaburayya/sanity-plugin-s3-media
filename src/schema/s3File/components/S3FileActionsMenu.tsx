@@ -10,13 +10,13 @@ import {
   useClickOutsideEvent,
   useGlobalKeyDown,
 } from '@sanity/ui'
+import {filesize} from 'filesize'
 import {type FC, type ReactNode, useCallback, useEffect, useState} from 'react'
 import {ContextMenuButton, useTranslation} from 'sanity'
 import {styled} from 'styled-components'
 
 import {useS3MediaContext} from '../../../contexts'
 import {S3AssetType, type S3FileAsset} from '../../../types'
-import {formatBytes} from '../../../utils'
 
 const MenuActionsWrapper = styled(Inline)<{$isAbsolute?: boolean}>`
   ${({$isAbsolute}) =>
@@ -135,7 +135,7 @@ export const S3FileActionsMenu: FC<S3FileActionsMenuProps> = (props) => {
             </Text>
 
             <Text size={1} muted>
-              {formatBytes(size)}
+              {filesize(size, {base: 10, round: 0})}
             </Text>
           </Stack>
         </Flex>

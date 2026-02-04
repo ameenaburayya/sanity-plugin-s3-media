@@ -1,7 +1,6 @@
 import {of} from 'rxjs'
-import {describe, expect, it, vi} from 'vitest'
 
-import {observeFileAsset, observeImageAsset} from '../../src/utils/observe'
+import {observeFileAsset, observeImageAsset} from '../observe'
 
 const PATHS = ['originalFilename', 'url', 'metadata', 'size', 'mimeType', 'extension']
 

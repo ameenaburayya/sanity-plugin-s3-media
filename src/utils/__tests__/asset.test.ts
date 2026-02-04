@@ -1,12 +1,5 @@
-import {describe, expect, it} from 'vitest'
-
-import {parseFileAssetId, parseImageAssetId} from '../../src/utils/asset/parse'
-import {
-  buildS3FilePath,
-  buildS3FileUrl,
-  buildS3ImagePath,
-  buildS3ImageUrl,
-} from '../../src/utils/asset/paths'
+import {buildS3FilePath, buildS3FileUrl, buildS3ImagePath, buildS3ImageUrl} from '../asset'
+import {parseFileAssetId, parseImageAssetId} from '../asset/parse'
 
 const fileId = 's3File-abcdefghijklmnopqrstuvwx-pdf'
 const imageId = 's3Image-abcdefghijklmnopqrstuvwx-120x80-jpg'

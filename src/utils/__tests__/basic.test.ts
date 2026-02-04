@@ -1,24 +1,6 @@
-import {describe, expect, it} from 'vitest'
-
-import {accepts} from '../../src/utils/accepts'
-import {formatBytes} from '../../src/utils/formatBytes'
-import {imageUrlToBlob} from '../../src/utils/imageUrlToBlob'
-import {isObject} from '../../src/utils/isObject'
-
-describe('formatBytes', () => {
-  it('formats zero bytes', () => {
-    expect(formatBytes(0)).toBe('0 Bytes')
-  })
-
-  it('formats using binary units', () => {
-    expect(formatBytes(1024)).toBe('1 KB')
-    expect(formatBytes(1024 * 1024)).toBe('1 MB')
-  })
-
-  it('clamps negative decimals to zero', () => {
-    expect(formatBytes(1536, -1)).toBe('2 KB')
-  })
-})
+import {accepts} from '../accepts'
+import {imageUrlToBlob} from '../imageUrlToBlob'
+import {isObject} from '../isObject'
 
 describe('isObject', () => {
   it('returns true for plain objects', () => {

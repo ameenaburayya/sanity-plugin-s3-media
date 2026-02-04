@@ -5,6 +5,10 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## <small>1.0.2 (2026-02-04)</small>
+
+- fix: add repository url for npm provenance ([ea46013](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/ea46013))
+
 ## <small>1.0.1 (2026-02-04)</small>
 
 - chore(ci): fetch tags for release ([f3ec5e1](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/f3ec5e1))

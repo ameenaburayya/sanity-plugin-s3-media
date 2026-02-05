@@ -20,6 +20,16 @@
       "import": "./dist/index.mjs",
       "default": "./dist/index.js"
     },
+    "./client": {
+      "source": "./src/client.ts",
+      "import": "./dist/client.mjs",
+      "default": "./dist/client.js"
+    },
+    "./asset-utils": {
+      "source": "./src/asset-utils.ts",
+      "import": "./dist/asset-utils.mjs",
+      "default": "./dist/asset-utils.js"
+    },
     "./package.json": "./package.json"
   },
   "main": "./dist/index.js",

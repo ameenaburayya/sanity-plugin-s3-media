@@ -17,8 +17,7 @@
   "exports": {
     ".": {
       "source": "./src/index.ts",
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
+      "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./package.json": "./package.json"
@@ -26,8 +25,7 @@
   "publishConfig": {
     "exports": {
       ".": {
-        "types": "./dist/index.d.ts",
-        "import": "./dist/index.mjs",
+        "import": "./dist/index.js",
         "default": "./dist/index.js"
       },
       "./package.json": "./package.json"

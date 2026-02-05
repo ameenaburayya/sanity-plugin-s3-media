@@ -17,35 +17,23 @@
   "exports": {
     ".": {
       "source": "./src/index.ts",
-      "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./asset-utils": {
       "source": "./src/asset-utils.ts",
-      "import": "./dist/asset-utils.js",
       "default": "./dist/asset-utils.js"
     },
     "./client": {
       "source": "./src/client.ts",
-      "import": "./dist/client.js",
       "default": "./dist/client.js"
     },
     "./package.json": "./package.json"
   },
   "publishConfig": {
     "exports": {
-      ".": {
-        "import": "./dist/index.js",
-        "default": "./dist/index.js"
-      },
-      "./asset-utils": {
-        "import": "./dist/asset-utils.js",
-        "default": "./dist/asset-utils.js"
-      },
-      "./client": {
-        "import": "./dist/client.js",
-        "default": "./dist/client.js"
-      },
+      ".": "./dist/index.js",
+      "./asset-utils": "./dist/asset-utils.js",
+      "./client": "./dist/client.js",
       "./package.json": "./package.json"
     }
   },
@@ -93,7 +81,7 @@
     "redux": "^5.0.1",
     "redux-observable": "3.0.0-rc.2",
     "rxjs": "^7.8.1",
-    "sanity": "^5"
+    "sanity": "^5.8.0"
   },
   "devDependencies": {
     "@babel/parser": "^7.29.0",

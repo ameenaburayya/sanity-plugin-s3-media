@@ -1,8 +1,16 @@
-export {
-  buildS3ImageUrl,
-  buildS3FileUrl,
-  tryGetS3AssetExtension,
-  tryGetS3ImageDimensions,
+import {buildS3FileUrl, buildS3ImageUrl} from './utils/asset/paths'
+import {
   getS3AssetExtension,
   getS3ImageDimensions,
-} from './utils'
+  tryGetS3AssetExtension,
+  tryGetS3ImageDimensions,
+} from './utils/resolve'
+
+export {
+  buildS3FileUrl,
+  buildS3ImageUrl,
+  getS3AssetExtension,
+  getS3ImageDimensions,
+  tryGetS3AssetExtension,
+  tryGetS3ImageDimensions,
+}

@@ -19,21 +19,11 @@
       "source": "./src/index.ts",
       "default": "./dist/index.js"
     },
-    "./asset-utils": {
-      "source": "./src/asset-utils.ts",
-      "default": "./dist/asset-utils.js"
-    },
-    "./client": {
-      "source": "./src/client.ts",
-      "default": "./dist/client.js"
-    },
     "./package.json": "./package.json"
   },
   "publishConfig": {
     "exports": {
       ".": "./dist/index.js",
-      "./asset-utils": "./dist/asset-utils.js",
-      "./client": "./dist/client.js",
       "./package.json": "./package.json"
     }
   },

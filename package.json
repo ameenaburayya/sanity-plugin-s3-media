@@ -13,22 +13,14 @@
     "url": "https://github.com/ameenaburayya/sanity-plugin-s3-media.git"
   },
   "sideEffects": false,
-  "type": "module",
+  "type": "commonjs",
   "exports": {
     ".": {
-      "require": "./dist/index.cjs",
+      "source": "./src/index.ts",
+      "import": "./dist/index.mjs",
       "default": "./dist/index.js"
     },
     "./package.json": "./package.json"
-  },
-  "publishConfig": {
-    "exports": {
-      ".": {
-        "import": "./dist/index.js",
-        "default": "./dist/index.js"
-      },
-      "./package.json": "./package.json"
-    }
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

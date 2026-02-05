@@ -70,6 +70,7 @@
     "pluralize": "^8.0.0",
     "react-dropzone": "^11.3.1",
     "react-file-icon": "^1.6.0",
+    "styled-components": "^6.3.8",
     "react-redux": "^9.2.0",
     "react-rx": "^4.2.2",
     "react-virtuoso": "^4.12.5",
@@ -117,7 +118,6 @@
     "react-is": "^19.2.4",
     "rimraf": "^3.0.2",
     "standard-version": "^9.5.0",
-    "styled-components": "^6.3.8",
     "typescript": "^5.9.3",
     "vitest": "^2.1.9"
   },
@@ -126,7 +126,7 @@
     "react-dom": "^19",
     "react-is": "^19",
     "sanity": "^5",
-    "styled-components": "^6.1"
+    "styled-components": "^6.3.8"
   },
   "packageManager": "npm@10.9.2",
   "engines": {

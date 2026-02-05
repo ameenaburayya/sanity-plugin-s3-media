@@ -5,6 +5,11 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 1.2.0 (2026-02-05)
+
+- Merge branch 'main' of https://github.com/ameenaburayya/sanity-plugin-s3-media ([6cb4901](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/6cb4901))
+- feat: split package ([19a6ec6](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/19a6ec6))
+
 ## <small>1.1.5 (2026-02-05)</small>
 
 - fix: config ([4aef459](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/4aef459))

@@ -5,6 +5,14 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## <small>1.1.5 (2026-02-05)</small>
+
+- fix: config ([4aef459](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/4aef459))
+- fix: lint ([8fd7871](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/8fd7871))
+- fix: package config ([417c6e8](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/417c6e8))
+- fix: package.json ([07f7852](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/07f7852))
+- Merge branch 'main' of https://github.com/ameenaburayya/sanity-plugin-s3-media ([02616c0](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/02616c0))
+
 ## <small>1.1.4 (2026-02-05)</small>
 
 - fix: module ([f5431c8](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/f5431c8))

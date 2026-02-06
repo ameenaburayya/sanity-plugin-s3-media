@@ -5,6 +5,11 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## <small>1.2.2 (2026-02-06)</small>
+
+- Merge branch 'main' of https://github.com/ameenaburayya/sanity-plugin-s3-media ([151fd56](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/151fd56))
+- fix: video preview mute ([b3b3144](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/b3b3144))
+
 ## <small>1.2.1 (2026-02-05)</small>
 
 - Merge branch 'main' of https://github.com/ameenaburayya/sanity-plugin-s3-media ([b6b4a38](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/b6b4a38))

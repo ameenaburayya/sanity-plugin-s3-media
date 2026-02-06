@@ -99,8 +99,9 @@ export const S3FileActionsMenu: FC<S3FileActionsMenuProps> = (props) => {
           {isVideoFile ? (
             <video
               controls
-              autoPlay
               loop
+              autoPlay
+              muted
               src={assetUrl}
               style={{
                 height: '100%',

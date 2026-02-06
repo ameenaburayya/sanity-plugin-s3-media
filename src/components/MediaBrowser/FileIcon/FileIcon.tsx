@@ -34,6 +34,7 @@ export const FileIcon: FC<FileIconProps> = (props) => {
       {assetUrl && asset?.mimeType.search('video') === 0 ? (
         <video
           autoPlay
+          muted
           loop
           src={assetUrl}
           style={{

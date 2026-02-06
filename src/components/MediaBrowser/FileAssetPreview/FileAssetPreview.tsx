@@ -29,6 +29,8 @@ export const FileAssetPreview: FC<FileAssetPreviewProps> = (props) => {
       <video
         controls
         autoPlay
+        muted
+        loop
         src={assetUrl}
         style={{
           height: '100%',

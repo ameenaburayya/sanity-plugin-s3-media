@@ -69,7 +69,7 @@ export const S3MediaContextProvider: FC<PropsWithChildren> = (props) => {
       }
 
       if (!s3AssetBaseUrl) {
-        return ''
+        throw new Error('S3 Base URL is not defined')
       }
 
       if (assetType === S3AssetType.IMAGE) {
@@ -80,7 +80,7 @@ export const S3MediaContextProvider: FC<PropsWithChildren> = (props) => {
         return buildS3FileUrl(assetId, {baseUrl: s3AssetBaseUrl})
       }
 
-      throw new Error('')
+      throw new Error("Can't build asset id")
     },
     [s3AssetBaseUrl],
   )

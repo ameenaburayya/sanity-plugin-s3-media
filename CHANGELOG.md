@@ -5,6 +5,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 1.3.0 (2026-02-23)
+
+- feat(schema): add s3Video type and s3VideoAsset with dimensions metadata ([adebaf8](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/adebaf8))
+- Merge branch 'main' of https://github.com/ameenaburayya/sanity-plugin-s3-media ([96aaab5](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/96aaab5))
+- test(ci): add comprehensive vitest suite with 100% coverage and run coverage in GitHub Actions ([b1942d3](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/b1942d3))
+
 ## <small>1.2.3 (2026-02-09)</small>
 
 - Merge branch 'main' of https://github.com/ameenaburayya/sanity-plugin-s3-media ([29e216d](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/29e216d))

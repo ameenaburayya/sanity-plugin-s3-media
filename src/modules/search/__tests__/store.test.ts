@@ -1,4 +1,4 @@
-import {searchActions, searchReducer} from '../index'
+import {searchActions, searchReducer} from '../store'
 
 describe('searchReducer', () => {
   it('returns the initial state', () => {

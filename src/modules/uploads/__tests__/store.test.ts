@@ -12,7 +12,7 @@ import {
   uploadsCheckRequestEpic,
   uploadsCompleteQueueEpic,
   uploadsReducer,
-} from '../index'
+} from '../store'
 
 const makeImageAsset = (overrides: Record<string, unknown> = {}) =>
   ({

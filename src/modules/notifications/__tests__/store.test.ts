@@ -11,7 +11,7 @@ import {
   notificationsAssetsUploadCompleteEpic,
   notificationsGenericErrorEpic,
   notificationsReducer,
-} from '../index'
+} from '../store'
 
 describe('notificationsReducer', () => {
   it('adds notifications', () => {

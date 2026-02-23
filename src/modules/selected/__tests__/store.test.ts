@@ -1,4 +1,4 @@
-import {selectedReducer} from '../index'
+import {selectedReducer} from '../store'
 
 describe('selectedReducer', () => {
   it('returns initial state for unknown actions', () => {

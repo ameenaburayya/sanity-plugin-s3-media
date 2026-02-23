@@ -2,7 +2,7 @@ import {EMPTY, lastValueFrom, of} from 'rxjs'
 import {toArray} from 'rxjs/operators'
 
 import {assetsActions} from '../../assets'
-import {dialogActions, dialogClearOnAssetUpdateEpic, dialogReducer} from '../index'
+import {dialogActions, dialogClearOnAssetUpdateEpic, dialogReducer} from '../store'
 
 const makeImageAsset = (overrides: Record<string, unknown> = {}) =>
   ({

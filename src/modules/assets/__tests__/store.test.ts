@@ -24,7 +24,7 @@ import {
   selectAssetsLength,
   selectAssetsPicked,
   selectAssetsPickedLength,
-} from '../index'
+} from '../store'
 
 const makeImageAsset = (overrides: Record<string, unknown> = {}) =>
   ({

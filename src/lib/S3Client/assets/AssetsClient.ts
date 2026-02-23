@@ -57,10 +57,6 @@ const upload = ({
           lengthComputable: true,
         })
 
-        if (!getSignedUrlEndpoint) {
-          throw new Error('getSignedUrlEndpoint is not defined')
-        }
-
         // Fetch signed URL
         const signedUrlResponse = await fetch(getSignedUrlEndpoint, {
           method: 'POST',

@@ -67,7 +67,10 @@ const getImageDimensions = (file: File): Observable<ImageDimensions | null> => {
   }).pipe(catchError(() => of(null)))
 }
 
-const getFileExtension = (filename: string): string => filename.split('.').pop() ?? ''
+const getFileExtension = (filename: string): string => {
+  const segments = filename.split('.')
+  return segments[segments.length - 1]
+}
 
 const buildFileName = (
   fileId: string,

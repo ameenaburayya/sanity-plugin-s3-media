@@ -56,15 +56,20 @@ jobs:
     # The test suite can be skipped via workflow_dispatch
     if: github.event.inputs.test != 'false'
     runs-on: ubuntu-latest
-    name: Node.js lts/* / ubuntu-latest
+    name: Test & Coverage
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           cache: npm
           node-version: lts/*
-      - run: npm install
-      - run: npm test --if-present
+      - run: npm clean-install
+      - run: npm test -- --coverage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage
+          if-no-files-found: error
 
   release:
     permissions:

@@ -21,6 +21,7 @@ const createBlob = (img: HTMLImageElement): Promise<Blob | null> => {
       canvas.toBlob(resolve, 'image/jpeg')
     } catch (err) {
       console.warn(`Unable to generate preview image:`, err)
+      resolve(null)
     }
   })
 }

@@ -24,7 +24,9 @@ describe('asset id parsing', () => {
   })
 
   it('throws on malformed ids', () => {
+    expect(() => parseFileAssetId('s3File-onlyassetid')).toThrow()
     expect(() => parseImageAssetId('s3Image-bad-id')).toThrow()
+    expect(() => parseImageAssetId('s3Image-onlyasset')).toThrow()
   })
 })
 

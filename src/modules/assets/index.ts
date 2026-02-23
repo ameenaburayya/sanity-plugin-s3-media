@@ -315,11 +315,12 @@ const assetsSlice = createSlice({
       state.allIds.sort((a, b) => {
         const tagA = state.byIds[a].asset[state.order.field] as number
         const tagB = state.byIds[b].asset[state.order.field] as number
+        const direction = state.order.direction === 'asc' ? 1 : -1
 
         if (tagA < tagB) {
-          return state.order.direction === 'asc' ? -1 : 1
+          return -1 * direction
         } else if (tagA > tagB) {
-          return state.order.direction === 'asc' ? 1 : -1
+          return 1 * direction
         }
         return 0
       })

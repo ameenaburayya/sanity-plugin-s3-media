@@ -1,7 +1,7 @@
 import {createSlice, type PayloadAction} from '@reduxjs/toolkit'
 import pluralize from 'pluralize'
 import {ofType} from 'redux-observable'
-import {EMPTY, of} from 'rxjs'
+import {of} from 'rxjs'
 import {filter, mergeMap} from 'rxjs/operators'
 
 import type {AssetItem, Dialog, Epic} from '../../types'
@@ -72,11 +72,7 @@ export const dialogClearOnAssetUpdateEpic: Epic = (action$) =>
       }): action is PayloadAction<{closeDialogId?: string}> => !!action?.payload?.closeDialogId,
     ),
     mergeMap((action) => {
-      const dialogId = action?.payload?.closeDialogId
-      if (dialogId) {
-        return of(dialogSlice.actions.remove({id: dialogId}))
-      }
-      return EMPTY
+      return of(dialogSlice.actions.remove({id: action.payload.closeDialogId as string}))
     }),
   )
 

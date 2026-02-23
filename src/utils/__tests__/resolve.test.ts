@@ -1,14 +1,31 @@
 import {
   getS3AssetDocumentId,
+  getS3AssetExtension,
   getS3ImageDimensions,
+  isInProgressUpload,
+  isS3AssetObjectStub,
+  isS3FileAsset,
   isS3FileSource,
+  isS3ImageAsset,
   isS3ImageSource,
+  tryGetS3AssetExtension,
+  tryGetS3ImageDimensions,
 } from '../resolve'
 
 const fileId = 's3File-abcdefghijklmnopqrstuvwx-pdf'
 const imageId = 's3Image-abcdefghijklmnopqrstuvwx-100x200-jpg'
 
 describe('resolve helpers', () => {
+  it('identifies in-progress uploads and object stubs', () => {
+    expect(isInProgressUpload({_upload: {stage: 'uploading'}} as any)).toBe(true)
+    expect(isInProgressUpload({_upload: {}, asset: {_id: fileId}} as any)).toBe(false)
+    expect(isInProgressUpload(null)).toBe(false)
+
+    expect(isS3AssetObjectStub({asset: {_id: fileId}} as any)).toBe(true)
+    expect(isS3AssetObjectStub({asset: 'not-object'} as any)).toBe(false)
+    expect(isS3AssetObjectStub(undefined)).toBe(false)
+  })
+
   it('returns placeholder for in-progress uploads', () => {
     const stub = {_upload: {}} as any
     expect(getS3AssetDocumentId(stub)).toBe('upload-in-progress-placeholder')
@@ -26,6 +43,9 @@ describe('resolve helpers', () => {
 
     const asset = {_id: fileId} as any
     expect(getS3AssetDocumentId(asset)).toBe(fileId)
+
+    const objectStub = {asset} as any
+    expect(getS3AssetDocumentId(objectStub)).toBe(fileId)
   })
 
   it('throws on invalid ids', () => {
@@ -45,7 +65,40 @@ describe('resolve helpers', () => {
   it('identifies file and image sources', () => {
     expect(isS3FileSource({_id: fileId} as any)).toBe(true)
     expect(isS3FileSource({_id: imageId} as any)).toBe(false)
+    expect(isS3FileSource({_id: 'invalid'} as any)).toBe(false)
     expect(isS3ImageSource({_id: imageId} as any)).toBe(true)
     expect(isS3ImageSource({_id: fileId} as any)).toBe(false)
+    expect(isS3ImageSource({_id: 'invalid'} as any)).toBe(false)
+  })
+
+  it('resolves extensions and in-progress extension placeholders', () => {
+    expect(getS3AssetExtension({_id: fileId} as any)).toBe('pdf')
+    expect(getS3AssetExtension({_id: imageId} as any)).toBe('jpg')
+    expect(getS3AssetExtension({_upload: {}} as any)).toBe('tmp')
+  })
+
+  it('safe resolvers return undefined for unresolvable ids', () => {
+    expect(tryGetS3ImageDimensions({_id: 'not-an-asset-id'} as any)).toBeUndefined()
+    expect(tryGetS3AssetExtension({_id: 'not-an-asset-id'} as any)).toBeUndefined()
+  })
+
+  it('safe resolvers rethrow non-unresolvable parser errors', () => {
+    const malformedButPatternMatchingImageId = 's3Image-abcdefghijklmnopqrstuvwx-0x200-jpg'
+
+    expect(() => tryGetS3ImageDimensions({_id: malformedButPatternMatchingImageId} as any)).toThrow(
+      "Malformed asset ID 's3Image-abcdefghijklmnopqrstuvwx-0x200-jpg'.",
+    )
+
+    expect(() => tryGetS3AssetExtension({_id: malformedButPatternMatchingImageId} as any)).toThrow(
+      "Malformed asset ID 's3Image-abcdefghijklmnopqrstuvwx-0x200-jpg'.",
+    )
+  })
+
+  it('identifies file and image asset documents by _type', () => {
+    expect(isS3FileAsset({_type: 's3FileAsset'} as any)).toBe(true)
+    expect(isS3FileAsset({_type: 's3ImageAsset'} as any)).toBe(false)
+
+    expect(isS3ImageAsset({_type: 's3ImageAsset'} as any)).toBe(true)
+    expect(isS3ImageAsset({_type: 's3FileAsset'} as any)).toBe(false)
   })
 })

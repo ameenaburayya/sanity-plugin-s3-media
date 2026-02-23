@@ -13,7 +13,7 @@ function readFileAsArrayBuffer(
       observer.next(reader.result)
       observer.complete()
     }
-    reader.readAsArrayBuffer(length === undefined ? file : file.slice(0, length))
+    reader.readAsArrayBuffer(file.slice(0, length))
     return () => reader.abort()
   })
 }

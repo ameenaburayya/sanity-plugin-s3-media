@@ -5,6 +5,11 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## <small>1.2.3 (2026-02-09)</small>
+
+- Merge branch 'main' of https://github.com/ameenaburayya/sanity-plugin-s3-media ([29e216d](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/29e216d))
+- fix: export useS3MediaContext ([4f2df5c](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/4f2df5c))
+
 ## <small>1.2.2 (2026-02-06)</small>
 
 - Merge branch 'main' of https://github.com/ameenaburayya/sanity-plugin-s3-media ([151fd56](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/151fd56))

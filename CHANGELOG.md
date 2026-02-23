@@ -5,6 +5,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## <small>1.3.1 (2026-02-23)</small>
+
+- fix(download): move download helper to utils/file and harden cross-origin download behavior ([2beaad5](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/2beaad5))
+- Merge branch 'main' of https://github.com/ameenaburayya/sanity-plugin-s3-media ([506b8fc](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/506b8fc))
+- refactor(test): make index files barrel-only, rename unit tests, and switch Vitest config to ESM ([2b666ed](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/2b666ed))
+
 ## 1.3.0 (2026-02-23)
 
 - feat(schema): add s3Video type and s3VideoAsset with dimensions metadata ([adebaf8](https://github.com/ameenaburayya/sanity-plugin-s3-media/commit/adebaf8))

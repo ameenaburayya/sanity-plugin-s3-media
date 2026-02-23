@@ -5,7 +5,7 @@ import {type FC, type ReactNode} from 'react'
 
 import {useS3MediaContext} from '../../../contexts'
 import {type AssetItem, type S3Asset, S3AssetType} from '../../../types'
-import {getAssetResolution, isS3ImageAsset} from '../../../utils'
+import {getAssetResolution, isS3ImageAsset, isS3VideoAsset} from '../../../utils'
 import {ButtonAssetCopy} from '../ButtonAssetCopy'
 
 type AssetMetadataProps = {
@@ -47,7 +47,11 @@ export const AssetMetadata: FC<AssetMetadataProps> = (props) => {
   const {buildAssetUrl} = useS3MediaContext()
 
   const assetUrl = buildAssetUrl({
-    assetType: isS3ImageAsset(asset) ? S3AssetType.IMAGE : S3AssetType.FILE,
+    assetType: isS3ImageAsset(asset)
+      ? S3AssetType.IMAGE
+      : isS3VideoAsset(asset)
+        ? S3AssetType.VIDEO
+        : S3AssetType.FILE,
     assetId: asset._id,
   })
 
@@ -63,7 +67,9 @@ export const AssetMetadata: FC<AssetMetadataProps> = (props) => {
           <Row label="Size" value={filesize(asset?.size, {base: 10, round: 0})} />
           <Row label="MIME type" value={asset?.mimeType} />
           <Row label="Extension" value={asset.extension.toUpperCase()} />
-          {isS3ImageAsset(asset) && <Row label="Dimensions" value={getAssetResolution(asset)} />}
+          {(isS3ImageAsset(asset) || isS3VideoAsset(asset)) && (
+            <Row label="Dimensions" value={getAssetResolution(asset)} />
+          )}
         </Stack>
       </Box>
 

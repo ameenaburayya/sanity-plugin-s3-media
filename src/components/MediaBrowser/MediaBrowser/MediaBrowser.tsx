@@ -48,7 +48,9 @@ const MediaBrowserContent = ({onClose}: {onClose?: S3AssetSourceComponentProps['
     dispatch(assetsActions.loadPageIndex({pageIndex: 0}))
 
     const subscriptionAsset = sanityClient
-      .listen(groq`*[_type in ["s3FileAsset", "s3ImageAsset"] && !(_id in path("drafts.**"))]`)
+      .listen(
+        groq`*[_type in ["s3FileAsset", "s3ImageAsset", "s3VideoAsset"] && !(_id in path("drafts.**"))]`,
+      )
       .subscribe(handleAssetUpdate)
 
     return () => {

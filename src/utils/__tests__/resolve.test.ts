@@ -2,18 +2,23 @@ import {
   getS3AssetDocumentId,
   getS3AssetExtension,
   getS3ImageDimensions,
+  getS3VideoDimensions,
   isInProgressUpload,
   isS3AssetObjectStub,
   isS3FileAsset,
   isS3FileSource,
   isS3ImageAsset,
   isS3ImageSource,
+  isS3VideoAsset,
+  isS3VideoSource,
   tryGetS3AssetExtension,
   tryGetS3ImageDimensions,
+  tryGetS3VideoDimensions,
 } from '../resolve'
 
 const fileId = 's3File-abcdefghijklmnopqrstuvwx-pdf'
 const imageId = 's3Image-abcdefghijklmnopqrstuvwx-100x200-jpg'
+const videoId = 's3Video-abcdefghijklmnopqrstuvwx-1920x1080-mp4'
 
 describe('resolve helpers', () => {
   it('identifies in-progress uploads and object stubs', () => {
@@ -35,6 +40,12 @@ describe('resolve helpers', () => {
       height: 0,
       aspectRatio: 0,
     })
+    expect(getS3VideoDimensions(stub)).toEqual({
+      _type: 's3VideoDimensions',
+      width: 0,
+      height: 0,
+      aspectRatio: 0,
+    })
   })
 
   it('resolves ids from references and assets', () => {
@@ -46,6 +57,9 @@ describe('resolve helpers', () => {
 
     const objectStub = {asset} as any
     expect(getS3AssetDocumentId(objectStub)).toBe(fileId)
+
+    const videoRef = {_type: 'reference', _ref: videoId} as any
+    expect(getS3AssetDocumentId(videoRef)).toBe(videoId)
   })
 
   it('throws on invalid ids', () => {
@@ -62,6 +76,16 @@ describe('resolve helpers', () => {
     })
   })
 
+  it('extracts video dimensions', () => {
+    const asset = {_id: videoId} as any
+    expect(getS3VideoDimensions(asset)).toEqual({
+      _type: 's3VideoDimensions',
+      width: 1920,
+      height: 1080,
+      aspectRatio: 1920 / 1080,
+    })
+  })
+
   it('identifies file and image sources', () => {
     expect(isS3FileSource({_id: fileId} as any)).toBe(true)
     expect(isS3FileSource({_id: imageId} as any)).toBe(false)
@@ -69,16 +93,21 @@ describe('resolve helpers', () => {
     expect(isS3ImageSource({_id: imageId} as any)).toBe(true)
     expect(isS3ImageSource({_id: fileId} as any)).toBe(false)
     expect(isS3ImageSource({_id: 'invalid'} as any)).toBe(false)
+    expect(isS3VideoSource({_id: videoId} as any)).toBe(true)
+    expect(isS3VideoSource({_id: fileId} as any)).toBe(false)
+    expect(isS3VideoSource({_id: 'invalid'} as any)).toBe(false)
   })
 
   it('resolves extensions and in-progress extension placeholders', () => {
     expect(getS3AssetExtension({_id: fileId} as any)).toBe('pdf')
     expect(getS3AssetExtension({_id: imageId} as any)).toBe('jpg')
+    expect(getS3AssetExtension({_id: videoId} as any)).toBe('mp4')
     expect(getS3AssetExtension({_upload: {}} as any)).toBe('tmp')
   })
 
   it('safe resolvers return undefined for unresolvable ids', () => {
     expect(tryGetS3ImageDimensions({_id: 'not-an-asset-id'} as any)).toBeUndefined()
+    expect(tryGetS3VideoDimensions({_id: 'not-an-asset-id'} as any)).toBeUndefined()
     expect(tryGetS3AssetExtension({_id: 'not-an-asset-id'} as any)).toBeUndefined()
   })
 
@@ -94,11 +123,15 @@ describe('resolve helpers', () => {
     )
   })
 
-  it('identifies file and image asset documents by _type', () => {
+  it('identifies file, image, and video asset documents by _type', () => {
     expect(isS3FileAsset({_type: 's3FileAsset'} as any)).toBe(true)
     expect(isS3FileAsset({_type: 's3ImageAsset'} as any)).toBe(false)
+    expect(isS3FileAsset({_type: 's3VideoAsset'} as any)).toBe(false)
 
     expect(isS3ImageAsset({_type: 's3ImageAsset'} as any)).toBe(true)
     expect(isS3ImageAsset({_type: 's3FileAsset'} as any)).toBe(false)
+
+    expect(isS3VideoAsset({_type: 's3VideoAsset'} as any)).toBe(true)
+    expect(isS3VideoAsset({_type: 's3ImageAsset'} as any)).toBe(false)
   })
 })

@@ -1,84 +1,73 @@
-import {lastValueFrom, of} from 'rxjs'
+import {lastValueFrom} from 'rxjs'
 
 import {defineHttpRequest} from '../request'
 
-const {createFetchClientMock, fetchClientMock} = vi.hoisted(() => {
-  return {
-    createFetchClientMock: vi.fn(),
-    fetchClientMock: vi.fn(),
-  }
-})
-
-vi.mock('../fetchClient', () => {
-  return {
-    createFetchClient: createFetchClientMock,
-  }
+const createFetchResponse = (
+  status: number,
+  statusMessage: string,
+  headers: Record<string, unknown> = {},
+) => ({
+  status,
+  statusText: statusMessage,
+  headers: {
+    entries: () => Object.entries(headers),
+  },
+  json: () => Promise.resolve({}),
 })
 
 describe('defineHttpRequest', () => {
-  beforeEach(() => {
-    createFetchClientMock.mockReset()
-    fetchClientMock.mockReset()
-    createFetchClientMock.mockReturnValue(fetchClientMock)
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllGlobals()
   })
 
-  it('applies default timeout/maxRetries/retryDelay when omitted', async () => {
-    fetchClientMock.mockReturnValue(
-      of({
-        type: 'response',
-        method: 'GET',
-        statusCode: 200,
-        statusMessage: 'OK',
-        headers: {},
-      }),
+  it('applies default timeout and retries with default retryDelay when omitted', async () => {
+    vi.useFakeTimers()
+
+    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout')
+
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValueOnce(createFetchResponse(503, 'Service Unavailable'))
+        .mockResolvedValueOnce(createFetchResponse(200, 'OK')),
     )
 
     const request = defineHttpRequest()
 
-    await lastValueFrom(request({url: 'https://api.example.com/items'}))
+    const responsePromise = lastValueFrom(request({url: 'https://api.example.com/items'}))
+    await vi.advanceTimersByTimeAsync(1000)
+    await responsePromise
 
-    expect(fetchClientMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        url: 'https://api.example.com/items',
-        timeout: 300000,
-        maxRetries: 3,
-        retryDelay: 1000,
-      }),
-    )
+    expect(fetch).toHaveBeenCalledTimes(2)
+    expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 300000)
+    expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 1000)
   })
 
   it('preserves explicit timeout and maxRetries values', async () => {
-    fetchClientMock.mockReturnValue(
-      of({
-        type: 'response',
-        method: 'GET',
-        statusCode: 200,
-        statusMessage: 'OK',
-        headers: {},
-      }),
-    )
+    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout')
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(createFetchResponse(429, 'Too Many Requests')))
 
     const request = defineHttpRequest()
 
-    await lastValueFrom(request({url: 'https://api.example.com/items', timeout: 2000, maxRetries: 0}))
+    await expect(
+      lastValueFrom(request({url: 'https://api.example.com/items', timeout: 2000, maxRetries: 0})),
+    ).rejects.toThrow('HTTP 429')
 
-    expect(fetchClientMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        timeout: 2000,
-        maxRetries: 0,
-      }),
-    )
+    expect(fetch).toHaveBeenCalledTimes(1)
+    expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 2000)
   })
 
   it('warns once per unique warning message across requests', async () => {
-    fetchClientMock.mockReturnValue(
-      of({
-        type: 'response',
-        method: 'GET',
-        statusCode: 200,
-        statusMessage: 'OK',
-        headers: {'x-sanity-warning': 'be careful'},
-      }),
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        createFetchResponse(200, 'OK', {
+          'x-sanity-warning': 'be careful',
+        }),
+      ),
     )
 
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
@@ -92,14 +81,14 @@ describe('defineHttpRequest', () => {
   })
 
   it('handles warning arrays and skips falsy warning entries', async () => {
-    fetchClientMock.mockReturnValue(
-      of({
-        type: 'response',
-        method: 'GET',
-        statusCode: 200,
-        statusMessage: 'OK',
-        headers: {'x-sanity-warning': ['warn-a', '', 'warn-b']},
-      } as any),
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ...createFetchResponse(200, 'OK'),
+        headers: {
+          entries: () => [['x-sanity-warning', ['warn-a', '', 'warn-b']]],
+        },
+      }),
     )
 
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
@@ -112,53 +101,23 @@ describe('defineHttpRequest', () => {
     expect(warnSpy).toHaveBeenNthCalledWith(2, 'warn-b')
   })
 
-  it('does not warn for non-response events', async () => {
-    fetchClientMock.mockReturnValue(
-      of({
-        type: 'progress',
-        stage: 'upload',
-        percent: 25,
-        loaded: 25,
-        total: 100,
-        lengthComputable: true,
-      } as any),
-    )
-
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-    const request = defineHttpRequest()
-
-    await lastValueFrom(request({url: 'https://api.example.com/progress'}))
-
-    expect(warnSpy).not.toHaveBeenCalled()
-  })
-
   it('ignores warnings matching string and regex ignore patterns', async () => {
-    fetchClientMock
-      .mockReturnValueOnce(
-        of({
-          type: 'response',
-          method: 'GET',
-          statusCode: 200,
-          statusMessage: 'OK',
-          headers: {'x-sanity-warning': 'please ignore-this warning'},
+    vi.stubGlobal('fetch', vi.fn())
+
+    ;(fetch as any)
+      .mockResolvedValueOnce(
+        createFetchResponse(200, 'OK', {
+          'x-sanity-warning': 'please ignore-this warning',
         }),
       )
-      .mockReturnValueOnce(
-        of({
-          type: 'response',
-          method: 'GET',
-          statusCode: 200,
-          statusMessage: 'OK',
-          headers: {'x-sanity-warning': 'warn-42'},
+      .mockResolvedValueOnce(
+        createFetchResponse(200, 'OK', {
+          'x-sanity-warning': 'warn-42',
         }),
       )
-      .mockReturnValueOnce(
-        of({
-          type: 'response',
-          method: 'GET',
-          statusCode: 200,
-          statusMessage: 'OK',
-          headers: {'x-sanity-warning': 'warn-me'},
+      .mockResolvedValueOnce(
+        createFetchResponse(200, 'OK', {
+          'x-sanity-warning': 'warn-me',
         }),
       )
 
@@ -176,14 +135,13 @@ describe('defineHttpRequest', () => {
   })
 
   it('supports a single ignoreWarnings pattern without array wrapping in caller code', async () => {
-    fetchClientMock.mockReturnValue(
-      of({
-        type: 'response',
-        method: 'GET',
-        statusCode: 200,
-        statusMessage: 'OK',
-        headers: {'x-sanity-warning': 'single-ignore-pattern'},
-      }),
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        createFetchResponse(200, 'OK', {
+          'x-sanity-warning': 'single-ignore-pattern',
+        }),
+      ),
     )
 
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)

@@ -20,9 +20,11 @@ import type {AssetItem, BrowserView, Epic, HttpError, Order,RootReducerState, S3
 import {
   buildS3FilePath,
   buildS3ImagePath,
+  buildS3VideoPath,
   constructFilter,
   isS3FileAsset,
   isS3ImageAsset,
+  isS3VideoAsset,
 } from '../../utils'
 import {searchActions} from '../search'
 import {UPLOADS_ACTIONS} from '../uploads/actions'
@@ -37,6 +39,10 @@ type ItemError = {
 const buildFileName = (asset: S3Asset): string => {
   if (isS3ImageAsset(asset)) {
     return buildS3ImagePath(asset._id)
+  }
+
+  if (isS3VideoAsset(asset)) {
+    return buildS3VideoPath(asset._id)
   }
 
   if (isS3FileAsset(asset)) {

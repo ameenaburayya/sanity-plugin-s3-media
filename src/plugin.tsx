@@ -3,7 +3,7 @@ import {definePlugin, type Tool as SanityTool} from 'sanity'
 
 import {S3MediaTool} from './components'
 import {S3MediaContextProvider, S3MediaOptionsContextProvider} from './contexts'
-import {s3File, s3FileAsset, s3Image, s3ImageAsset} from './schema'
+import {s3File, s3FileAsset, s3Image, s3ImageAsset, s3Video, s3VideoAsset} from './schema'
 import type {S3MediaPluginOptions} from './types'
 
 /**
@@ -22,7 +22,7 @@ export const s3Media = definePlugin<S3MediaPluginOptions | void>((options) => ({
     },
   },
   schema: {
-    types: [s3File, s3FileAsset, s3Image, s3ImageAsset],
+    types: [s3File, s3FileAsset, s3Image, s3ImageAsset, s3Video, s3VideoAsset],
   },
   tools: (prev) => {
     return [

@@ -39,6 +39,7 @@ import {
   getUniqueDocuments,
   isS3FileAsset,
   isS3ImageAsset,
+  isS3VideoAsset,
 } from '../../../utils'
 import {GRID_TEMPLATE_COLUMNS} from '../constants'
 import {FileIcon} from '../FileIcon'
@@ -231,7 +232,7 @@ const BaseTableRowAsset: FC<TableRowAssetProps> = (props) => {
         <Flex align="center" justify="center" style={{height: '100%', position: 'relative'}}>
           <Box style={{height: '100%', opacity: opacityPreview, position: 'relative'}}>
             {/* File icon */}
-            {isS3FileAsset(asset) && (
+            {(isS3FileAsset(asset) || isS3VideoAsset(asset)) && (
               <FileIcon asset={asset} extension={asset.extension} width="40px" />
             )}
 
@@ -308,7 +309,7 @@ const BaseTableRowAsset: FC<TableRowAssetProps> = (props) => {
         }}
       >
         <Text muted size={1} style={{lineHeight: '2em'}} textOverflow="ellipsis">
-          {isS3ImageAsset(asset) && getAssetResolution(asset)}
+          {(isS3ImageAsset(asset) || isS3VideoAsset(asset)) && getAssetResolution(asset)}
         </Text>
       </Box>
 

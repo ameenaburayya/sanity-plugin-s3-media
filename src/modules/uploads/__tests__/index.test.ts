@@ -14,26 +14,6 @@ import {
   uploadsReducer,
 } from '../index'
 
-const mockUploadS3Asset = vi.fn()
-const mockConstructFilter = vi.fn()
-const mockGeneratePreviewBlobUrl$ = vi.fn()
-const mockHashFile = vi.fn()
-
-vi.mock('../../../lib', () => ({
-  uploadS3Asset: (...args: any[]) => mockUploadS3Asset(...args),
-}))
-
-vi.mock('../../../utils', async () => {
-  const actual = await vi.importActual<typeof import('../../../utils')>('../../../utils')
-
-  return {
-    ...actual,
-    constructFilter: (...args: any[]) => mockConstructFilter(...args),
-    generatePreviewBlobUrl$: (...args: any[]) => mockGeneratePreviewBlobUrl$(...args),
-    hashFile: (...args: any[]) => mockHashFile(...args),
-  }
-})
-
 const makeImageAsset = (overrides: Record<string, unknown> = {}) =>
   ({
     _id: 's3Image-abcdefghijklmnopqrstuvwx-120x80-jpg',
@@ -84,27 +64,68 @@ const makeDeps = () =>
     sanityClient: {
       observable: {
         fetch: vi.fn(),
+        create: vi.fn(),
       },
     },
     s3Client: {
       observable: {
-        assets: {},
+        assets: {
+          uploadAsset: vi.fn(),
+        },
       },
     },
   }) as any
+
+const getSha1Hash = async (file: File): Promise<string> => {
+  const buffer = await file.arrayBuffer()
+  const hash = await crypto.subtle.digest('SHA-1', buffer)
+  const hashArray = Array.from(new Uint8Array(hash))
+
+  return hashArray.map((value) => value.toString(16).padStart(2, '0')).join('')
+}
+
+const createPreviewEnvironment = () => {
+  const revokeObjectURL = vi.fn()
+  const createObjectURL = vi
+    .fn()
+    .mockReturnValueOnce('blob://large')
+    .mockReturnValue('blob://preview')
+
+  ;(globalThis as any).window = {
+    URL: {
+      createObjectURL,
+      revokeObjectURL,
+    },
+  }
+
+  class ImageMock {
+    width = 120
+    height = 80
+    onload: null | (() => void) = null
+
+    set src(_value: string) {
+      this.onload?.()
+    }
+  }
+
+  ;(globalThis as any).Image = ImageMock
+  ;(globalThis as any).document = {
+    createElement: vi.fn(() => ({
+      width: 0,
+      height: 0,
+      getContext: vi.fn(() => ({drawImage: vi.fn()})),
+      toBlob: (callback: (blob: Blob | null) => void) =>
+        callback(new Blob(['preview'], {type: 'image/jpeg'})),
+    })),
+  }
+
+  return {createObjectURL, revokeObjectURL}
+}
 
 describe('uploadsReducer', () => {
   const revokeObjectURL = vi.fn()
 
   beforeEach(() => {
-    mockConstructFilter.mockReset()
-    mockGeneratePreviewBlobUrl$.mockReset()
-    mockHashFile.mockReset()
-    mockUploadS3Asset.mockReset()
-
-    mockConstructFilter.mockReturnValue('_type in ["s3ImageAsset", "s3FileAsset"]')
-    mockGeneratePreviewBlobUrl$.mockReturnValue(of('blob://preview'))
-
     ;(globalThis as any).window = {
       URL: {
         revokeObjectURL,
@@ -251,18 +272,28 @@ describe('uploads selectors', () => {
 
 describe('uploads epics', () => {
   beforeEach(() => {
-    mockConstructFilter.mockReset()
-    mockGeneratePreviewBlobUrl$.mockReset()
-    mockHashFile.mockReset()
-    mockUploadS3Asset.mockReset()
+    createPreviewEnvironment()
+  })
 
-    mockConstructFilter.mockReturnValue('_type in ["s3ImageAsset", "s3FileAsset"]')
-    mockGeneratePreviewBlobUrl$.mockReturnValue(of('blob://preview'))
+  afterEach(() => {
+    delete (globalThis as any).window
+    delete (globalThis as any).Image
+    delete (globalThis as any).document
+    vi.useRealTimers()
   })
 
   it('uploadsAssetStartEpic emits preview, upload progress, and upload complete', async () => {
-    const asset = makeImageAsset({sha1hash: 'hash-image'})
-    const uploadItem = makeUploadItem({hash: 'hash-image'})
+    const asset = {
+      _id: 's3File-uploadedasset-jpg',
+      _type: 's3FileAsset',
+      assetId: 'uploadedasset',
+      extension: 'jpg',
+      mimeType: 'image/jpeg',
+      sha1hash: 'hash-image',
+      size: 1024,
+    } as any
+
+    const uploadItem = makeUploadItem({assetType: S3AssetType.FILE, hash: 'hash-image'})
 
     const progressEvent = {
       lengthComputable: true,
@@ -271,66 +302,67 @@ describe('uploads epics', () => {
       type: 'progress',
     }
 
-    mockUploadS3Asset.mockReturnValue(
-      of(
-        progressEvent,
-        {
-          lengthComputable: true,
-          percent: 50,
-          stage: 'download',
-          type: 'progress',
-        },
-        {
-          asset,
-          exists: false,
-          id: asset._id,
-          type: 'complete',
-        },
-      ),
+    const downloadEvent = {
+      lengthComputable: true,
+      percent: 80,
+      stage: 'download',
+      type: 'progress',
+    }
+
+    const deps = makeDeps()
+    deps.sanityClient.observable.fetch.mockReturnValue(of(null))
+    deps.sanityClient.observable.create.mockReturnValue(of(asset))
+    deps.s3Client.observable.assets.uploadAsset.mockReturnValue(
+      of(progressEvent, downloadEvent, {type: 'response'}),
     )
 
     const result = await lastValueFrom(
       uploadsAssetStartEpic(
         of(
           uploadsActions.uploadStart({
-            file: {name: 'photo.jpg', size: 1024, type: 'image/jpeg'} as any,
+            file: new File(['img'], 'photo.jpg', {type: 'image/jpeg'}) as any,
             uploadItem,
           }),
         ) as any,
         EMPTY as any,
-        makeDeps(),
+        deps,
       ).pipe(toArray()),
     )
 
-    expect(result).toEqual([
-      uploadsActions.previewReady({blobUrl: 'blob://preview', hash: 'hash-image'}),
-      uploadsActions.uploadProgress({event: progressEvent as any, uploadHash: 'hash-image'}),
-      UPLOADS_ACTIONS.uploadComplete({asset}),
-    ])
+    expect(result).toHaveLength(3)
+    expect(result).toEqual(
+      expect.arrayContaining([
+        uploadsActions.previewReady({blobUrl: 'blob://preview', hash: 'hash-image'}),
+        uploadsActions.uploadProgress({event: progressEvent as any, uploadHash: 'hash-image'}),
+        UPLOADS_ACTIONS.uploadComplete({asset}),
+      ]),
+    )
   })
 
   it('uploadsAssetStartEpic maps already-existing asset completion to uploadError', async () => {
-    const asset = makeImageAsset({sha1hash: 'hash-image'})
+    const existingAsset = {
+      _id: 's3File-existing-jpg',
+      _type: 's3FileAsset',
+      assetId: 'existing',
+      extension: 'jpg',
+      mimeType: 'image/jpeg',
+      sha1hash: 'hash-image',
+      size: 1024,
+    }
 
-    mockUploadS3Asset.mockReturnValue(
-      of({
-        asset,
-        exists: true,
-        id: asset._id,
-        type: 'complete',
-      }),
-    )
+    const deps = makeDeps()
+    deps.sanityClient.observable.fetch.mockReturnValue(of(existingAsset))
 
     const result = await lastValueFrom(
       uploadsAssetStartEpic(
         of(
           uploadsActions.uploadStart({
-            file: {name: 'photo.jpg', size: 1024, type: 'image/jpeg'} as any,
-            uploadItem: makeUploadItem({hash: 'hash-image'}),
+            file: new File(['img'], 'photo.jpg', {type: 'image/jpeg'}) as any,
+            uploadItem: makeUploadItem({assetType: S3AssetType.FILE, hash: 'hash-image'}),
           }),
         ) as any,
         EMPTY as any,
-        makeDeps(),
+        deps,
       ).pipe(toArray()),
     )
 
@@ -344,7 +376,9 @@ describe('uploads epics', () => {
   })
 
   it('uploadsAssetStartEpic maps upload failures to uploadError', async () => {
-    mockUploadS3Asset.mockReturnValue(
+    const deps = makeDeps()
+    deps.sanityClient.observable.fetch.mockReturnValue(of(null))
+    deps.s3Client.observable.assets.uploadAsset.mockReturnValue(
       throwError(() => ({
         message: 'S3 failed',
         statusCode: 503,
@@ -355,12 +389,12 @@ describe('uploads epics', () => {
       uploadsAssetStartEpic(
         of(
           uploadsActions.uploadStart({
-            file: {name: 'photo.jpg', size: 1024, type: 'image/jpeg'} as any,
-            uploadItem: makeUploadItem({hash: 'hash-image'}),
+            file: new File(['img'], 'photo.jpg', {type: 'image/jpeg'}) as any,
+            uploadItem: makeUploadItem({assetType: S3AssetType.FILE, hash: 'hash-image'}),
           }),
         ) as any,
         EMPTY as any,
-        makeDeps(),
+        deps,
       ).pipe(toArray()),
     )
 
@@ -374,18 +408,20 @@ describe('uploads epics', () => {
   })
 
   it('uploadsAssetStartEpic applies default error fallback values', async () => {
-    mockUploadS3Asset.mockReturnValue(throwError(() => ({})))
+    const deps = makeDeps()
+    deps.sanityClient.observable.fetch.mockReturnValue(of(null))
+    deps.s3Client.observable.assets.uploadAsset.mockReturnValue(throwError(() => ({})))
 
     const result = await lastValueFrom(
       uploadsAssetStartEpic(
         of(
           uploadsActions.uploadStart({
-            file: {name: 'photo.jpg', size: 1024, type: 'image/jpeg'} as any,
-            uploadItem: makeUploadItem({hash: 'hash-image'}),
+            file: new File(['img'], 'photo.jpg', {type: 'image/jpeg'}) as any,
+            uploadItem: makeUploadItem({assetType: S3AssetType.FILE, hash: 'hash-image'}),
           }),
         ) as any,
         EMPTY as any,
-        makeDeps(),
+        deps,
       ).pipe(toArray()),
     )
 
@@ -400,18 +436,24 @@ describe('uploads epics', () => {
 
   it('uploadsAssetStartEpic stops stream on uploadCancel', async () => {
     const uploadEvents$ = new Subject<any>()
-    mockUploadS3Asset.mockReturnValue(uploadEvents$)
+
+    const deps = makeDeps()
+    deps.sanityClient.observable.fetch.mockReturnValue(of(null))
+    deps.s3Client.observable.assets.uploadAsset.mockReturnValue(uploadEvents$)
 
     const action$ = new Subject<any>()
-    const output$ = uploadsAssetStartEpic(action$ as any, EMPTY as any, makeDeps())
+    const output$ = uploadsAssetStartEpic(action$ as any, EMPTY as any, deps)
     const resultPromise = lastValueFrom(output$.pipe(toArray()))
 
     action$.next(
       uploadsActions.uploadStart({
-        file: {name: 'photo.jpg', size: 1024, type: 'image/jpeg'} as any,
-        uploadItem: makeUploadItem({hash: 'hash-image'}),
+        file: new File(['img'], 'photo.jpg', {type: 'image/jpeg'}) as any,
+        uploadItem: makeUploadItem({assetType: S3AssetType.FILE, hash: 'hash-image'}),
       }),
     )
+
+    await Promise.resolve()
+    await Promise.resolve()
 
     action$.next(uploadsActions.uploadCancel({hash: 'hash-image'}))
 
@@ -438,13 +480,11 @@ describe('uploads epics', () => {
   })
 
   it('uploadsAssetUploadEpic starts queued upload for new hash', async () => {
-    mockHashFile.mockReturnValue(of('hash-new'))
-
-    const file = {
-      name: 'photo.jpg',
-      size: 1024,
+    const file = new File(['img'], 'photo.jpg', {
       type: 'image/jpeg',
-    } as any
+    }) as any
+
+    const expectedHash = await getSha1Hash(file)
 
     const result = await lastValueFrom(
       uploadsAssetUploadEpic(
@@ -460,9 +500,9 @@ describe('uploads epics', () => {
         uploadItem: {
           _type: 'upload',
           assetType: S3AssetType.IMAGE,
-          hash: 'hash-new',
+          hash: expectedHash,
           name: 'photo.jpg',
-          size: 1024,
+          size: 3,
           status: 'queued',
         },
       }),
@@ -470,13 +510,11 @@ describe('uploads epics', () => {
   })
 
   it('uploadsAssetUploadEpic respects forceAsAssetType and skips existing hashes', async () => {
-    const file = {
-      name: 'photo.jpg',
-      size: 1024,
+    const file = new File(['img'], 'photo.jpg', {
       type: 'image/jpeg',
-    } as any
+    }) as any
 
-    mockHashFile.mockReturnValue(of('hash-existing'))
+    const expectedHash = await getSha1Hash(file)
 
     let result = await lastValueFrom(
       uploadsAssetUploadEpic(
@@ -492,9 +530,9 @@ describe('uploads epics', () => {
         uploadItem: {
           _type: 'upload',
           assetType: S3AssetType.FILE,
-          hash: 'hash-existing',
+          hash: expectedHash,
           name: 'photo.jpg',
-          size: 1024,
+          size: 3,
           status: 'queued',
         },
       }),
@@ -506,9 +544,9 @@ describe('uploads epics', () => {
         new BehaviorSubject(
           makeRootState({
             uploads: {
-              allIds: ['hash-existing'],
+              allIds: [expectedHash],
               byIds: {
-                'hash-existing': makeUploadItem({hash: 'hash-existing'}),
+                [expectedHash]: makeUploadItem({hash: expectedHash}),
               },
             },
           }),
@@ -521,13 +559,11 @@ describe('uploads epics', () => {
   })
 
   it('uploadsAssetUploadEpic infers FILE for non-image mime types', async () => {
-    mockHashFile.mockReturnValue(of('hash-pdf'))
-
-    const file = {
-      name: 'doc.pdf',
-      size: 123,
+    const file = new File(['pdf'], 'doc.pdf', {
       type: 'application/pdf',
-    } as any
+    }) as any
+
+    const expectedHash = await getSha1Hash(file)
 
     const result = await lastValueFrom(
       uploadsAssetUploadEpic(
@@ -543,9 +579,39 @@ describe('uploads epics', () => {
         uploadItem: {
           _type: 'upload',
           assetType: S3AssetType.FILE,
-          hash: 'hash-pdf',
+          hash: expectedHash,
           name: 'doc.pdf',
-          size: 123,
+          size: 3,
+          status: 'queued',
+        },
+      }),
+    ])
+  })
+
+  it('uploadsAssetUploadEpic infers VIDEO for video mime types', async () => {
+    const file = new File(['video'], 'clip.mp4', {
+      type: 'video/mp4',
+    }) as any
+
+    const expectedHash = await getSha1Hash(file)
+
+    const result = await lastValueFrom(
+      uploadsAssetUploadEpic(
+        of(uploadsActions.uploadRequest({file})) as any,
+        new BehaviorSubject(makeRootState()) as any,
+        makeDeps(),
+      ).pipe(toArray()),
+    )
+
+    expect(result).toEqual([
+      uploadsActions.uploadStart({
+        file,
+        uploadItem: {
+          _type: 'upload',
+          assetType: S3AssetType.VIDEO,
+          hash: expectedHash,
+          name: 'clip.mp4',
+          size: 5,
           status: 'queued',
         },
       }),

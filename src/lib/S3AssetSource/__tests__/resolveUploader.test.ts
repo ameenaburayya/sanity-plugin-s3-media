@@ -1,67 +1,71 @@
 import {resolveUploaderBySchemaType} from '../resolveUploader'
 
 const isTypeMock = vi.hoisted(() => vi.fn())
-const acceptsMock = vi.hoisted(() => vi.fn())
 
-vi.mock('sanity', () => ({
-  _isType: isTypeMock,
-}))
+vi.mock('sanity', async () => {
+  const actual = await vi.importActual<typeof import('sanity')>('sanity')
 
-vi.mock('../../../utils', () => {
   return {
-    accepts: acceptsMock,
-    withMaxConcurrency: <A extends unknown[], R>(func: (...args: A) => R) => func,
-    hashFile: vi.fn(),
-    CLEANUP_EVENT: {type: 'cleanup'},
-    createInitialUploadEvent: vi.fn(),
-    createUploadEvent: vi.fn(),
+    ...actual,
+    _isType: isTypeMock,
   }
 })
 
 describe('resolveUploaderBySchemaType', () => {
-  const schemaType = {
+  const imageSchemaType = {
     name: 'mediaField',
     options: {accept: 'image/png'},
   } as any
-  const file = {name: 'photo.png', type: 'image/png'} as any
 
   it('returns the first uploader matching schema type and accept rules', () => {
-    isTypeMock.mockImplementation((_schema: unknown, schemaTypeName: string) => schemaTypeName === 's3Image')
-    acceptsMock.mockReturnValue(true)
+    const file = {name: 'photo.png', type: 'image/png'} as any
 
-    const uploader = resolveUploaderBySchemaType(schemaType, file)
+    isTypeMock.mockImplementation((_schema: unknown, schemaTypeName: string) => schemaTypeName === 's3Image')
+
+    const uploader = resolveUploaderBySchemaType(imageSchemaType, file)
 
     expect(uploader?.schemaTypeName).toBe('s3Image')
-    expect(acceptsMock).toHaveBeenNthCalledWith(1, file, 'image/*')
-    expect(acceptsMock).toHaveBeenNthCalledWith(2, file, 'image/png')
+    expect(uploader?.accept).toBe('image/*')
   })
 
   it('returns null when schema type does not match any uploader', () => {
+    const file = {name: 'photo.png', type: 'image/png'} as any
     isTypeMock.mockReturnValue(false)
 
-    const uploader = resolveUploaderBySchemaType(schemaType, file)
+    const uploader = resolveUploaderBySchemaType(imageSchemaType, file)
 
     expect(uploader).toBeNull()
-    expect(acceptsMock).not.toHaveBeenCalled()
   })
 
   it('returns null when schema accepts rules reject the file', () => {
-    isTypeMock.mockImplementation((_schema: unknown, schemaTypeName: string) => schemaTypeName === 's3Image')
-    acceptsMock.mockImplementation((_file: unknown, accept: string) => accept !== 'image/png')
+    const file = {name: 'photo.webp', type: 'image/webp'} as any
 
-    const uploader = resolveUploaderBySchemaType(schemaType, file)
+    isTypeMock.mockImplementation((_schema: unknown, schemaTypeName: string) => schemaTypeName === 's3Image')
+
+    const uploader = resolveUploaderBySchemaType(imageSchemaType, file)
 
     expect(uploader).toBeNull()
   })
 
   it('falls back to empty schema accept string when schema options are missing', () => {
+    const file = {name: 'archive.zip', type: 'application/zip'} as any
+
     isTypeMock.mockImplementation((_schema: unknown, schemaTypeName: string) => schemaTypeName === 's3File')
-    acceptsMock.mockReturnValue(true)
 
     const uploader = resolveUploaderBySchemaType({name: 'fieldWithoutOptions'} as any, file)
 
     expect(uploader?.schemaTypeName).toBe('s3File')
-    expect(acceptsMock).toHaveBeenNthCalledWith(1, file, '')
-    expect(acceptsMock).toHaveBeenNthCalledWith(2, file, '')
+    expect(uploader?.accept).toBe('')
+  })
+
+  it('matches the video uploader and enforces video accept rules', () => {
+    const file = {name: 'clip.mp4', type: 'video/mp4'} as any
+
+    isTypeMock.mockImplementation((_schema: unknown, schemaTypeName: string) => schemaTypeName === 's3Video')
+
+    const uploader = resolveUploaderBySchemaType({name: 'videoField'} as any, file)
+
+    expect(uploader?.schemaTypeName).toBe('s3Video')
+    expect(uploader?.accept).toBe('video/*')
   })
 })

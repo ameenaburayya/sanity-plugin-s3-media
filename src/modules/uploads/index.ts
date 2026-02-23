@@ -198,7 +198,11 @@ export const uploadsAssetUploadEpic: Epic = (action$, state$) =>
         mergeMap((hash) => {
           const assetType =
             forceAsAssetType ||
-            (file.type.indexOf('image') >= 0 ? S3AssetType.IMAGE : S3AssetType.FILE)
+            (file.type.indexOf('image') >= 0
+              ? S3AssetType.IMAGE
+              : file.type.indexOf('video') >= 0
+                ? S3AssetType.VIDEO
+                : S3AssetType.FILE)
 
           const uploadItem = {
             hash,

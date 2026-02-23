@@ -3,7 +3,7 @@ import {createContext, type FC, PropsWithChildren, useCallback, useContext, useS
 
 import {createS3Client, type S3Client} from '../lib'
 import {S3AssetType, type S3Credentials} from '../types'
-import {buildS3FileUrl, buildS3ImageUrl} from '../utils/asset/paths'
+import {buildS3FileUrl, buildS3ImageUrl, buildS3VideoUrl} from '../utils/asset/paths'
 
 type IS3MediaContext = {
   s3Client: S3Client
@@ -78,6 +78,10 @@ export const S3MediaContextProvider: FC<PropsWithChildren> = (props) => {
 
       if (assetType === S3AssetType.FILE) {
         return buildS3FileUrl(assetId, {baseUrl: s3AssetBaseUrl})
+      }
+
+      if (assetType === S3AssetType.VIDEO) {
+        return buildS3VideoUrl(assetId, {baseUrl: s3AssetBaseUrl})
       }
 
       throw new Error("Can't build asset id")

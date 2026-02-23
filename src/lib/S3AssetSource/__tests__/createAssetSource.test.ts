@@ -1,24 +1,11 @@
-import {createS3FileAssetSource, createS3ImageAssetSource} from '../createAssetSource'
+import {DocumentsIcon, ImageIcon} from '@sanity/icons'
 
-const createS3UploaderMock = vi.hoisted(() => vi.fn(() => 'UploaderToken'))
-const {imageIcon, documentsIcon, component} = vi.hoisted(() => ({
-  imageIcon: Symbol('ImageIcon'),
-  documentsIcon: Symbol('DocumentsIcon'),
-  component: Symbol('S3AssetSourceComponent'),
-}))
-
-vi.mock('@sanity/icons', () => ({
-  ImageIcon: imageIcon,
-  DocumentsIcon: documentsIcon,
-}))
-
-vi.mock('../../../components', () => ({
-  S3AssetSource: component,
-}))
-
-vi.mock('../uploader', () => ({
-  createS3Uploader: createS3UploaderMock,
-}))
+import {S3AssetSource as S3AssetSourceComponent} from '../../../components'
+import {
+  createS3FileAssetSource,
+  createS3ImageAssetSource,
+  createS3VideoAssetSource,
+} from '../createAssetSource'
 
 describe('createS3AssetSource', () => {
   it('creates an image asset source with image icon and uploader', () => {
@@ -26,14 +13,12 @@ describe('createS3AssetSource', () => {
 
     const source = createS3ImageAssetSource(props)
 
-    expect(source).toEqual({
-      name: 's3-media',
-      title: 'Image source',
-      component,
-      icon: imageIcon,
-      Uploader: 'UploaderToken',
-    })
-    expect(createS3UploaderMock).toHaveBeenCalledWith(props)
+    expect(source.name).toBe('s3-media')
+    expect(source.title).toBe('Image source')
+    expect(source.component).toBe(S3AssetSourceComponent)
+    expect(source.icon).toBe(ImageIcon)
+    expect(source.Uploader).toBeDefined()
+    expect(source.Uploader!.name).toBe('S3AssetSourceUploader')
   })
 
   it('creates a file asset source with documents icon and uploader', () => {
@@ -41,13 +26,24 @@ describe('createS3AssetSource', () => {
 
     const source = createS3FileAssetSource(props)
 
-    expect(source).toEqual({
-      name: 's3-media',
-      title: 'File source',
-      component,
-      icon: documentsIcon,
-      Uploader: 'UploaderToken',
-    })
-    expect(createS3UploaderMock).toHaveBeenCalledWith(props)
+    expect(source.name).toBe('s3-media')
+    expect(source.title).toBe('File source')
+    expect(source.component).toBe(S3AssetSourceComponent)
+    expect(source.icon).toBe(DocumentsIcon)
+    expect(source.Uploader).toBeDefined()
+    expect(source.Uploader!.name).toBe('S3AssetSourceUploader')
+  })
+
+  it('creates a video asset source with documents icon and uploader', () => {
+    const props = {title: 'Video source', sanityClient: {}, s3Client: {}} as any
+
+    const source = createS3VideoAssetSource(props)
+
+    expect(source.name).toBe('s3-media')
+    expect(source.title).toBe('Video source')
+    expect(source.component).toBe(S3AssetSourceComponent)
+    expect(source.icon).toBe(DocumentsIcon)
+    expect(source.Uploader).toBeDefined()
+    expect(source.Uploader!.name).toBe('S3AssetSourceUploader')
   })
 })

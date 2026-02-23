@@ -4,7 +4,7 @@ import type {Order} from './types/browser'
 export const UPLOAD_STATUS_KEY = '_upload'
 export const STALE_UPLOAD_MS = 1000 * 60 * 2
 
-export const SUPPORTED_ASSET_TYPES = [S3AssetType.FILE, S3AssetType.IMAGE]
+export const SUPPORTED_ASSET_TYPES = [S3AssetType.FILE, S3AssetType.IMAGE, S3AssetType.VIDEO]
 
 export const ORDER_OPTIONS: (Order | null)[] = [
   {

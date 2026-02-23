@@ -16,9 +16,9 @@ import {
 
 import {UPLOAD_STATUS_KEY} from '../../../constants'
 import {useS3MediaContext} from '../../../contexts'
-import {createS3FileAssetSource} from '../../../lib'
-import type {S3AssetSource} from '../../../types'
-import {createInitialUploadPatches, observeFileAsset} from '../../../utils'
+import {createS3FileAssetSource, createS3VideoAssetSource} from '../../../lib'
+import {type S3AssetSource,S3AssetType} from '../../../types'
+import {createInitialUploadPatches, observeFileAsset, observeVideoAsset} from '../../../utils'
 import type {S3FileInputProps} from '../types'
 import {S3FileInputAsset} from './S3FileInputAsset'
 import {S3FileInputAssetSource} from './S3FileInputAssetSource'
@@ -45,16 +45,24 @@ export const S3FileInput: FC<S3FileInputProps> = (props) => {
 
   const {s3Client} = useS3MediaContext()
 
+  const isVideoField = schemaType.name === S3AssetType.VIDEO
+
   const assetSources = useMemo(
-    () => [createS3FileAssetSource({sanityClient, s3Client, title: 'S3 File'})],
-    [sanityClient, s3Client],
+    () =>
+      isVideoField
+        ? [createS3VideoAssetSource({sanityClient, s3Client, title: 'S3 Video'})]
+        : [createS3FileAssetSource({sanityClient, s3Client, title: 'S3 File'})],
+    [isVideoField, sanityClient, s3Client],
   )
 
   const documentPreviewStore = useDocumentPreviewStore()
 
   const observeAsset = useCallback(
-    (assetId: string) => observeFileAsset(documentPreviewStore, assetId),
-    [documentPreviewStore],
+    (assetId: string) =>
+      isVideoField
+        ? observeVideoAsset(documentPreviewStore, assetId)
+        : observeFileAsset(documentPreviewStore, assetId),
+    [documentPreviewStore, isVideoField],
   )
 
   const {push} = useToast()

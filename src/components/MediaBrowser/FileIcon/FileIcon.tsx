@@ -5,13 +5,13 @@ import {defaultStyles, FileIcon as ReactFileIcon} from 'react-file-icon'
 import {styled} from 'styled-components'
 
 import {useS3MediaContext} from '../../../contexts'
-import {S3AssetType, type S3FileAsset} from '../../../types'
+import {S3AssetType, type S3FileAsset, type S3VideoAsset} from '../../../types'
 
 type FileIconProps = {
   extension?: string
   onClick?: (e: MouseEvent) => void
   width: string
-  asset?: S3FileAsset
+  asset?: S3FileAsset | S3VideoAsset
 }
 
 // Force react-file-icon styles
@@ -27,7 +27,12 @@ export const FileIcon: FC<FileIconProps> = (props) => {
 
   const {buildAssetUrl} = useS3MediaContext()
 
-  const assetUrl = asset ? buildAssetUrl({assetType: S3AssetType.FILE, assetId: asset._id}) : null
+  const assetUrl = asset
+    ? buildAssetUrl({
+        assetType: asset._type === 's3VideoAsset' ? S3AssetType.VIDEO : S3AssetType.FILE,
+        assetId: asset._id,
+      })
+    : null
 
   return (
     <Flex align="center" justify="center" onClick={onClick} style={{height: '100%'}}>

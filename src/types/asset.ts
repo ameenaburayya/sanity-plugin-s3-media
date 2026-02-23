@@ -6,12 +6,18 @@ import type {
   SanityDocument,
 } from 'sanity'
 
-import type {S3FileSchemaType, S3ImageMetaData, S3ImageSchemaType} from './schema'
+import type {
+  S3FileSchemaType,
+  S3ImageMetaData,
+  S3ImageSchemaType,
+  S3VideoMetaData,
+  S3VideoSchemaType,
+} from './schema'
 
 /** @public */
 export interface S3AssetDocument extends SanityDocument {
   _id: string
-  _type: 's3FileAsset' | 's3ImageAsset'
+  _type: 's3FileAsset' | 's3ImageAsset' | 's3VideoAsset'
   assetId: string
   extension: string
   mimeType: string
@@ -27,12 +33,16 @@ export type S3FileAsset = S3AssetDocument & {_type: 's3FileAsset'}
 export type S3ImageAsset = S3AssetDocument & {_type: 's3ImageAsset'; metadata: S3ImageMetaData}
 
 /** @public */
-export type S3Asset = S3FileAsset | S3ImageAsset
+export type S3VideoAsset = S3AssetDocument & {_type: 's3VideoAsset'; metadata: S3VideoMetaData}
+
+/** @public */
+export type S3Asset = S3FileAsset | S3ImageAsset | S3VideoAsset
 
 /** @public */
 export enum S3AssetType {
   FILE = 's3File',
   IMAGE = 's3Image',
+  VIDEO = 's3Video',
 }
 
 export interface S3AssetSourceComponentProps {
@@ -46,7 +56,7 @@ export interface S3AssetSourceComponentProps {
   onClose: () => void
   onSelect: (assetFromSource: AssetFromSource[]) => void
   onChangeAction?: (action: AssetSourceComponentAction) => void
-  schemaType?: S3ImageSchemaType | S3FileSchemaType
+  schemaType?: S3ImageSchemaType | S3FileSchemaType | S3VideoSchemaType
   assetToOpen?: S3AssetDocument
 }
 
@@ -66,6 +76,14 @@ export interface S3FileAssetIdParts {
 
 export interface S3ImageAssetIdParts {
   type: 's3Image'
+  assetId: string
+  extension: string
+  width: number
+  height: number
+}
+
+export interface S3VideoAssetIdParts {
+  type: 's3Video'
   assetId: string
   extension: string
   width: number

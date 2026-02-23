@@ -1,56 +1,52 @@
-import {
-  buildS3FileUrl as buildS3FileUrlExport,
-  buildS3ImageUrl as buildS3ImageUrlExport,
-  getS3AssetExtension as getS3AssetExtensionExport,
-  getS3ImageDimensions as getS3ImageDimensionsExport,
-  tryGetS3AssetExtension as tryGetS3AssetExtensionExport,
-  tryGetS3ImageDimensions as tryGetS3ImageDimensionsExport,
-} from '../asset-utils'
-
-const {
-  buildS3FileUrl,
-  buildS3ImageUrl,
-  getS3AssetExtension,
-  getS3ImageDimensions,
-  tryGetS3AssetExtension,
-  tryGetS3ImageDimensions,
-} = vi.hoisted(() => ({
-  buildS3FileUrl: vi.fn(() => 'file-url'),
-  buildS3ImageUrl: vi.fn(() => 'image-url'),
-  getS3AssetExtension: vi.fn(() => 'png'),
-  getS3ImageDimensions: vi.fn(() => ({width: 100, height: 50, aspectRatio: 2})),
-  tryGetS3AssetExtension: vi.fn(() => undefined),
-  tryGetS3ImageDimensions: vi.fn(() => undefined),
-}))
-
-vi.mock('../utils/asset/paths', () => ({
-  buildS3FileUrl,
-  buildS3ImageUrl,
-}))
-
-vi.mock('../utils/resolve', () => ({
-  getS3AssetExtension,
-  getS3ImageDimensions,
-  tryGetS3AssetExtension,
-  tryGetS3ImageDimensions,
-}))
+import * as assetUtils from '../asset-utils'
+import * as paths from '../utils/asset/paths'
+import * as resolve from '../utils/resolve'
 
 describe('asset-utils exports', () => {
+  const fileId = 's3File-abcdefghijklmnopqrstuvwx-pdf'
+  const imageId = 's3Image-abcdefghijklmnopqrstuvwx-100x50-png'
+  const videoId = 's3Video-abcdefghijklmnopqrstuvwx-1920x1080-mp4'
+
   it('re-exports path and resolve helpers', () => {
-    expect(buildS3FileUrlExport).toBe(buildS3FileUrl)
-    expect(buildS3ImageUrlExport).toBe(buildS3ImageUrl)
-    expect(getS3AssetExtensionExport).toBe(getS3AssetExtension)
-    expect(getS3ImageDimensionsExport).toBe(getS3ImageDimensions)
-    expect(tryGetS3AssetExtensionExport).toBe(tryGetS3AssetExtension)
-    expect(tryGetS3ImageDimensionsExport).toBe(tryGetS3ImageDimensions)
+    expect(assetUtils.buildS3FileUrl).toBe(paths.buildS3FileUrl)
+    expect(assetUtils.buildS3ImageUrl).toBe(paths.buildS3ImageUrl)
+    expect(assetUtils.buildS3VideoUrl).toBe(paths.buildS3VideoUrl)
+
+    expect(assetUtils.getS3AssetExtension).toBe(resolve.getS3AssetExtension)
+    expect(assetUtils.getS3ImageDimensions).toBe(resolve.getS3ImageDimensions)
+    expect(assetUtils.getS3VideoDimensions).toBe(resolve.getS3VideoDimensions)
+    expect(assetUtils.tryGetS3AssetExtension).toBe(resolve.tryGetS3AssetExtension)
+    expect(assetUtils.tryGetS3ImageDimensions).toBe(resolve.tryGetS3ImageDimensions)
+    expect(assetUtils.tryGetS3VideoDimensions).toBe(resolve.tryGetS3VideoDimensions)
   })
 
-  it('keeps mocked runtime behavior', () => {
-    expect(buildS3FileUrlExport('id', {baseUrl: 'x'})).toBe('file-url')
-    expect(buildS3ImageUrlExport('id', {baseUrl: 'x'})).toBe('image-url')
-    expect(getS3AssetExtensionExport({} as any)).toBe('png')
-    expect(getS3ImageDimensionsExport({} as any)).toEqual({width: 100, height: 50, aspectRatio: 2})
-    expect(tryGetS3AssetExtensionExport({} as any)).toBeUndefined()
-    expect(tryGetS3ImageDimensionsExport({} as any)).toBeUndefined()
+  it('uses real helper behavior', () => {
+    expect(assetUtils.buildS3FileUrl(fileId, {baseUrl: 'https://cdn.example.com'})).toBe(
+      'https://cdn.example.com/abcdefghijklmnopqrstuvwx.pdf',
+    )
+    expect(assetUtils.buildS3ImageUrl(imageId, {baseUrl: 'https://cdn.example.com'})).toBe(
+      'https://cdn.example.com/abcdefghijklmnopqrstuvwx-100x50.png',
+    )
+    expect(assetUtils.buildS3VideoUrl(videoId, {baseUrl: 'https://cdn.example.com'})).toBe(
+      'https://cdn.example.com/abcdefghijklmnopqrstuvwx-1920x1080.mp4',
+    )
+
+    expect(assetUtils.getS3AssetExtension({_id: fileId} as any)).toBe('pdf')
+    expect(assetUtils.getS3ImageDimensions({_id: imageId} as any)).toEqual({
+      _type: 's3ImageDimensions',
+      width: 100,
+      height: 50,
+      aspectRatio: 2,
+    })
+    expect(assetUtils.getS3VideoDimensions({_id: videoId} as any)).toEqual({
+      _type: 's3VideoDimensions',
+      width: 1920,
+      height: 1080,
+      aspectRatio: 16 / 9,
+    })
+
+    expect(assetUtils.tryGetS3AssetExtension({} as any)).toBeUndefined()
+    expect(assetUtils.tryGetS3ImageDimensions({} as any)).toBeUndefined()
+    expect(assetUtils.tryGetS3VideoDimensions({} as any)).toBeUndefined()
   })
 })

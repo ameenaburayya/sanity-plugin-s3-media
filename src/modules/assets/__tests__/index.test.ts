@@ -59,6 +59,26 @@ const makeFileAsset = (overrides: Record<string, unknown> = {}) =>
     ...overrides,
   }) as any
 
+const makeVideoAsset = (overrides: Record<string, unknown> = {}) =>
+  ({
+    _id: 's3Video-abcdefghijklmnopqrstuvwx-1920x1080-mp4',
+    _type: 's3VideoAsset',
+    assetId: 'abcdefghijklmnopqrstuvwx',
+    extension: 'mp4',
+    metadata: {
+      dimensions: {
+        aspectRatio: 1920 / 1080,
+        height: 1080,
+        width: 1920,
+      },
+    },
+    mimeType: 'video/mp4',
+    sha1hash: 'hash-video',
+    size: 4096,
+    _updatedAt: 3,
+    ...overrides,
+  }) as any
+
 const makeRootState = (overrides: Record<string, unknown> = {}) =>
   ({
     assets: assetsReducer(undefined, {type: 'unknown'} as any),
@@ -423,6 +443,28 @@ describe('assets epics', () => {
       fileName: 'abcdefghijklmnopqrstuvwx-120x80.jpg',
     })
     expect(result).toEqual([assetsActions.deleteComplete({assetIds: [imageAsset._id]})])
+  })
+
+  it('assetsDeleteEpic deletes video assets by computed video path', async () => {
+    const videoAsset = makeVideoAsset({_id: 's3Video-abcdefghijklmnopqrstuvwx-1920x1080-mp4'})
+    const deps = makeDeps()
+
+    deps.sanityClient.observable.fetch.mockReturnValue(of([{_id: videoAsset._id, referenceCount: 0}]))
+    deps.s3Client.observable.assets.deleteAsset.mockReturnValue(of({ok: true}))
+    deps.sanityClient.observable.delete.mockReturnValue(of({ok: true}))
+
+    const result = await lastValueFrom(
+      assetsDeleteEpic(
+        of(assetsActions.deleteRequest({assets: [videoAsset]})) as any,
+        EMPTY as any,
+        deps,
+      ).pipe(toArray()),
+    )
+
+    expect(deps.s3Client.observable.assets.deleteAsset).toHaveBeenCalledWith({
+      fileName: 'abcdefghijklmnopqrstuvwx-1920x1080.mp4',
+    })
+    expect(result).toEqual([assetsActions.deleteComplete({assetIds: [videoAsset._id]})])
   })
 
   it('assetsDeleteEpic emits skipped and complete when only some are deletable', async () => {

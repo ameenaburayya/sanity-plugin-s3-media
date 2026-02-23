@@ -9,6 +9,7 @@ import {
   S3AssetType,
   type S3FileAsset,
   type S3ImageAsset,
+  type S3VideoAsset,
   type UploadCompleteEvent,
   type UploadEvent,
 } from '../../types'
@@ -34,7 +35,7 @@ const fetchExistingAsset = (
   client: SanityClient,
   assetType: S3AssetType,
   id: string,
-): Observable<S3ImageAsset | S3FileAsset | null> =>
+): Observable<S3ImageAsset | S3FileAsset | S3VideoAsset | null> =>
   client.observable.fetch(
     '*[_type == $documentType && _id == $id][0]',
     {documentType: `${assetType}Asset`, id},
@@ -67,6 +68,37 @@ const getImageDimensions = (file: File): Observable<ImageDimensions | null> => {
   }).pipe(catchError(() => of(null)))
 }
 
+const getVideoDimensions = (file: File): Observable<ImageDimensions | null> => {
+  if (!file.type.startsWith('video/')) {
+    return of(null)
+  }
+
+  return new Observable<ImageDimensions>((subscriber) => {
+    const video = document.createElement('video')
+    const url = URL.createObjectURL(file)
+
+    const cleanup = () => {
+      URL.revokeObjectURL(url)
+      video.removeAttribute('src')
+      video.load()
+    }
+
+    video.onloadedmetadata = () => {
+      subscriber.next({width: video.videoWidth, height: video.videoHeight})
+      subscriber.complete()
+      cleanup()
+    }
+
+    video.onerror = () => {
+      subscriber.error(new Error('Failed to load video metadata'))
+      cleanup()
+    }
+
+    video.preload = 'metadata'
+    video.src = url
+  }).pipe(catchError(() => of(null)))
+}
+
 const getFileExtension = (filename: string): string => {
   const segments = filename.split('.')
   return segments[segments.length - 1]
@@ -89,7 +121,9 @@ const buildDocumentId = (
 ): string =>
   assetType === S3AssetType.IMAGE && dimensions
     ? `${S3AssetType.IMAGE}-${fileId}-${dimensions.width}x${dimensions.height}-${extension}`
-    : `${S3AssetType.FILE}-${fileId}-${extension}`
+    : assetType === S3AssetType.VIDEO && dimensions
+      ? `${S3AssetType.VIDEO}-${fileId}-${dimensions.width}x${dimensions.height}-${extension}`
+      : `${S3AssetType.FILE}-${fileId}-${extension}`
 
 const buildAssetDocument = (
   assetType: S3AssetType,
@@ -102,7 +136,12 @@ const buildAssetDocument = (
 ): S3Asset => {
   const baseDocument = {
     _id: documentId,
-    _type: assetType === S3AssetType.IMAGE ? 's3ImageAsset' : 's3FileAsset',
+    _type:
+      assetType === S3AssetType.IMAGE
+        ? 's3ImageAsset'
+        : assetType === S3AssetType.VIDEO
+          ? 's3VideoAsset'
+          : 's3FileAsset',
     assetId: fileId,
     originalFilename: storeOriginalFilename ? file.name : undefined,
     sha1hash: hash,
@@ -119,6 +158,22 @@ const buildAssetDocument = (
         _type: 's3ImageMetadata',
         dimensions: {
           _type: 's3ImageDimensions',
+          height: dimensions.height,
+          width: dimensions.width,
+          aspectRatio: dimensions.width / dimensions.height,
+        },
+      },
+    }
+  }
+
+  if (assetType === S3AssetType.VIDEO && dimensions) {
+    return {
+      ...baseDocument,
+      _type: 's3VideoAsset',
+      metadata: {
+        _type: 's3VideoMetadata',
+        dimensions: {
+          _type: 's3VideoDimensions',
           height: dimensions.height,
           width: dimensions.width,
           aspectRatio: dimensions.width / dimensions.height,
@@ -156,12 +211,21 @@ const uploadAsset = ({
 
   return hashFile(file).pipe(
     mergeMap((hash) => {
-      const dimensions$ = assetType === S3AssetType.IMAGE ? getImageDimensions(file) : of(null)
+      const dimensions$ =
+        assetType === S3AssetType.IMAGE
+          ? getImageDimensions(file)
+          : assetType === S3AssetType.VIDEO
+            ? getVideoDimensions(file)
+            : of(null)
 
       return dimensions$.pipe(map((dimensions) => ({hash, dimensions})))
     }),
 
     mergeMap(({hash, dimensions}) => {
+      if (assetType === S3AssetType.VIDEO && !dimensions) {
+        throw new Error('Unable to determine video dimensions')
+      }
+
       // Check for existing asset if we have a hash
       if (hash) {
         const documentId = buildDocumentId(assetType, hash, extension, dimensions)

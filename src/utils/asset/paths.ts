@@ -1,4 +1,4 @@
-import {parseFileAssetId, parseImageAssetId} from './parse'
+import {parseFileAssetId, parseImageAssetId, parseVideoAssetId} from './parse'
 
 interface UrlBuilderOptions {
   baseUrl: string
@@ -57,4 +57,30 @@ export function buildS3ImagePath(documentId: string): string {
 export function buildS3ImageUrl(assetId: string, options: UrlBuilderOptions): string {
   const baseUrl = options?.baseUrl
   return `${baseUrl}/${buildS3ImagePath(assetId)}`
+}
+
+/**
+ * Builds the base video path from the minimal set of parts required to assemble it
+ *
+ * @param asset - An asset-like shape defining ID, dimensions and extension
+ * @returns The path to the video
+ * @public
+ */
+export function buildS3VideoPath(documentId: string): string {
+  const {assetId, width, height, extension} = parseVideoAssetId(documentId)
+
+  return `${assetId}-${width}x${height}.${extension}`
+}
+
+/**
+ * Builds the base video URL from the minimal set of parts required to assemble it
+ *
+ * @param asset - An asset-like shape defining ID, dimensions and extension
+ * @param options - Base URL configuration
+ * @returns The URL to the video, as a string
+ * @public
+ */
+export function buildS3VideoUrl(assetId: string, options: UrlBuilderOptions): string {
+  const baseUrl = options?.baseUrl
+  return `${baseUrl}/${buildS3VideoPath(assetId)}`
 }

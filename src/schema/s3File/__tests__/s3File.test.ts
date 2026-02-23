@@ -1,17 +1,18 @@
 import {s3File} from '..'
+import {S3FileInput} from '../components'
 
 const defineTypeMock = vi.hoisted(() => vi.fn((schema) => schema))
 const defineFieldMock = vi.hoisted(() => vi.fn((field) => field))
-const s3FileInput = vi.hoisted(() => Symbol('S3FileInput'))
 
-vi.mock('sanity', () => ({
-  defineType: defineTypeMock,
-  defineField: defineFieldMock,
-}))
+vi.mock('sanity', async () => {
+  const actual = await vi.importActual<typeof import('sanity')>('sanity')
 
-vi.mock('../components', () => ({
-  S3FileInput: s3FileInput,
-}))
+  return {
+    ...actual,
+    defineType: defineTypeMock,
+    defineField: defineFieldMock,
+  }
+})
 
 describe('s3File schema', () => {
   it('defines object schema with required reference field and custom field renderer', () => {
@@ -30,7 +31,7 @@ describe('s3File schema', () => {
     expect((assetField.validation as (rule: any) => unknown)({required})).toBe('required-rule')
     expect(required).toHaveBeenCalledTimes(1)
 
-    expect(schema.components.input).toBe(s3FileInput)
+    expect(schema.components.input).toBe(S3FileInput)
 
     const renderDefault = vi.fn(() => 'rendered-field')
     const result = (schema.components.field as (props: any) => unknown)({name: 'asset', renderDefault})

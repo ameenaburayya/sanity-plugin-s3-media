@@ -40,6 +40,7 @@ export const UploadPlaceholder: FC<UploadPlaceholderProps> = (props) => {
   const collapsed = rect?.border && rect.border.width < 440
 
   const isFileType = type === S3AssetType.FILE
+  const isVideoType = type === S3AssetType.VIDEO
 
   const {t} = useTranslation()
 
@@ -58,7 +59,11 @@ export const UploadPlaceholder: FC<UploadPlaceholderProps> = (props) => {
     [onUpload],
   )
 
-  const accept = get(schemaType, 'options.accept', isFileType ? '' : 'image/*')
+  const accept = get(
+    schemaType,
+    'options.accept',
+    isFileType ? '' : isVideoType ? 'video/*' : 'image/*',
+  )
 
   const uploadButton = useMemo(() => {
     switch (assetSourcesWithUpload.length) {
@@ -101,8 +106,12 @@ export const UploadPlaceholder: FC<UploadPlaceholderProps> = (props) => {
       return <AccessDeniedIcon />
     }
 
-    return isFileType ? <BinaryDocumentIcon /> : <ImageIcon />
-  }, [directUploads, isFileType, readOnly])
+    if (isVideoType || isFileType) {
+      return <BinaryDocumentIcon />
+    }
+
+    return <ImageIcon />
+  }, [directUploads, isFileType, isVideoType, readOnly])
 
   const messageText = useMemo(() => {
     if (directUploads === false) {
@@ -113,8 +122,12 @@ export const UploadPlaceholder: FC<UploadPlaceholderProps> = (props) => {
       return 'Read only'
     }
 
-    return isFileType ? 'Drag or paste file here' : 'Drag or paste image here'
-  }, [directUploads, readOnly, isFileType])
+    return isVideoType
+      ? 'Drag or paste video here'
+      : isFileType
+        ? 'Drag or paste file here'
+        : 'Drag or paste image here'
+  }, [directUploads, readOnly, isFileType, isVideoType])
 
   return assetSourcesWithUpload.length === 0 ? null : (
     <Flex

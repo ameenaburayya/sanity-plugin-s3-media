@@ -12,7 +12,7 @@ import {
   WithReferencedAsset,
 } from '../../../components'
 import {useS3MediaContext, useS3MediaOptionsContext} from '../../../contexts'
-import {type S3AssetSource, S3AssetType, type S3FileAsset} from '../../../types'
+import {type S3AssetSource, S3AssetType, type S3FileAsset, type S3VideoAsset} from '../../../types'
 import {type S3FileInputProps} from '../types'
 import {S3FileActionsMenu} from './S3FileActionsMenu'
 import {S3FileSkeleton} from './S3FileSkeleton'
@@ -20,7 +20,7 @@ import {S3FileSkeleton} from './S3FileSkeleton'
 type S3FileInputPreviewContentProps = Pick<S3FileInputProps, 'readOnly' | 'value'> & {
   browseMenuItem: ReactNode
   clearField: () => void
-  fileAsset: S3FileAsset
+  fileAsset: S3FileAsset | S3VideoAsset
   isMenuOpen: boolean
   setIsMenuOpen: (isOpen: boolean) => void
   uploadMenuItem: ReactNode
@@ -39,7 +39,10 @@ const S3FileInputPreviewContent: FC<S3FileInputPreviewContentProps> = (props) =>
 
   const {buildAssetUrl} = useS3MediaContext()
 
-  const url = buildAssetUrl({assetId: fileAsset._id, assetType: S3AssetType.FILE})
+  const url = buildAssetUrl({
+    assetId: fileAsset._id,
+    assetType: fileAsset._type === 's3VideoAsset' ? S3AssetType.VIDEO : S3AssetType.FILE,
+  })
 
   return (
     <S3FileActionsMenu
@@ -62,7 +65,7 @@ const S3FileInputPreviewContent: FC<S3FileInputPreviewContentProps> = (props) =>
 
 type S3FileInputPreviewProps = Pick<S3FileInputProps, 'readOnly' | 'schemaType' | 'value'> & {
   assetSources: S3AssetSource[]
-  observeAsset: (id: string) => Observable<S3FileAsset>
+  observeAsset: (id: string) => Observable<S3FileAsset | S3VideoAsset>
   clearField: () => void
   onSelectFiles: (assetSource: S3AssetSource, files: File[]) => void
   setSelectedAssetSource: (assetSource: S3AssetSource | null) => void
@@ -86,7 +89,7 @@ export const S3FileInputPreview: FC<S3FileInputPreviewProps> = (props) => {
 
   const {directUploads} = useS3MediaOptionsContext()
 
-  const accept = get(schemaType, 'options.accept', '')
+  const accept = get(schemaType, 'options.accept', schemaType.name === 's3Video' ? 'video/*' : '')
 
   const assetSourcesWithUpload = assetSources.filter((s) => Boolean(s.Uploader))
 

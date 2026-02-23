@@ -1,12 +1,12 @@
 # sanity-plugin-s3-media
 
 Sanity Studio plugin that adds an S3-backed media browser, asset sources, and
-schema types for files and images stored in AWS S3.
+schema types for files, images, and videos stored in AWS S3.
 
 ## Features
 
 - Media tool in Studio for browsing, searching, and managing S3 assets.
-- Asset sources for `s3Image` and `s3File` inputs.
+- Asset sources for `s3Image`, `s3File`, and `s3Video` inputs.
 - Direct uploads to S3 via a signed URL endpoint.
 - Optional CloudFront domain for delivery URLs.
 - Utilities to build S3 asset URLs from document IDs.
@@ -42,8 +42,8 @@ Plugin options:
 
 ### 2) Add schema types
 
-This plugin provides `s3Image` and `s3File` object types that reference
-`s3ImageAsset` and `s3FileAsset` documents. Use them like any other field:
+This plugin provides `s3Image`, `s3File`, and `s3Video` object types that reference
+`s3ImageAsset`, `s3FileAsset`, and `s3VideoAsset` documents. Use them like any other field:
 
 ```ts
 import {defineField, defineType} from 'sanity'
@@ -65,6 +65,10 @@ export const product = defineType({
       options: {
         accept: 'application/pdf',
       },
+    }),
+    defineField({
+      name: 'promoVideo',
+      type: 's3Video',
     }),
   ],
 })
@@ -140,10 +144,11 @@ Response: any 2xx status is treated as success.
 The package also exports helpers for constructing asset URLs:
 
 ```ts
-import {buildS3FileUrl, buildS3ImageUrl} from 'sanity-plugin-s3-media'
+import {buildS3FileUrl, buildS3ImageUrl, buildS3VideoUrl} from 'sanity-plugin-s3-media'
 
 const fileUrl = buildS3FileUrl('s3File-<assetId>-<ext>', {baseUrl})
 const imageUrl = buildS3ImageUrl('s3Image-<assetId>-<width>x<height>-<ext>', {baseUrl})
+const videoUrl = buildS3VideoUrl('s3Video-<assetId>-<width>x<height>-<ext>', {baseUrl})
 ```
 
 ## Troubleshooting

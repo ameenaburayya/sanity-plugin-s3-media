@@ -15,8 +15,10 @@ const imageId = 's3Image-abcdefghijklmnopqrstuvwx-100x200-jpg'
 
 describe('media browser helpers', () => {
   it('builds groq filters with optional search', () => {
-    const baseFilter = constructFilter({assetTypes: [S3AssetType.FILE, S3AssetType.IMAGE]})
-    expect(baseFilter).toContain('_type in ["s3FileAsset","s3ImageAsset"]')
+    const baseFilter = constructFilter({
+      assetTypes: [S3AssetType.FILE, S3AssetType.IMAGE, S3AssetType.VIDEO],
+    })
+    expect(baseFilter).toContain('_type in ["s3FileAsset","s3ImageAsset","s3VideoAsset"]')
     expect(baseFilter).toContain('!(_id in path("drafts.**"))')
 
     const searchFilter = constructFilter({assetTypes: [S3AssetType.FILE], searchQuery: '  cats '})
@@ -56,6 +58,7 @@ describe('media browser helpers', () => {
   it('validates supported asset types', () => {
     expect(isSupportedAssetType('s3File')).toBe(true)
     expect(isSupportedAssetType('s3Image')).toBe(true)
+    expect(isSupportedAssetType('s3Video')).toBe(true)
     expect(isSupportedAssetType('nope')).toBe(false)
     expect(isSupportedAssetType()).toBe(false)
   })

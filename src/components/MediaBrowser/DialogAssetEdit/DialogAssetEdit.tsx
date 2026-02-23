@@ -8,7 +8,7 @@ import {useTypedSelector} from '../../../hooks'
 import {dialogActions, selectAssetById} from '../../../modules'
 import {S3AssetType} from '../../../types'
 import type {DialogAssetEditProps} from '../../../types/browser'
-import {getUniqueDocuments, isS3FileAsset, isS3ImageAsset} from '../../../utils'
+import {getUniqueDocuments, isS3FileAsset, isS3ImageAsset, isS3VideoAsset} from '../../../utils'
 import {AssetMetadata} from '../AssetMetadata'
 import {Dialog} from '../Dialog'
 import {DocumentList} from '../DocumentList'
@@ -118,7 +118,9 @@ export const DialogAssetEdit: FC<PropsWithChildren<{dialog: DialogAssetEditProps
         <Box flex={1} padding={4}>
           <Box style={{aspectRatio: '1'}}>
             {/* File */}
-            {isS3FileAsset(currentAsset) && <FileAssetPreview asset={currentAsset} />}
+            {(isS3FileAsset(currentAsset) || isS3VideoAsset(currentAsset)) && (
+              <FileAssetPreview asset={currentAsset} />
+            )}
 
             {/* Image */}
             {isS3ImageAsset(currentAsset) && (

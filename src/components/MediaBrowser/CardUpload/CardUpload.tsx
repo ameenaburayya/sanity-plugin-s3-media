@@ -101,7 +101,7 @@ export const CardUpload: FC<CardUploadProps> = (props) => {
             />
           )}
 
-          {item.assetType === S3AssetType.FILE && (
+          {(item.assetType === S3AssetType.FILE || item.assetType === S3AssetType.VIDEO) && (
             <div style={{height: '100%', opacity: 0.1}}>
               <FileIcon width="80px" />
             </div>

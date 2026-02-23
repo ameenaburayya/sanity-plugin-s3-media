@@ -26,3 +26,13 @@ export function createS3FileAssetSource(props: CreateS3AssetSourceProps): S3Asse
     Uploader: createS3Uploader(props),
   }
 }
+
+export function createS3VideoAssetSource(props: CreateS3AssetSourceProps): S3AssetSource {
+  return {
+    name: sourceName,
+    title: props.title,
+    component: S3AssetSourceComponent,
+    icon: DocumentsIcon,
+    Uploader: createS3Uploader(props),
+  }
+}

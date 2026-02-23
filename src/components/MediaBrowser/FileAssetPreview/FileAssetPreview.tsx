@@ -14,7 +14,10 @@ export const FileAssetPreview: FC<FileAssetPreviewProps> = (props) => {
 
   const {buildAssetUrl} = useS3MediaContext()
 
-  const assetUrl = buildAssetUrl({assetType: S3AssetType.FILE, assetId: asset._id})
+  const assetUrl = buildAssetUrl({
+    assetType: asset._type === 's3VideoAsset' ? S3AssetType.VIDEO : S3AssetType.FILE,
+    assetId: asset._id,
+  })
 
   if (asset.mimeType.search('audio') === 0) {
     return (

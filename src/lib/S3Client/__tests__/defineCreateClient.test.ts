@@ -1,19 +1,6 @@
-import {of} from 'rxjs'
+import {lastValueFrom} from 'rxjs'
 
 import defineCreateClientExports from '../defineCreateClient'
-
-const {defineHttpRequestMock, defaultRequesterMock} = vi.hoisted(() => {
-  return {
-    defineHttpRequestMock: vi.fn(),
-    defaultRequesterMock: vi.fn(),
-  }
-})
-
-vi.mock('../http/request', () => {
-  return {
-    defineHttpRequest: defineHttpRequestMock,
-  }
-})
 
 class FakeClient {
   httpRequest: any
@@ -25,37 +12,52 @@ class FakeClient {
   }
 }
 
+const createFetchResponse = (
+  status: number,
+  statusText: string,
+  headers: Record<string, unknown> = {},
+) => ({
+  status,
+  statusText,
+  headers: {
+    entries: () => Object.entries(headers),
+  },
+  json: () => Promise.resolve({}),
+})
+
 describe('defineCreateClientExports', () => {
   beforeEach(() => {
-    defineHttpRequestMock.mockReset()
-    defaultRequesterMock.mockReset()
-
-    defaultRequesterMock.mockReturnValue(
-      of({
-        type: 'response',
-        method: 'GET',
-        statusCode: 200,
-        statusMessage: 'OK',
-        headers: {},
-      }),
-    )
-    defineHttpRequestMock.mockReturnValue(defaultRequesterMock)
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(createFetchResponse(200, 'OK')) as any))
   })
 
-  it('creates clients that use defineHttpRequest requester by default', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('creates clients that use defineHttpRequest requester by default', async () => {
     const {createClient} = defineCreateClientExports(FakeClient)
     const config = {bucketKey: 'bucket', getSignedUrlEndpoint: 'https://api.example.com/sign'}
 
     const client = createClient(config as any)
 
-    expect(defineHttpRequestMock).toHaveBeenCalledTimes(1)
     expect(client).toBeInstanceOf(FakeClient)
     expect(client.config).toEqual(config)
 
     const options = {url: 'https://api.example.com/items'}
-    client.httpRequest(options)
+    const responseEvent = await lastValueFrom(client.httpRequest(options))
 
-    expect(defaultRequesterMock).toHaveBeenCalledWith(options)
+    expect(responseEvent).toEqual(
+      expect.objectContaining({
+        type: 'response',
+        statusCode: 200,
+        statusMessage: 'OK',
+      }),
+    )
+
+    expect(fetch).toHaveBeenCalledWith(
+      'https://api.example.com/items',
+      expect.objectContaining({method: 'GET'}),
+    )
   })
 
   it('prefers requester override when provided', () => {
@@ -68,27 +70,32 @@ describe('defineCreateClientExports', () => {
     const result = client.httpRequest(options, overrideRequester)
 
     expect(overrideRequester).toHaveBeenCalledWith(options)
-    expect(defaultRequesterMock).not.toHaveBeenCalled()
+    expect(fetch).not.toHaveBeenCalled()
     expect(result).toBe('override-result')
   })
 
-  it('creates a new default requester for each created client', () => {
-    const firstRequester = vi.fn().mockReturnValue('first')
-    const secondRequester = vi.fn().mockReturnValue('second')
+  it('creates a new default requester for each created client', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() =>
+        Promise.resolve(
+          createFetchResponse(200, 'OK', {
+            'x-sanity-warning': 'warn-once-per-client',
+          }),
+        ) as any,
+      ),
+    )
 
-    defineHttpRequestMock.mockReset()
-    defineHttpRequestMock.mockReturnValueOnce(firstRequester).mockReturnValueOnce(secondRequester)
-
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
     const {createClient} = defineCreateClientExports(FakeClient)
 
     const firstClient = createClient({bucketKey: 'one'} as any)
     const secondClient = createClient({bucketKey: 'two'} as any)
 
-    firstClient.httpRequest({url: 'https://api.example.com/1'})
-    secondClient.httpRequest({url: 'https://api.example.com/2'})
+    await lastValueFrom(firstClient.httpRequest({url: 'https://api.example.com/1'}))
+    await lastValueFrom(firstClient.httpRequest({url: 'https://api.example.com/1-again'}))
+    await lastValueFrom(secondClient.httpRequest({url: 'https://api.example.com/2'}))
 
-    expect(defineHttpRequestMock).toHaveBeenCalledTimes(2)
-    expect(firstRequester).toHaveBeenCalledTimes(1)
-    expect(secondRequester).toHaveBeenCalledTimes(1)
+    expect(warnSpy).toHaveBeenCalledTimes(2)
   })
 })

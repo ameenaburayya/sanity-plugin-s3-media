@@ -1,6 +1,6 @@
 import {of} from 'rxjs'
 
-import {observeFileAsset, observeImageAsset} from '../observe'
+import {observeFileAsset, observeImageAsset, observeVideoAsset} from '../observe'
 
 const PATHS = ['originalFilename', 'url', 'metadata', 'size', 'mimeType', 'extension']
 
@@ -11,8 +11,10 @@ describe('observe helpers', () => {
 
     observeImageAsset(store as any, 'img-id')
     observeFileAsset(store as any, 'file-id')
+    observeVideoAsset(store as any, 'video-id')
 
     expect(observePaths).toHaveBeenCalledWith({_type: 'reference', _ref: 'img-id'}, PATHS)
     expect(observePaths).toHaveBeenCalledWith({_type: 'reference', _ref: 'file-id'}, PATHS)
+    expect(observePaths).toHaveBeenCalledWith({_type: 'reference', _ref: 'video-id'}, PATHS)
   })
 })

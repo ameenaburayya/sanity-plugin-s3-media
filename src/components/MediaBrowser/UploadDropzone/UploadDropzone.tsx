@@ -67,6 +67,7 @@ export const UploadDropzone: FC<PropsWithChildren> = (props) => {
   const assetTypes = useTypedSelector((state) => state.assets.assetTypes)
 
   const isImageAssetType = assetTypes.length === 1 && assetTypes[0] === S3AssetType.IMAGE
+  const isVideoAssetType = assetTypes.length === 1 && assetTypes[0] === S3AssetType.VIDEO
 
   // Callbacks
   const handleDrop = async (acceptedFiles: File[]) => {
@@ -128,7 +129,7 @@ export const UploadDropzone: FC<PropsWithChildren> = (props) => {
 
   // Limit file picking to only images if we're specifically within an image selection context (e.g. picking from image fields)
   const {getRootProps, getInputProps, isDragActive, open} = useDropzone({
-    accept: isImageAssetType ? 'image/*' : '',
+    accept: isImageAssetType ? 'image/*' : isVideoAssetType ? 'video/*' : '',
     getFilesFromEvent: handleFileGetter,
     noClick: true,
     // HACK: Disable drag and drop functionality when in a selecting context

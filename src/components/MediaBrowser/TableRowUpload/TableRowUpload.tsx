@@ -104,7 +104,7 @@ export const TableRowUpload: FC<TableRowUploadProps> = (props) => {
             />
           )}
 
-          {item.assetType === S3AssetType.FILE && (
+          {(item.assetType === S3AssetType.FILE || item.assetType === S3AssetType.VIDEO) && (
             <div style={{height: '100%', opacity: 0.1}}>
               <FileIcon width="40px" />
             </div>

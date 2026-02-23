@@ -1,14 +1,5 @@
 import {createS3Client as createS3ClientExport, S3Client as S3ClientExport} from '../client'
-
-const {createS3Client, S3Client} = vi.hoisted(() => ({
-  createS3Client: vi.fn(),
-  S3Client: class MockS3Client {},
-}))
-
-vi.mock('../lib', () => ({
-  createS3Client,
-  S3Client,
-}))
+import {createS3Client, S3Client} from '../lib'
 
 describe('client exports', () => {
   it('re-exports client factory and class from lib', () => {

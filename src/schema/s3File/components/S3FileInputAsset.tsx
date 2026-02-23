@@ -11,8 +11,13 @@ import {
   UploadWarning,
 } from '../../../components'
 import {useS3MediaOptionsContext} from '../../../contexts'
-import {type S3AssetSource, S3AssetType, type S3FileAsset as S3FileAssetType} from '../../../types'
-import {isS3FileSource} from '../../../utils'
+import {
+  type S3AssetSource,
+  S3AssetType,
+  type S3FileAsset as S3FileAssetType,
+  type S3VideoAsset,
+} from '../../../types'
+import {isS3FileSource, isS3VideoSource} from '../../../utils'
 import {type S3FileInputProps} from '../types'
 import {InvalidFileWarning} from './InvalidFileWarning'
 import {S3FileInputPreview} from './S3FileInputPreview'
@@ -28,7 +33,7 @@ type S3FileInputAssetProps = Pick<
   isUploading: boolean
   onStale: () => void
   clearField: () => void
-  observeAsset: (id: string) => Observable<S3FileAssetType>
+  observeAsset: (id: string) => Observable<S3FileAssetType | S3VideoAsset>
   onCancelUpload?: () => void
   onClearUploadStatus: () => void
   onSelectFiles: (assetSource: S3AssetSource, files: File[]) => void
@@ -58,6 +63,7 @@ export const S3FileInputAsset: FC<S3FileInputAssetProps> = (props) => {
   } = props
 
   const {directUploads} = useS3MediaOptionsContext()
+  const isVideoField = schemaType.name === 's3Video'
 
   const assetFieldPath = useMemo(() => path.concat(ASSET_FIELD_PATH), [path])
 
@@ -88,7 +94,13 @@ export const S3FileInputAsset: FC<S3FileInputAssetProps> = (props) => {
 
   const hasValueOrUpload = Boolean(value?._upload || value?.asset)
 
-  if (value && typeof value.asset !== 'undefined' && !value?._upload && !isS3FileSource(value)) {
+  const hasInvalidAssetSource =
+    value &&
+    typeof value.asset !== 'undefined' &&
+    !value?._upload &&
+    !(isVideoField ? isS3VideoSource(value) : isS3FileSource(value))
+
+  if (hasInvalidAssetSource) {
     return <InvalidFileWarning onClearValue={clearField} />
   }
 
@@ -132,7 +144,7 @@ export const S3FileInputAsset: FC<S3FileInputAssetProps> = (props) => {
                   radius={2}
                 >
                   <UploadPlaceholder
-                    type={S3AssetType.FILE}
+                    type={isVideoField ? S3AssetType.VIDEO : S3AssetType.FILE}
                     readOnly={readOnly}
                     schemaType={schemaType}
                     assetSources={assetSources}

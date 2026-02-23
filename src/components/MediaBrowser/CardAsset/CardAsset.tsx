@@ -21,7 +21,7 @@ import {useAssetSourceActions} from '../../../contexts/S3AssetSourceDispatchCont
 import {useKeyPress, useTypedSelector} from '../../../hooks'
 import {assetsActions, dialogActions, selectAssetById} from '../../../modules'
 import {S3AssetType} from '../../../types'
-import {getSchemeColor, isS3FileAsset, isS3ImageAsset} from '../../../utils'
+import {getSchemeColor, isS3FileAsset, isS3ImageAsset, isS3VideoAsset} from '../../../utils'
 import {PANEL_HEIGHT} from '../constants'
 import {FileIcon} from '../FileIcon'
 import {Image} from '../Image'
@@ -160,7 +160,7 @@ const BaseCardAsset: FC<CardAssetProps> = (props) => {
         >
           <div onClick={handleAssetClick} style={{height: '100%', opacity: opacityPreview}}>
             {/* File icon */}
-            {isS3FileAsset(asset) && (
+            {(isS3FileAsset(asset) || isS3VideoAsset(asset)) && (
               <FileIcon asset={asset} extension={asset.extension} width="80px" />
             )}
 

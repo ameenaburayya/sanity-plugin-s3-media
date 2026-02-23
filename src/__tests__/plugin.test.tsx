@@ -1,44 +1,22 @@
+import {ImageIcon} from '@sanity/icons'
 import * as React from 'react'
 import {isValidElement} from 'react'
 
+import {S3MediaTool} from '../components'
+import {S3MediaContextProvider, S3MediaOptionsContextProvider} from '../contexts'
 import {s3Media} from '../plugin'
+import {s3File, s3FileAsset, s3Image, s3ImageAsset, s3Video, s3VideoAsset} from '../schema'
 
 const definePluginMock = vi.hoisted(() => vi.fn((factory) => factory))
-const {imageIcon, mediaTool, optionsProvider, mediaProvider, s3File, s3FileAsset, s3Image, s3ImageAsset} =
-  vi.hoisted(() => ({
-    imageIcon: Symbol('ImageIcon'),
-    mediaTool: Symbol('S3MediaTool'),
-    optionsProvider: Symbol('S3MediaOptionsContextProvider'),
-    mediaProvider: Symbol('S3MediaContextProvider'),
-    s3File: {name: 's3File'},
-    s3FileAsset: {name: 's3FileAsset'},
-    s3Image: {name: 's3Image'},
-    s3ImageAsset: {name: 's3ImageAsset'},
-  }))
 
-vi.mock('sanity', () => ({
-  definePlugin: definePluginMock,
-}))
+vi.mock('sanity', async () => {
+  const actual = await vi.importActual<typeof import('sanity')>('sanity')
 
-vi.mock('@sanity/icons', () => ({
-  ImageIcon: imageIcon,
-}))
-
-vi.mock('../components', () => ({
-  S3MediaTool: mediaTool,
-}))
-
-vi.mock('../contexts', () => ({
-  S3MediaOptionsContextProvider: optionsProvider,
-  S3MediaContextProvider: mediaProvider,
-}))
-
-vi.mock('../schema', () => ({
-  s3File,
-  s3FileAsset,
-  s3Image,
-  s3ImageAsset,
-}))
+  return {
+    ...actual,
+    definePlugin: definePluginMock,
+  }
+})
 
 describe('s3Media plugin', () => {
   beforeEach(() => {
@@ -55,16 +33,23 @@ describe('s3Media plugin', () => {
     const config = s3Media({title: 'Library'}) as any
 
     expect(config.name).toBe('s3Media')
-    expect(config.schema.types).toEqual([s3File, s3FileAsset, s3Image, s3ImageAsset])
+    expect(config.schema.types).toEqual([
+      s3File,
+      s3FileAsset,
+      s3Image,
+      s3ImageAsset,
+      s3Video,
+      s3VideoAsset,
+    ])
 
     const tools = (config.tools as (prev: any[]) => any[])([{name: 'desk'}])
     expect(tools).toEqual([
       {name: 'desk'},
       {
-        icon: imageIcon,
+        icon: ImageIcon,
         name: 's3media',
         title: 'Library',
-        component: mediaTool,
+        component: S3MediaTool,
       },
     ])
 
@@ -76,11 +61,11 @@ describe('s3Media plugin', () => {
 
     expect(renderDefault).toHaveBeenCalledWith({renderDefault, test: true})
     expect(isValidElement(layout)).toBe(true)
-    expect(layout.type).toBe(optionsProvider)
+    expect(layout.type).toBe(S3MediaOptionsContextProvider)
     expect(layout.props.options).toEqual({title: 'Library'})
 
     const innerLayout = layout.props.children
-    expect(innerLayout.type).toBe(mediaProvider)
+    expect(innerLayout.type).toBe(S3MediaContextProvider)
     expect(innerLayout.props.children).toBe('default-layout')
   })
 
@@ -90,10 +75,10 @@ describe('s3Media plugin', () => {
     const tools = (config.tools as (prev: any[]) => any[])([])
     expect(tools).toEqual([
       {
-        icon: imageIcon,
+        icon: ImageIcon,
         name: 's3media',
         title: 'S3 Media',
-        component: mediaTool,
+        component: S3MediaTool,
       },
     ])
   })

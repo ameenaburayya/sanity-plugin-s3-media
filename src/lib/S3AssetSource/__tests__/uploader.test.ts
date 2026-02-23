@@ -3,28 +3,74 @@ import {Observable, of} from 'rxjs'
 import {createS3Uploader} from '../uploader'
 
 const uuidMock = vi.hoisted(() => vi.fn())
-const resolveUploaderBySchemaTypeMock = vi.hoisted(() => vi.fn())
+const isTypeMock = vi.hoisted(() =>
+  vi.fn(
+    (schemaType: {name?: string}, schemaTypeName: string) => schemaType?.name === schemaTypeName,
+  ),
+)
 
 vi.mock('@sanity/uuid', () => ({
   uuid: uuidMock,
 }))
 
-vi.mock('../resolveUploader', () => ({
-  resolveUploaderBySchemaType: resolveUploaderBySchemaTypeMock,
-}))
+vi.mock('sanity', async () => {
+  const actual = await vi.importActual<typeof import('sanity')>('sanity')
+
+  return {
+    ...actual,
+    _isType: isTypeMock,
+  }
+})
 
 describe('createS3Uploader', () => {
-  const sanityClient = {id: 'sanity'}
-  const s3Client = {id: 's3'}
+  const buildDeps = () => {
+    const fetch = vi.fn(() => of(null))
+    const create = vi.fn(() =>
+      of({
+        _id: 's3File-createdasset-pdf',
+        _type: 's3FileAsset',
+        assetId: 'createdasset',
+        extension: 'pdf',
+        mimeType: 'application/pdf',
+        sha1hash: 'createdasset',
+        size: 2,
+      }),
+    )
 
-  const makeUploader = () => {
-    const Uploader = createS3Uploader({sanityClient, s3Client} as any)
-    return new Uploader()
+    const uploadAsset = vi.fn(() => of({type: 'response'}))
+
+    return {
+      sanityClient: {observable: {fetch, create}},
+      s3Client: {observable: {assets: {uploadAsset}}},
+      fetch,
+      create,
+      uploadAsset,
+    }
   }
 
-  it('throws when schemaType or onChange are missing', () => {
-    const uploader = makeUploader()
+  const makeUploader = (overrides?: {
+    sanityClient?: Record<string, unknown>
+    s3Client?: Record<string, unknown>
+  }) => {
+    const deps = buildDeps()
+    const sanityClient = (overrides?.sanityClient as any) || deps.sanityClient
+    const s3Client = (overrides?.s3Client as any) || deps.s3Client
 
+    const Uploader = createS3Uploader({sanityClient, s3Client} as any)
+
+    return {uploader: new Uploader(), deps}
+  }
+
+  beforeEach(() => {
+    isTypeMock.mockImplementation(
+      (schemaType: {name?: string}, schemaTypeName: string) => schemaType?.name === schemaTypeName,
+    )
+  })
+
+  it('throws when schemaType or onChange are missing', () => {
+    uuidMock.mockReturnValue('file-missing')
+
+    const {uploader} = makeUploader()
     const file = new File(['x'], 'missing.txt', {type: 'text/plain'})
 
     expect(() => uploader.upload([file], undefined as any)).toThrow(
@@ -40,37 +86,31 @@ describe('createS3Uploader', () => {
     )
   })
 
-  it('handles successful upload lifecycle and emits all-complete', () => {
+  it('handles successful upload lifecycle and emits all-complete', async () => {
     uuidMock.mockReturnValue('file-1')
 
-    const upload = vi.fn(() =>
-      of(
-        {patches: [{op: 'set'}]},
-        {patches: null},
-      ),
-    )
-
-    resolveUploaderBySchemaTypeMock.mockReturnValue({upload})
-
-    const uploader = makeUploader()
+    const {uploader, deps} = makeUploader()
     const onChange = vi.fn()
     const events: any[] = []
+
     uploader.subscribe((event) => events.push(event))
 
-    uploader.upload([new File(['ok'], 'photo.png', {type: 'image/png'})], {
-      schemaType: {name: 's3Image', options: {storeOriginalFilename: false}} as any,
+    uploader.upload([new File(['ok'], 'photo.pdf', {type: 'application/pdf'})], {
+      schemaType: {name: 's3File', options: {storeOriginalFilename: false}} as any,
       onChange,
     })
 
-    expect(upload).toHaveBeenCalledWith({
-      file: expect.any(File),
-      sanityClient,
-      s3Client,
-      options: {storeOriginalFilename: false},
+    await vi.waitFor(() => {
+      expect(onChange).toHaveBeenCalled()
+      expect(uploader.getFiles()).toEqual([])
     })
 
-    expect(onChange).toHaveBeenCalledTimes(1)
-    expect(onChange).toHaveBeenCalledWith([{op: 'set'}])
+    expect(deps.uploadAsset).toHaveBeenCalledWith(
+      expect.objectContaining({
+        assetType: 's3File',
+        file: expect.any(File),
+      }),
+    )
 
     expect(events).toEqual(
       expect.arrayContaining([
@@ -79,30 +119,39 @@ describe('createS3Uploader', () => {
         expect.objectContaining({type: 'all-complete'}),
       ]),
     )
-
-    expect(uploader.getFiles()).toEqual([])
   })
 
-  it('normalizes unknown upload errors and emits error event', () => {
+  it('normalizes unknown upload errors and emits error event', async () => {
     uuidMock.mockReturnValue('file-err')
 
-    const upload = vi.fn(
-      () =>
-        new Observable((subscriber) => {
-          subscriber.error('unexpected')
-        }),
-    )
+    const {uploader, deps} = makeUploader({
+      s3Client: {
+        observable: {
+          assets: {
+            uploadAsset: vi.fn(
+              () =>
+                new Observable((subscriber) => {
+                  subscriber.error('unexpected')
+                }),
+            ),
+          },
+        },
+      },
+    })
 
-    resolveUploaderBySchemaTypeMock.mockReturnValue({upload})
-
-    const uploader = makeUploader()
     const events: any[] = []
     uploader.subscribe((event) => events.push(event))
 
-    uploader.upload([new File(['bad'], 'broken.png', {type: 'image/png'})], {
-      schemaType: {name: 's3Image'} as any,
+    uploader.upload([new File(['bad'], 'broken.pdf', {type: 'application/pdf'})], {
+      schemaType: {name: 's3File'} as any,
       onChange: vi.fn(),
     })
+
+    await vi.waitFor(() => {
+      expect(events.some((event) => event.type === 'status' && event.status === 'error')).toBe(true)
+    })
+
+    expect(deps.fetch).toHaveBeenCalled()
 
     const statusEvent = events.find((event) => event.type === 'status' && event.status === 'error')
     expect(statusEvent.file.error).toBeInstanceOf(Error)
@@ -112,25 +161,34 @@ describe('createS3Uploader', () => {
     expect(errorEvent.files).toEqual([])
   })
 
-  it('preserves Error instances from upload failures', () => {
+  it('preserves Error instances from upload failures', async () => {
     uuidMock.mockReturnValue('file-error-instance')
 
-    const upload = vi.fn(
-      () =>
-        new Observable((subscriber) => {
-          subscriber.error(new Error('explicit upload failure'))
-        }),
-    )
+    const {uploader} = makeUploader({
+      s3Client: {
+        observable: {
+          assets: {
+            uploadAsset: vi.fn(
+              () =>
+                new Observable((subscriber) => {
+                  subscriber.error(new Error('explicit upload failure'))
+                }),
+            ),
+          },
+        },
+      },
+    })
 
-    resolveUploaderBySchemaTypeMock.mockReturnValue({upload})
-
-    const uploader = makeUploader()
     const events: any[] = []
     uploader.subscribe((event) => events.push(event))
 
-    uploader.upload([new File(['bad'], 'broken-again.png', {type: 'image/png'})], {
-      schemaType: {name: 's3Image'} as any,
+    uploader.upload([new File(['bad'], 'broken-again.pdf', {type: 'application/pdf'})], {
+      schemaType: {name: 's3File'} as any,
       onChange: vi.fn(),
+    })
+
+    await vi.waitFor(() => {
+      expect(events.some((event) => event.type === 'status' && event.status === 'error')).toBe(true)
     })
 
     const statusEvent = events.find((event) => event.type === 'status' && event.status === 'error')
@@ -140,9 +198,8 @@ describe('createS3Uploader', () => {
 
   it('aborts a single file and then aborts all remaining files', () => {
     uuidMock.mockReturnValueOnce('file-1').mockReturnValueOnce('file-2')
-    resolveUploaderBySchemaTypeMock.mockReturnValue(null)
 
-    const uploader = makeUploader()
+    const {uploader} = makeUploader()
     const events: any[] = []
     uploader.subscribe((event) => events.push(event))
 
@@ -151,7 +208,7 @@ describe('createS3Uploader', () => {
         new File(['a'], 'first.txt', {type: 'text/plain'}),
         new File(['b'], 'second.txt', {type: 'text/plain'}),
       ],
-      {schemaType: {name: 's3File'} as any, onChange: vi.fn()},
+      {schemaType: {name: 'unsupportedType'} as any, onChange: vi.fn()},
     )
 
     uploader.abort(files[0])
@@ -163,17 +220,18 @@ describe('createS3Uploader', () => {
 
     const abortEvents = events.filter((event) => event.type === 'abort')
     expect(abortEvents).toHaveLength(2)
-    expect(events).toEqual(expect.arrayContaining([expect.objectContaining({type: 'all-complete'})]))
+    expect(events).toEqual(
+      expect.arrayContaining([expect.objectContaining({type: 'all-complete'})]),
+    )
   })
 
   it('replays current file state to new subscribers and supports unsubscribe', () => {
     uuidMock.mockReturnValue('file-sub')
-    resolveUploaderBySchemaTypeMock.mockReturnValue(null)
 
-    const uploader = makeUploader()
+    const {uploader} = makeUploader()
 
     uploader.upload([new File(['c'], 'queued.txt', {type: 'text/plain'})], {
-      schemaType: {name: 's3File'} as any,
+      schemaType: {name: 'unsupportedType'} as any,
       onChange: vi.fn(),
     })
 
@@ -197,14 +255,13 @@ describe('createS3Uploader', () => {
 
   it('emits progress percentages when updateFile receives a progress delta', () => {
     uuidMock.mockReturnValue('file-progress')
-    resolveUploaderBySchemaTypeMock.mockReturnValue(null)
 
-    const uploader = makeUploader()
+    const {uploader} = makeUploader()
     const events: any[] = []
     uploader.subscribe((event) => events.push(event))
 
     uploader.upload([new File(['d'], 'progress.txt', {type: 'text/plain'})], {
-      schemaType: {name: 's3File'} as any,
+      schemaType: {name: 'unsupportedType'} as any,
       onChange: vi.fn(),
     })
 
@@ -223,27 +280,37 @@ describe('createS3Uploader', () => {
     vi.useFakeTimers()
     uuidMock.mockReturnValueOnce('file-async-error').mockReturnValueOnce('file-async-complete')
 
-    resolveUploaderBySchemaTypeMock
-      .mockReturnValueOnce({
-        upload: () =>
+    const uploadAsset = vi
+      .fn()
+      .mockImplementationOnce(
+        () =>
           new Observable((subscriber) => {
             const timeout = setTimeout(() => {
               subscriber.error(new Error('async boom'))
             }, 1)
+
             return () => clearTimeout(timeout)
           }),
-      })
-      .mockReturnValueOnce({
-        upload: () =>
+      )
+      .mockImplementationOnce(
+        () =>
           new Observable((subscriber) => {
             const timeout = setTimeout(() => {
+              subscriber.next({type: 'response'})
               subscriber.complete()
             }, 1)
+
             return () => clearTimeout(timeout)
           }),
-      })
+      )
 
-    const uploader = makeUploader()
+    const {uploader} = makeUploader({
+      s3Client: {
+        observable: {
+          assets: {uploadAsset},
+        },
+      },
+    })
 
     uploader.upload([new File(['a'], 'a.txt', {type: 'text/plain'})], {
       schemaType: {name: 's3File'} as any,
@@ -255,6 +322,9 @@ describe('createS3Uploader', () => {
     })
 
     await vi.advanceTimersByTimeAsync(5)
-    expect(uploader.getFiles()).toEqual([])
+
+    await vi.waitFor(() => {
+      expect(uploader.getFiles()).toEqual([])
+    })
   })
 })

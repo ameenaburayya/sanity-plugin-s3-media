@@ -11,8 +11,12 @@ import {
   type S3ImageDimensions,
   type S3ImageSource,
   type S3ImageUploadStub,
+  type S3VideoAsset,
+  type S3VideoDimensions,
+  type S3VideoSource,
+  type S3VideoUploadStub,
 } from '../types'
-import {parseFileAssetId, parseImageAssetId} from './asset/parse'
+import {parseFileAssetId, parseImageAssetId, parseVideoAssetId} from './asset/parse'
 import {isObject} from './isObject'
 
 /**
@@ -26,6 +30,8 @@ type SafeFunction<Args extends unknown[], Return> = (...args: Args) => Return | 
 const idPattern = new RegExp(
   `^(?:` +
     `${S3AssetType.IMAGE}-(?:[a-zA-Z0-9_]{24,40}|[a-f0-9]{40})+-\\d+x\\d+-[a-z0-9]+` +
+    `|` +
+    `${S3AssetType.VIDEO}-(?:[a-zA-Z0-9_]{24,40}|[a-f0-9]{40})+-\\d+x\\d+-[a-z0-9]+` +
     `|` +
     `${S3AssetType.FILE}-(?:[a-zA-Z0-9_]{24,40}|[a-f0-9]{40})+-[a-z0-9]+` +
     `)$`,
@@ -108,8 +114,10 @@ function getForgivingResolver<Args extends unknown[], Return>(
  * @returns Whether or not the passed object is an in-progress upload
  * @public
  */
-export function isInProgressUpload(stub: unknown): stub is S3ImageUploadStub | S3FileUploadStub {
-  const item = stub as S3ImageUploadStub | S3FileUploadStub
+export function isInProgressUpload(
+  stub: unknown,
+): stub is S3ImageUploadStub | S3FileUploadStub | S3VideoUploadStub {
+  const item = stub as S3ImageUploadStub | S3FileUploadStub | S3VideoUploadStub
   return isObject(item) && Boolean(item._upload) && !('asset' in item)
 }
 
@@ -135,7 +143,7 @@ export function isS3AssetObjectStub(stub: unknown): stub is S3AssetObjectStub {
  * Throws if passed asset source could not be resolved to an asset document ID
  * @public
  */
-export function getS3AssetDocumentId(src: S3FileSource | S3ImageSource): string {
+export function getS3AssetDocumentId(src: S3FileSource | S3ImageSource | S3VideoSource): string {
   // Check if this is an in-progress upload (has upload but no asset)
   if (isInProgressUpload(src)) {
     // Return a placeholder ID that indicates in-progress state
@@ -195,11 +203,43 @@ export function getS3ImageDimensions(src: S3ImageSource): S3ImageDimensions {
 }
 
 /**
+ * Returns the width, height and aspect ratio of a passed video asset, from any
+ * inferrable structure (id, url, path, asset document, video object etc)
+ *
+ * @param src - Input source (video object, asset, reference, id, url, path)
+ * @returns Object with width, height and aspect ratio properties
+ *
+ * @throws {@link UnresolvableError}
+ * Throws if passed video source could not be resolved to an asset ID
+ * @public
+ */
+export function getS3VideoDimensions(src: S3VideoSource): S3VideoDimensions {
+  // Check if this is an in-progress upload
+  if (isInProgressUpload(src)) {
+    // Return placeholder dimensions for in-progress uploads
+    return {width: 0, height: 0, aspectRatio: 0, _type: 's3VideoDimensions'}
+  }
+
+  const videoId = getS3AssetDocumentId(src)
+  const {width, height} = parseVideoAssetId(videoId)
+  const aspectRatio = width / height
+
+  return {width, height, aspectRatio, _type: 's3VideoDimensions'}
+}
+
+/**
  * {@inheritDoc getS3ImageDimensions}
  * @returns Returns `undefined` instead of throwing if a value cannot be resolved
  * @public
  */
 export const tryGetS3ImageDimensions = getForgivingResolver(getS3ImageDimensions)
+
+/**
+ * {@inheritDoc getS3VideoDimensions}
+ * @returns Returns `undefined` instead of throwing if a value cannot be resolved
+ * @public
+ */
+export const tryGetS3VideoDimensions = getForgivingResolver(getS3VideoDimensions)
 
 /**
  * Returns the file extension for a given asset
@@ -211,7 +251,7 @@ export const tryGetS3ImageDimensions = getForgivingResolver(getS3ImageDimensions
  * Throws if passed asset source could not be resolved to an asset ID
  * @public
  */
-export function getS3AssetExtension(src: S3FileSource | S3ImageSource): string {
+export function getS3AssetExtension(src: S3FileSource | S3ImageSource | S3VideoSource): string {
   // Check if this is an in-progress upload
   if (isInProgressUpload(src)) {
     // Return placeholder extension for in-progress uploads
@@ -220,9 +260,15 @@ export function getS3AssetExtension(src: S3FileSource | S3ImageSource): string {
 
   const assetId = getS3AssetDocumentId(src)
 
-  return isS3FileSource(src)
-    ? parseFileAssetId(assetId).extension
-    : parseImageAssetId(assetId).extension
+  if (isS3FileSource(src)) {
+    return parseFileAssetId(assetId).extension
+  }
+
+  if (isS3VideoSource(src)) {
+    return parseVideoAssetId(assetId).extension
+  }
+
+  return parseImageAssetId(assetId).extension
 }
 
 /**
@@ -257,10 +303,27 @@ export function isS3ImageSource(src: unknown): src is S3ImageSource {
   return assetId ? assetId.startsWith(`${S3AssetType.IMAGE}-`) : false
 }
 
+/**
+ * Return whether or not the passed source is an s3 video source
+ *
+ * @param src - Source to check
+ * @returns Whether or not the given source is an s3 video source
+ * @public
+ */
+export function isS3VideoSource(src: unknown): src is S3VideoSource {
+  const assetId = tryGetS3AssetDocumentId(src as S3VideoSource)
+
+  return assetId ? assetId.startsWith(`${S3AssetType.VIDEO}-`) : false
+}
+
 export const isS3FileAsset = (asset: S3Asset): asset is S3FileAsset => {
   return (asset as S3FileAsset)._type === 's3FileAsset'
 }
 
 export const isS3ImageAsset = (asset: S3Asset): asset is S3ImageAsset => {
   return (asset as S3ImageAsset)._type === 's3ImageAsset'
+}
+
+export const isS3VideoAsset = (asset: S3Asset): asset is S3VideoAsset => {
+  return (asset as S3VideoAsset)._type === 's3VideoAsset'
 }

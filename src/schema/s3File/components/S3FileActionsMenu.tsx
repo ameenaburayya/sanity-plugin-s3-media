@@ -16,7 +16,7 @@ import {ContextMenuButton, useTranslation} from 'sanity'
 import {styled} from 'styled-components'
 
 import {useS3MediaContext} from '../../../contexts'
-import {S3AssetType, type S3FileAsset} from '../../../types'
+import {S3AssetType, type S3FileAsset, type S3VideoAsset} from '../../../types'
 
 const MenuActionsWrapper = styled(Inline)<{$isAbsolute?: boolean}>`
   ${({$isAbsolute}) =>
@@ -30,7 +30,7 @@ const MenuActionsWrapper = styled(Inline)<{$isAbsolute?: boolean}>`
 
 type S3FileActionsMenuProps = {
   children: ReactNode
-  fileAsset: S3FileAsset
+  fileAsset: S3FileAsset | S3VideoAsset
   muted?: boolean
   disabled?: boolean
   isMenuOpen: boolean
@@ -87,7 +87,10 @@ export const S3FileActionsMenu: FC<S3FileActionsMenuProps> = (props) => {
 
   const {buildAssetUrl} = useS3MediaContext()
 
-  const assetUrl = buildAssetUrl({assetType: S3AssetType.FILE, assetId})
+  const assetUrl = buildAssetUrl({
+    assetType: fileAsset._type === 's3VideoAsset' ? S3AssetType.VIDEO : S3AssetType.FILE,
+    assetId,
+  })
 
   const isAudioFile = mimeType.search('audio') === 0
   const isVideoFile = mimeType.search('video') === 0

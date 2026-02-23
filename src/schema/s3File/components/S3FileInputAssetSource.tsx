@@ -4,13 +4,13 @@ import type {Observable} from 'rxjs'
 import {type AssetFromSource, type AssetSourceComponentAction, useTranslation} from 'sanity'
 
 import {WithReferencedAsset} from '../../../components'
-import {type S3AssetSource, S3AssetType, type S3FileAsset} from '../../../types'
+import {type S3AssetSource, S3AssetType, type S3FileAsset, type S3VideoAsset} from '../../../types'
 import type {S3FileInputProps} from '../types'
 import {S3FileSkeleton} from './S3FileSkeleton'
 
 type S3FileInputAssetSourceProps = Pick<S3FileInputProps, 'value' | 'schemaType'> & {
   isUploading: boolean
-  observeAsset: (id: string) => Observable<S3FileAsset>
+  observeAsset: (id: string) => Observable<S3FileAsset | S3VideoAsset>
   setSelectedAssetSource: (assetSource: S3AssetSource | null) => void
   onSelectAssets: (assetsFromSource: AssetFromSource[]) => void
   selectedAssetSource: S3AssetSource | null
@@ -29,7 +29,9 @@ export const S3FileInputAssetSource: FC<S3FileInputAssetSourceProps> = (props) =
 
   const {t} = useTranslation()
 
-  const accept = get(schemaType, 'options.accept', '')
+  const isVideoField = schemaType.name === 's3Video'
+
+  const accept = get(schemaType, 'options.accept', isVideoField ? 'video/*' : '')
 
   const handleAssetSourceClosed = useCallback(() => {
     setSelectedAssetSource(null)
@@ -39,6 +41,9 @@ export const S3FileInputAssetSource: FC<S3FileInputAssetSourceProps> = (props) =
     () => (isUploading ? 'upload' : 'select'),
     [isUploading],
   )
+
+  const assetType = isVideoField ? S3AssetType.VIDEO : S3AssetType.FILE
+  const dialogHeaderTitle = isVideoField ? 'S3 Video' : t('inputs.file.dialog.title')
 
   if (!selectedAssetSource) {
     return null
@@ -58,8 +63,8 @@ export const S3FileInputAssetSource: FC<S3FileInputAssetSourceProps> = (props) =
             accept={accept}
             action={action}
             assetSource={selectedAssetSource}
-            assetType={S3AssetType.FILE}
-            dialogHeaderTitle={t('inputs.file.dialog.title')}
+            assetType={assetType}
+            dialogHeaderTitle={dialogHeaderTitle}
             onClose={handleAssetSourceClosed}
             onSelect={onSelectAssets}
             schemaType={schemaType}
@@ -75,8 +80,8 @@ export const S3FileInputAssetSource: FC<S3FileInputAssetSourceProps> = (props) =
       accept={accept}
       action={action}
       assetSource={selectedAssetSource}
-      assetType={S3AssetType.FILE}
-      dialogHeaderTitle={t('inputs.file.dialog.title')}
+      assetType={assetType}
+      dialogHeaderTitle={dialogHeaderTitle}
       onClose={handleAssetSourceClosed}
       onSelect={onSelectAssets}
       schemaType={schemaType}

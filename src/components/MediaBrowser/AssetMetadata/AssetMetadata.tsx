@@ -5,7 +5,7 @@ import {type FC, type ReactNode} from 'react'
 
 import {useS3MediaContext} from '../../../contexts'
 import {type AssetItem, type S3Asset, S3AssetType} from '../../../types'
-import {getAssetResolution, isS3ImageAsset, isS3VideoAsset} from '../../../utils'
+import {downloadAsset, getAssetResolution, isS3ImageAsset, isS3VideoAsset} from '../../../utils'
 import {ButtonAssetCopy} from '../ButtonAssetCopy'
 
 type AssetMetadataProps = {
@@ -55,10 +55,6 @@ export const AssetMetadata: FC<AssetMetadataProps> = (props) => {
     assetId: asset._id,
   })
 
-  const handleDownload = () => {
-    window.location.href = `download.${assetUrl}`
-  }
-
   return (
     <Box marginTop={3}>
       {/* Base */}
@@ -82,7 +78,7 @@ export const AssetMetadata: FC<AssetMetadataProps> = (props) => {
             fontSize={1}
             icon={DownloadIcon}
             mode="ghost"
-            onClick={handleDownload}
+            onClick={() => downloadAsset(assetUrl)}
             text="Download"
           />
           {/* Copy to clipboard */}

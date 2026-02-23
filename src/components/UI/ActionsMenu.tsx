@@ -3,6 +3,7 @@ import {MenuDivider, useToast} from '@sanity/ui'
 import {type FC, type MouseEventHandler, type ReactNode, useCallback} from 'react'
 import {useTranslation} from 'sanity'
 
+import {downloadAsset} from '../../utils'
 import {MenuItem} from './MenuItem'
 
 interface ActionsMenuProps {
@@ -39,11 +40,9 @@ export const ActionsMenu: FC<ActionsMenuProps> = (props) => {
 
       {url && (
         <MenuItem
-          as="a"
           icon={DownloadIcon}
           text={t('inputs.files.common.actions-menu.download.label')}
-          href={url}
-          download
+          onClick={() => downloadAsset(url)}
         />
       )}
       {url && (

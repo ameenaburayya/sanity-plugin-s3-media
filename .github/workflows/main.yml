@@ -74,6 +74,8 @@ jobs:
           fi
         env:
           HUSKY: 0
+      - name: Build Internal Types Package
+        run: pnpm --filter sanity-plugin-s3-media-types run build
       - name: Publish Packages
         run: pnpm release
         env:

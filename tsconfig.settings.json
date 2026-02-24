@@ -2,6 +2,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "outDir": "./dist",
+    "baseUrl": ".",
 
     "target": "esnext",
     "jsx": "preserve",
@@ -12,6 +13,10 @@
     "moduleDetection": "force",
     "strict": true,
     "allowSyntheticDefaultImports": true,
+    "paths": {
+      "sanity-plugin-s3-media-asset-utils": ["packages/asset-utils/src/index.ts"],
+      "sanity-plugin-s3-media-types": ["packages/types/src/index.ts"]
+    },
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,

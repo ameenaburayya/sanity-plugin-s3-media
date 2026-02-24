@@ -81,7 +81,6 @@
     "redux-observable": "3.0.0-rc.2",
     "rxjs": "^7.8.1",
     "sanity": "^5",
-    "sanity-plugin-s3-media": "link:.yalc/sanity-plugin-s3-media",
     "styled-components": "^6.3.8"
   },
   "devDependencies": {

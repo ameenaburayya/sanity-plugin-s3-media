@@ -86,9 +86,6 @@ importers:
       sanity:
         specifier: ^5
         version: 5.11.0(@emotion/is-prop-valid@1.4.0)(@noble/hashes@2.0.1)(@types/node@25.3.0)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(babel-plugin-react-compiler@1.0.0)(immer@11.1.4)(jiti@2.6.1)(lightningcss@1.31.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(styled-components@6.3.11(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
-      sanity-plugin-s3-media:
-        specifier: link:.yalc/sanity-plugin-s3-media
-        version: link:.yalc/sanity-plugin-s3-media
       styled-components:
         specifier: ^6.3.8
         version: 6.3.11(react-dom@19.2.4(react@19.2.4))(react@19.2.4)

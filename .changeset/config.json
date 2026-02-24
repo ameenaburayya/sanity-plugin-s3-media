@@ -7,5 +7,5 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["sanity-plugin-s3-media-types"]
+  "ignore": []
 }

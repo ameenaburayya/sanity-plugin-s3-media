@@ -1,6 +1,6 @@
 {
   "name": "sanity-plugin-s3-media-asset-utils",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Asset utility helpers for sanity-plugin-s3-media",
   "license": "MIT",
   "author": "Ameen Aburayya <a.aburayya95@gmail.com>",

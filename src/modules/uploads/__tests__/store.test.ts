@@ -1,7 +1,7 @@
 import {BehaviorSubject, EMPTY, lastValueFrom, of, Subject, throwError} from 'rxjs'
 import {toArray} from 'rxjs/operators'
+import {S3AssetType} from 'sanity-plugin-s3-media-types'
 
-import {S3AssetType} from '../../../types'
 import {assetsActions} from '../../assets'
 import {UPLOADS_ACTIONS} from '../actions'
 import {

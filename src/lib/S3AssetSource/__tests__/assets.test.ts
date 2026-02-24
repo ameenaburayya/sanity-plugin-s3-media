@@ -1,7 +1,7 @@
 import {lastValueFrom, type Observable, of} from 'rxjs'
 import {toArray} from 'rxjs/operators'
+import {S3AssetType} from 'sanity-plugin-s3-media-types'
 
-import {S3AssetType} from '../../../types'
 import {uploadS3Asset} from '../assets'
 
 const collectEvents = async <T>(stream$: Observable<T>): Promise<T[]> => {

@@ -4,13 +4,13 @@ import {Flex, Text} from '@sanity/ui'
 import {type FC, type PropsWithChildren} from 'react'
 import {type DropEvent, type DropzoneOptions, useDropzone} from 'react-dropzone'
 import {useDispatch} from 'react-redux'
+import {S3AssetType} from 'sanity-plugin-s3-media-types'
 import {styled} from 'styled-components'
 
 import {DropzoneDispatchProvider, useS3MediaOptionsContext} from '../../../contexts'
 import {useAssetSourceActions} from '../../../contexts/S3AssetSourceDispatchContext'
 import {useTypedSelector} from '../../../hooks'
 import {notificationsActions, uploadsActions} from '../../../modules'
-import {S3AssetType} from '../../../types'
 
 const UploadContainer = styled.div`
   color: white;

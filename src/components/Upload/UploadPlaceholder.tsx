@@ -10,9 +10,10 @@ import {get} from 'lodash'
 import {type FC, type ReactNode, useCallback, useMemo, useState} from 'react'
 import {type SchemaType} from 'sanity'
 import {useTranslation} from 'sanity'
+import {S3AssetType} from 'sanity-plugin-s3-media-types'
 import {styled} from 'styled-components'
 
-import {type S3AssetSource, S3AssetType} from '../../types'
+import type {S3AssetSource} from '../../types'
 import {FileInputButton} from '../File/FileInputButton'
 import {UploadDropDownMenu} from './UploadDropDownMenu'
 

@@ -1,5 +1,6 @@
+import type {S3AssetType} from 'sanity-plugin-s3-media-types'
+
 import {SUPPORTED_ASSET_TYPES} from '../../constants'
-import type {S3AssetType} from '../../types'
 
 export const validateAssetType = (type: S3AssetType): void => {
   if (SUPPORTED_ASSET_TYPES.indexOf(type) === -1) {

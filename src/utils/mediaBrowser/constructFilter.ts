@@ -1,6 +1,5 @@
 import groq from 'groq'
-
-import type {S3AssetType} from '../../types'
+import type {S3AssetType} from 'sanity-plugin-s3-media-types'
 
 export const constructFilter = ({
   assetTypes,

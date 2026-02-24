@@ -1,7 +1,7 @@
 import {lastValueFrom, of} from 'rxjs'
 import {toArray} from 'rxjs/operators'
+import {S3AssetType} from 'sanity-plugin-s3-media-types'
 
-import {S3AssetType} from '../../../types'
 import {uploadFile} from '../uploadFile'
 
 const setMock = vi.hoisted(() => vi.fn((value, path) => ({type: 'set', value, path})))

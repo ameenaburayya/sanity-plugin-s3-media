@@ -3,8 +3,9 @@ import pluralize from 'pluralize'
 import {ofType} from 'redux-observable'
 import {of} from 'rxjs'
 import {filter, mergeMap} from 'rxjs/operators'
+import type {S3ImageAsset} from 'sanity-plugin-s3-media-types'
 
-import type {Epic,S3ImageAsset} from '../../types'
+import type {Epic} from '../../types'
 import {assetsActions} from '../assets'
 import {uploadsActions} from '../uploads'
 

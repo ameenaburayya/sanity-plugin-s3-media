@@ -1,4 +1,5 @@
-import {S3AssetType} from './types'
+import {S3AssetType} from 'sanity-plugin-s3-media-types'
+
 import type {Order} from './types/browser'
 
 export const UPLOAD_STATUS_KEY = '_upload'

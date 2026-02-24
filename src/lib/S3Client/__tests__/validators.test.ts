@@ -1,4 +1,5 @@
-import {S3AssetType} from '../../../types'
+import {S3AssetType} from 'sanity-plugin-s3-media-types'
+
 import {validateAssetType} from '../validators'
 
 describe('validateAssetType', () => {

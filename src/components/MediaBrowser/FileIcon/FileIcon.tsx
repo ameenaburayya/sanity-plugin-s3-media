@@ -2,10 +2,10 @@ import {Box, Flex} from '@sanity/ui'
 import {type FC, type MouseEvent} from 'react'
 import type {DefaultExtensionType} from 'react-file-icon'
 import {defaultStyles, FileIcon as ReactFileIcon} from 'react-file-icon'
+import {S3AssetType, type S3FileAsset, type S3VideoAsset} from 'sanity-plugin-s3-media-types'
 import {styled} from 'styled-components'
 
 import {useS3MediaContext} from '../../../contexts'
-import {S3AssetType, type S3FileAsset, type S3VideoAsset} from '../../../types'
 
 type FileIconProps = {
   extension?: string

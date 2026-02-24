@@ -13,10 +13,10 @@ import {
 import {filesize} from 'filesize'
 import {type FC, type ReactNode, useCallback, useEffect, useState} from 'react'
 import {ContextMenuButton, useTranslation} from 'sanity'
+import {S3AssetType, type S3FileAsset, type S3VideoAsset} from 'sanity-plugin-s3-media-types'
 import {styled} from 'styled-components'
 
 import {useS3MediaContext} from '../../../contexts'
-import {S3AssetType, type S3FileAsset, type S3VideoAsset} from '../../../types'
 
 const MenuActionsWrapper = styled(Inline)<{$isAbsolute?: boolean}>`
   ${({$isAbsolute}) =>

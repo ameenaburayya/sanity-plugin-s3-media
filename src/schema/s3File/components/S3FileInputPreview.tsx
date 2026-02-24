@@ -3,6 +3,7 @@ import {get, startCase} from 'lodash'
 import {type FC, type MouseEvent, type ReactNode, useCallback, useMemo, useState} from 'react'
 import type {Observable} from 'rxjs'
 import {useTranslation} from 'sanity'
+import {S3AssetType, type S3FileAsset, type S3VideoAsset} from 'sanity-plugin-s3-media-types'
 
 import {
   ActionsMenu,
@@ -12,7 +13,7 @@ import {
   WithReferencedAsset,
 } from '../../../components'
 import {useS3MediaContext, useS3MediaOptionsContext} from '../../../contexts'
-import {type S3AssetSource, S3AssetType, type S3FileAsset, type S3VideoAsset} from '../../../types'
+import type {S3AssetSource} from '../../../types'
 import {type S3FileInputProps} from '../types'
 import {S3FileActionsMenu} from './S3FileActionsMenu'
 import {S3FileSkeleton} from './S3FileSkeleton'

@@ -1,7 +1,6 @@
 import type {Observable} from 'rxjs'
 import type {DocumentPreviewStore} from 'sanity'
-
-import type {S3FileAsset, S3ImageAsset, S3VideoAsset} from '../types'
+import type {S3FileAsset, S3ImageAsset, S3VideoAsset} from 'sanity-plugin-s3-media-types'
 
 function observeAssetDoc(documentPreviewStore: DocumentPreviewStore, id: string) {
   return documentPreviewStore.observePaths({_type: 'reference', _ref: id}, [

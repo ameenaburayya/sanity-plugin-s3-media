@@ -4,10 +4,11 @@ import {type FC, type ReactNode, useCallback, useMemo} from 'react'
 import {useObservable} from 'react-rx'
 import {type Observable} from 'rxjs'
 import {type Reference, useTranslation} from 'sanity'
+import {S3AssetType, type S3ImageAsset} from 'sanity-plugin-s3-media-types'
 
 import {ActionsMenu, FileInputMenuItem, MenuItem, UploadDropDownMenu} from '../../../components'
 import {useS3MediaContext, useS3MediaOptionsContext} from '../../../contexts'
-import {type S3AssetSource, S3AssetType, type S3ImageAsset} from '../../../types'
+import type {S3AssetSource} from '../../../types'
 import {type S3ImageInputProps} from '../types'
 import {S3ImageActionsMenu, S3ImageActionsMenuWaitPlaceholder} from './S3ImageActionsMenu'
 

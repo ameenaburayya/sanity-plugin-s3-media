@@ -1,6 +1,6 @@
 import {lastValueFrom} from 'rxjs'
+import {S3AssetType} from 'sanity-plugin-s3-media-types'
 
-import {S3AssetType} from '../../../../types'
 import * as validators from '../../validators'
 import {AssetsClient, ObservableAssetsClient} from '../AssetsClient'
 
@@ -397,15 +397,15 @@ describe('AssetsClient delete', () => {
 
     const observableClient = new ObservableAssetsClient(createClient() as any)
 
-    await expect(lastValueFrom(observableClient.deleteAsset({fileName: 'photo.png'}))).resolves.toEqual(
-      {
-        type: 'response',
-        method: 'POST',
-        statusCode: 204,
-        statusMessage: 'No Content',
-        headers: {},
-      },
-    )
+    await expect(
+      lastValueFrom(observableClient.deleteAsset({fileName: 'photo.png'})),
+    ).resolves.toEqual({
+      type: 'response',
+      method: 'POST',
+      statusCode: 204,
+      statusMessage: 'No Content',
+      headers: {},
+    })
 
     expect(fetchMock).toHaveBeenCalledWith(
       'https://api.example.com/delete',
@@ -435,9 +435,9 @@ describe('AssetsClient delete', () => {
 
     const observableClient = new ObservableAssetsClient(createClient() as any)
 
-    await expect(lastValueFrom(observableClient.deleteAsset({fileName: 'photo.png'}))).rejects.toThrow(
-      'S3 delete failed: 500 Internal Server Error',
-    )
+    await expect(
+      lastValueFrom(observableClient.deleteAsset({fileName: 'photo.png'})),
+    ).rejects.toThrow('S3 delete failed: 500 Internal Server Error')
   })
 
   it('errors when delete request throws', async () => {
@@ -446,9 +446,9 @@ describe('AssetsClient delete', () => {
 
     const observableClient = new ObservableAssetsClient(createClient() as any)
 
-    await expect(lastValueFrom(observableClient.deleteAsset({fileName: 'photo.png'}))).rejects.toThrow(
-      'delete endpoint unavailable',
-    )
+    await expect(
+      lastValueFrom(observableClient.deleteAsset({fileName: 'photo.png'})),
+    ).rejects.toThrow('delete endpoint unavailable')
   })
 
   it('returns final response event from promise-based deleteAsset', async () => {

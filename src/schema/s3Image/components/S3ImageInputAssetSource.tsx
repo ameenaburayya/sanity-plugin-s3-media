@@ -2,9 +2,10 @@ import {get} from 'lodash'
 import {type FC, useCallback, useMemo} from 'react'
 import type {Observable} from 'rxjs'
 import {type AssetFromSource, type AssetSourceComponentAction} from 'sanity'
+import {S3AssetType, type S3ImageAsset} from 'sanity-plugin-s3-media-types'
 
 import {WithReferencedAsset} from '../../../components'
-import {type S3AssetSource, S3AssetType, type S3ImageAsset} from '../../../types'
+import type {S3AssetSource} from '../../../types'
 import {type S3ImageInputProps} from '../types'
 
 type S3ImageInputAssetSourceProps = Pick<S3ImageInputProps, 'value' | 'schemaType'> & {

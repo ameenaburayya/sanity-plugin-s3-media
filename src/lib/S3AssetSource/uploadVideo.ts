@@ -1,9 +1,10 @@
 import {concat, of} from 'rxjs'
 import {map} from 'rxjs/operators'
 import {set} from 'sanity'
+import {S3AssetType} from 'sanity-plugin-s3-media-types'
 
 import {UPLOAD_STATUS_KEY} from '../../constants'
-import {S3AssetType, type S3Uploader} from '../../types'
+import type {S3Uploader} from '../../types'
 import {CLEANUP_EVENT, createInitialUploadEvent, createUploadEvent} from '../../utils'
 import {uploadS3Asset} from './assets'
 

@@ -1,6 +1,5 @@
 import {createAction} from '@reduxjs/toolkit'
-
-import type {S3AssetDocument} from '../../types'
+import type {S3AssetDocument} from 'sanity-plugin-s3-media-types'
 
 export const UPLOADS_ACTIONS = {
   uploadComplete: createAction(

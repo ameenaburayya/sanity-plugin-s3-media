@@ -2,9 +2,9 @@ import {WarningOutlineIcon} from '@sanity/icons'
 import {Text} from '@sanity/ui'
 import {type FC, memo, useCallback, useState} from 'react'
 import {LoadingBlock, useTranslation} from 'sanity'
+import {S3AssetType} from 'sanity-plugin-s3-media-types'
 
 import {useS3MediaContext} from '../../../contexts'
-import {S3AssetType} from '../../../types'
 import {type S3ImageInputProps} from '../types'
 import {ErrorIconWrapper, FlexOverlay, Overlay, RatioBox} from './S3ImagePreview.styled'
 

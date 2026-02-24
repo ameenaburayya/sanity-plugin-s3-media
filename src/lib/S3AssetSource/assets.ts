@@ -2,7 +2,6 @@
 import {Observable, of} from 'rxjs'
 import {catchError, map, mergeMap} from 'rxjs/operators'
 import {type SanityClient, type UploadOptions} from 'sanity'
-
 import {
   type S3Asset,
   type S3AssetDocument,
@@ -10,9 +9,9 @@ import {
   type S3FileAsset,
   type S3ImageAsset,
   type S3VideoAsset,
-  type UploadCompleteEvent,
-  type UploadEvent,
-} from '../../types'
+} from 'sanity-plugin-s3-media-types'
+
+import {type UploadCompleteEvent, type UploadEvent} from '../../types'
 import {hashFile, withMaxConcurrency} from '../../utils'
 import type {S3Client} from '../S3Client'
 

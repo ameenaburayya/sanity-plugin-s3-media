@@ -1,7 +1,7 @@
 import {BehaviorSubject, EMPTY, lastValueFrom, of, Subject, throwError} from 'rxjs'
 import {toArray} from 'rxjs/operators'
+import {S3AssetType} from 'sanity-plugin-s3-media-types'
 
-import {S3AssetType} from '../../../types'
 import {searchActions} from '../../search'
 import {UPLOADS_ACTIONS} from '../../uploads/actions'
 import {
@@ -197,9 +197,15 @@ describe('assetsReducer', () => {
     const asset2 = makeImageAsset({_id: 'asset-2'})
     const asset3 = makeImageAsset({_id: 'asset-3'})
 
-    let state = assetsReducer(undefined, assetsActions.fetchError({message: 'boom', statusCode: 500}))
+    let state = assetsReducer(
+      undefined,
+      assetsActions.fetchError({message: 'boom', statusCode: 500}),
+    )
 
-    state = assetsReducer(state, assetsActions.fetchComplete({assets: [asset1, asset2, asset1, asset3]}))
+    state = assetsReducer(
+      state,
+      assetsActions.fetchComplete({assets: [asset1, asset2, asset1, asset3]}),
+    )
 
     expect(state.allIds).toEqual(['asset-1', 'asset-2', 'asset-3'])
     expect(state.fetchCount).toBe(4)
@@ -220,7 +226,10 @@ describe('assetsReducer', () => {
     const asset2 = makeImageAsset({_id: 'asset-2', size: 1})
     const asset3 = makeImageAsset({_id: 'asset-3', size: 2})
 
-    let state = assetsReducer(undefined, assetsActions.fetchComplete({assets: [asset1, asset2, asset3]}))
+    let state = assetsReducer(
+      undefined,
+      assetsActions.fetchComplete({assets: [asset1, asset2, asset3]}),
+    )
 
     state = assetsReducer(state, assetsActions.pickRange({endId: 'asset-3', startId: 'asset-1'}))
 
@@ -278,13 +287,10 @@ describe('assetsReducer', () => {
     expect(state.fetching).toBe(true)
     expect(state.fetchingError).toBeUndefined()
 
-    state = assetsReducer(
-      state,
-      {
-        payload: undefined,
-        type: assetsActions.fetchComplete.type,
-      } as any,
-    )
+    state = assetsReducer(state, {
+      payload: undefined,
+      type: assetsActions.fetchComplete.type,
+    } as any)
     expect(state.fetchCount).toBe(0)
 
     state = assetsReducer(state, assetsActions.fetchComplete({assets: [] as any}))
@@ -300,7 +306,10 @@ describe('assetsReducer', () => {
     const asset3 = makeImageAsset({_id: 'asset-3', size: 3})
     const asset1Updated = makeImageAsset({_id: 'asset-1', size: 10, title: 'Updated'})
 
-    let state = assetsReducer(undefined, assetsActions.fetchComplete({assets: [asset1, asset2, asset3]}))
+    let state = assetsReducer(
+      undefined,
+      assetsActions.fetchComplete({assets: [asset1, asset2, asset3]}),
+    )
 
     state = assetsReducer(state, assetsActions.insertUploads({results: {'hash-1': 'asset-4'}}))
     expect(state.allIds).toContain('asset-4')
@@ -311,7 +320,10 @@ describe('assetsReducer', () => {
     )
     expect(duplicateState.allIds).toEqual(['hash-1'])
 
-    state = assetsReducer(undefined, assetsActions.fetchComplete({assets: [asset1, asset2, asset3]}))
+    state = assetsReducer(
+      undefined,
+      assetsActions.fetchComplete({assets: [asset1, asset2, asset3]}),
+    )
 
     state = assetsReducer(state, assetsActions.listenerCreateQueue({asset: asset1}))
     state = assetsReducer(
@@ -409,7 +421,10 @@ describe('assets selectors', () => {
     const asset1 = makeImageAsset({_id: 'asset-1'})
     const asset2 = makeImageAsset({_id: 'asset-2'})
 
-    let assetsState = assetsReducer(undefined, assetsActions.fetchComplete({assets: [asset1, asset2]}))
+    let assetsState = assetsReducer(
+      undefined,
+      assetsActions.fetchComplete({assets: [asset1, asset2]}),
+    )
     assetsState = assetsReducer(assetsState, assetsActions.pick({assetId: 'asset-2', picked: true}))
 
     const state = makeRootState({assets: assetsState})
@@ -427,7 +442,9 @@ describe('assets epics', () => {
     const imageAsset = makeImageAsset({_id: 's3Image-abcdefghijklmnopqrstuvwx-120x80-jpg'})
     const deps = makeDeps()
 
-    deps.sanityClient.observable.fetch.mockReturnValue(of([{_id: imageAsset._id, referenceCount: 0}]))
+    deps.sanityClient.observable.fetch.mockReturnValue(
+      of([{_id: imageAsset._id, referenceCount: 0}]),
+    )
     deps.s3Client.observable.assets.deleteAsset.mockReturnValue(of({ok: true}))
     deps.sanityClient.observable.delete.mockReturnValue(of({ok: true}))
 
@@ -449,7 +466,9 @@ describe('assets epics', () => {
     const videoAsset = makeVideoAsset({_id: 's3Video-abcdefghijklmnopqrstuvwx-1920x1080-mp4'})
     const deps = makeDeps()
 
-    deps.sanityClient.observable.fetch.mockReturnValue(of([{_id: videoAsset._id, referenceCount: 0}]))
+    deps.sanityClient.observable.fetch.mockReturnValue(
+      of([{_id: videoAsset._id, referenceCount: 0}]),
+    )
     deps.s3Client.observable.assets.deleteAsset.mockReturnValue(of({ok: true}))
     deps.sanityClient.observable.delete.mockReturnValue(of({ok: true}))
 
@@ -627,9 +646,7 @@ describe('assets epics', () => {
       ).pipe(toArray()),
     )
 
-    expect(result).toEqual([
-      assetsActions.fetchError({message: 'fetch failed', statusCode: 503}),
-    ])
+    expect(result).toEqual([assetsActions.fetchError({message: 'fetch failed', statusCode: 503})])
 
     deps.sanityClient.observable.fetch.mockReturnValueOnce(throwError(() => ({})))
 
@@ -641,9 +658,7 @@ describe('assets epics', () => {
       ).pipe(toArray()),
     )
 
-    expect(result).toEqual([
-      assetsActions.fetchError({message: 'Internal error', statusCode: 500}),
-    ])
+    expect(result).toEqual([assetsActions.fetchError({message: 'Internal error', statusCode: 500})])
   })
 
   it('assetsFetchPageIndexEpic and assetsFetchNextPageEpic derive next fetch actions from state', async () => {

@@ -3,9 +3,10 @@ import {Box, Button, Flex, Inline, Stack, Text} from '@sanity/ui'
 import {filesize} from 'filesize'
 import {type FC, type ReactNode} from 'react'
 import {isS3ImageAsset, isS3VideoAsset} from 'sanity-plugin-s3-media-asset-utils'
+import {type S3Asset, S3AssetType} from 'sanity-plugin-s3-media-types'
 
 import {useS3MediaContext} from '../../../contexts'
-import {type AssetItem, type S3Asset, S3AssetType} from '../../../types'
+import type {AssetItem} from '../../../types'
 import {downloadAsset, getAssetResolution} from '../../../utils'
 import {ButtonAssetCopy} from '../ButtonAssetCopy'
 

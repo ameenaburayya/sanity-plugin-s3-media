@@ -1,4 +1,6 @@
-import {S3AssetType, type S3UploaderDefinition} from '../../types'
+import {S3AssetType} from 'sanity-plugin-s3-media-types'
+
+import type {S3UploaderDefinition} from '../../types'
 import {uploadFile} from './uploadFile'
 import {uploadImage} from './uploadImage'
 import {uploadVideo} from './uploadVideo'

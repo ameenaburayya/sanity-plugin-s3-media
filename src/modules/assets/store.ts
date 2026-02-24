@@ -21,19 +21,11 @@ import {
   isS3ImageAsset,
   isS3VideoAsset,
 } from 'sanity-plugin-s3-media-asset-utils'
+import type {S3Asset, S3AssetType} from 'sanity-plugin-s3-media-types'
 
 import {getOrderTitle} from '../../config/orders'
 import {ORDER_OPTIONS} from '../../constants'
-import type {
-  AssetItem,
-  BrowserView,
-  Epic,
-  HttpError,
-  Order,
-  RootReducerState,
-  S3Asset,
-  S3AssetType,
-} from '../../types'
+import type {AssetItem, BrowserView, Epic, HttpError, Order, RootReducerState} from '../../types'
 import {constructFilter} from '../../utils'
 import {searchActions} from '../search'
 import {UPLOADS_ACTIONS} from '../uploads/actions'

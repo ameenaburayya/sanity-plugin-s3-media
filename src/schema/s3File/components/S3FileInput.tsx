@@ -13,11 +13,12 @@ import {
   useDocumentPreviewStore,
   useTranslation,
 } from 'sanity'
+import {S3AssetType} from 'sanity-plugin-s3-media-types'
 
 import {UPLOAD_STATUS_KEY} from '../../../constants'
 import {useS3MediaContext} from '../../../contexts'
 import {createS3FileAssetSource, createS3VideoAssetSource} from '../../../lib'
-import {type S3AssetSource,S3AssetType} from '../../../types'
+import type {S3AssetSource} from '../../../types'
 import {createInitialUploadPatches, observeFileAsset, observeVideoAsset} from '../../../utils'
 import type {S3FileInputProps} from '../types'
 import {S3FileInputAsset} from './S3FileInputAsset'

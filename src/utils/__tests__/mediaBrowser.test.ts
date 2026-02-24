@@ -1,6 +1,6 @@
 import {hues} from '@sanity/color'
+import {S3AssetType} from 'sanity-plugin-s3-media-types'
 
-import {S3AssetType} from '../../types'
 import {
   constructFilter,
   getAssetResolution,

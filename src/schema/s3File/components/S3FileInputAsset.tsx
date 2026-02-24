@@ -3,6 +3,11 @@ import {type FC, type FocusEvent, useCallback, useMemo} from 'react'
 import type {Observable} from 'rxjs'
 import {ChangeIndicator} from 'sanity'
 import {isS3FileSource, isS3VideoSource} from 'sanity-plugin-s3-media-asset-utils'
+import {
+  S3AssetType,
+  type S3FileAsset as S3FileAssetType,
+  type S3VideoAsset,
+} from 'sanity-plugin-s3-media-types'
 
 import {
   BrowserButton,
@@ -12,12 +17,7 @@ import {
   UploadWarning,
 } from '../../../components'
 import {useS3MediaOptionsContext} from '../../../contexts'
-import {
-  type S3AssetSource,
-  S3AssetType,
-  type S3FileAsset as S3FileAssetType,
-  type S3VideoAsset,
-} from '../../../types'
+import {type S3AssetSource} from '../../../types'
 import {type S3FileInputProps} from '../types'
 import {InvalidFileWarning} from './InvalidFileWarning'
 import {S3FileInputPreview} from './S3FileInputPreview'

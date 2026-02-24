@@ -1,7 +1,6 @@
 import {createSlice} from '@reduxjs/toolkit'
 import type {SanityDocument} from '@sanity/client'
-
-import type {S3AssetDocument} from '../../types'
+import type {S3AssetDocument} from 'sanity-plugin-s3-media-types'
 
 type SelectedReducerState = {
   assets: S3AssetDocument[]

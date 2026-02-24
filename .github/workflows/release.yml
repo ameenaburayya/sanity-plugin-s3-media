@@ -24,6 +24,8 @@ jobs:
         with:
           fetch-depth: 0
       - uses: ./.github/actions/setup
+      - name: Build Internal Types Package
+        run: pnpm --filter sanity-plugin-s3-media-types run build
       - name: Update npm for trusted publishing (OIDC)
         run: npm install -g npm@latest
       - name: Create Release PR or Publish to npm

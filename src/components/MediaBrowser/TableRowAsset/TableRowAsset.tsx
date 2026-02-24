@@ -26,6 +26,7 @@ import {
 } from 'react'
 import {useDispatch} from 'react-redux'
 import {useColorSchemeValue, WithReferringDocuments} from 'sanity'
+import {isS3FileAsset, isS3ImageAsset, isS3VideoAsset} from 'sanity-plugin-s3-media-asset-utils'
 import {css, styled} from 'styled-components'
 
 import {useS3MediaContext} from '../../../contexts'
@@ -33,14 +34,7 @@ import {useAssetSourceActions} from '../../../contexts/S3AssetSourceDispatchCont
 import {useKeyPress, useTypedSelector} from '../../../hooks'
 import {assetsActions, dialogActions, selectAssetById} from '../../../modules'
 import {S3AssetType} from '../../../types'
-import {
-  getAssetResolution,
-  getSchemeColor,
-  getUniqueDocuments,
-  isS3FileAsset,
-  isS3ImageAsset,
-  isS3VideoAsset,
-} from '../../../utils'
+import {getAssetResolution, getSchemeColor, getUniqueDocuments} from '../../../utils'
 import {GRID_TEMPLATE_COLUMNS} from '../constants'
 import {FileIcon} from '../FileIcon'
 import {Image} from '../Image'

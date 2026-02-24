@@ -1,9 +1,9 @@
 import {SettingsView, useSecrets} from '@sanity/studio-secrets'
 import {createContext, type FC, PropsWithChildren, useCallback, useContext, useState} from 'react'
+import {buildS3FileUrl, buildS3ImageUrl, buildS3VideoUrl} from 'sanity-plugin-s3-media-asset-utils'
 
 import {createS3Client, type S3Client} from '../lib'
 import {S3AssetType, type S3Credentials} from '../types'
-import {buildS3FileUrl, buildS3ImageUrl, buildS3VideoUrl} from '../utils/asset/paths'
 
 type IS3MediaContext = {
   s3Client: S3Client

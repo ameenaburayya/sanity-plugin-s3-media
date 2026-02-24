@@ -11,7 +11,6 @@ export default defineConfig({
       all: true,
       reporter: ['text', 'html'],
       include: [
-        'src/asset-utils.ts',
         'src/client.ts',
         'src/config/**/*.ts',
         'src/constants.ts',
@@ -27,6 +26,7 @@ export default defineConfig({
         'src/**/__tests__/**',
         'src/schema/**/components/**',
         'src/types/**',
+        'src/**/types.ts',
       ],
       thresholds: {
         lines: 100,

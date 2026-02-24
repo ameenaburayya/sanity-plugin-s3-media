@@ -1,11 +1,16 @@
 import {Box} from '@sanity/ui'
 import React, {type CSSProperties, type FC, type FocusEvent, useCallback, useMemo} from 'react'
-import {ChangeIndicator, type InputOnSelectFileFunctionProps, type InputProps,type UploadState} from 'sanity'
+import {
+  ChangeIndicator,
+  type InputOnSelectFileFunctionProps,
+  type InputProps,
+  type UploadState,
+} from 'sanity'
+import {tryGetS3ImageDimensions} from 'sanity-plugin-s3-media-asset-utils'
 
 import {UploadTargetCard, UploadWarning} from '../../../components'
 import {useS3MediaOptionsContext} from '../../../contexts'
 import type {S3AssetSource} from '../../../types'
-import {tryGetS3ImageDimensions} from '../../../utils'
 import {type S3ImageInputProps} from '../types'
 
 const ASSET_FIELD_PATH = ['asset'] as const

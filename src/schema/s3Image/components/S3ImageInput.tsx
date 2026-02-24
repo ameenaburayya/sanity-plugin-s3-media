@@ -16,18 +16,14 @@ import {
   useDocumentPreviewStore,
   useTranslation,
 } from 'sanity'
+import {isInProgressUpload, isS3ImageSource} from 'sanity-plugin-s3-media-asset-utils'
 
 import {BrowserButton, UploadPlaceholder, UploadProgress} from '../../../components'
 import {UPLOAD_STATUS_KEY} from '../../../constants'
 import {useS3MediaContext, useS3MediaOptionsContext} from '../../../contexts'
 import {createS3ImageAssetSource} from '../../../lib'
 import {type S3AssetSource, S3AssetType} from '../../../types'
-import {
-  createInitialUploadPatches,
-  isInProgressUpload,
-  isS3ImageSource,
-  observeImageAsset,
-} from '../../../utils'
+import {createInitialUploadPatches, observeImageAsset} from '../../../utils'
 import type {S3ImageInputProps} from '../types'
 import {InvalidImageWarning} from './InvalidImageWarning'
 import {S3ImageInputAsset} from './S3ImageInputAsset'

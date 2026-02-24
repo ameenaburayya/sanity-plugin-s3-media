@@ -1,15 +1,23 @@
 # sanity-plugin-s3-media
 
-Sanity Studio plugin that adds an S3-backed media browser, asset sources, and
-schema types for files, images, and videos stored in AWS S3.
+A [Sanity Studio](https://www.sanity.io/) plugin that replaces the default asset pipeline with your own AWS S3 bucket. Browse, search, upload, and manage images, files, and videos directly from Studio — all stored in S3 and optionally served through CloudFront.
 
 ## Features
 
-- Media tool in Studio for browsing, searching, and managing S3 assets.
-- Asset sources for `s3Image`, `s3File`, and `s3Video` inputs.
-- Direct uploads to S3 via a signed URL endpoint.
-- Optional CloudFront domain for delivery URLs.
-- Utilities to build S3 asset URLs from document IDs.
+- **Media browser** — a dedicated Studio tool for browsing, searching, and managing all your S3 assets in one place.
+- **Custom asset sources** — drop-in `s3Image`, `s3File`, and `s3Video` schema types that work just like native Sanity fields.
+- **Direct uploads** — files go straight to S3 via a signed URL endpoint, no intermediate server required.
+- **CloudFront support** — optionally serve assets through a CloudFront distribution for faster delivery.
+- **Asset utilities** — companion package [`sanity-plugin-s3-media-asset-utils`](./packages/asset-utils) for building URLs and parsing asset IDs outside the Studio.
+
+## Packages
+
+This project ships two npm packages:
+
+| Package                                                                          | Description                                                                                                                    |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| [`sanity-plugin-s3-media`](https://www.npmjs.com/package/sanity-plugin-s3-media) | The Studio plugin — media browser, asset sources, and schema types.                                                            |
+| [`sanity-plugin-s3-media-asset-utils`](./packages/asset-utils)                   | Standalone utility helpers for building S3 asset URLs and parsing asset IDs. Works anywhere — no Studio dependency at runtime. |
 
 ## Install
 
@@ -19,9 +27,10 @@ npm install sanity-plugin-s3-media
 
 ## Setup
 
-### 1) Add the plugin
+### 1. Register the plugin
 
 ```ts
+// sanity.config.ts
 import {defineConfig} from 'sanity'
 import {s3Media} from 'sanity-plugin-s3-media'
 
@@ -35,15 +44,14 @@ export default defineConfig({
 })
 ```
 
-Plugin options:
+| Option          | Default | Description                                            |
+| --------------- | ------- | ------------------------------------------------------ |
+| `directUploads` | `true`  | Enable or disable direct S3 uploads from Studio.       |
+| `maxSize`       | —       | Maximum upload size in bytes enforced by the dropzone. |
 
-- `directUploads` (default `true`): enable/disable direct S3 uploads.
-- `maxSize` (bytes): maximum upload size enforced by the dropzone.
+### 2. Use the schema types
 
-### 2) Add schema types
-
-This plugin provides `s3Image`, `s3File`, and `s3Video` object types that reference
-`s3ImageAsset`, `s3FileAsset`, and `s3VideoAsset` documents. Use them like any other field:
+The plugin registers three object types — `s3Image`, `s3File`, and `s3Video` — that reference their corresponding asset documents (`s3ImageAsset`, `s3FileAsset`, `s3VideoAsset`). Use them like any other Sanity field:
 
 ```ts
 import {defineField, defineType} from 'sanity'
@@ -74,37 +82,33 @@ export const product = defineType({
 })
 ```
 
-Schema options:
+| Option                  | Default | Description                                                   |
+| ----------------------- | ------- | ------------------------------------------------------------- |
+| `accept`                | —       | File input accept string (e.g. `image/*`, `application/pdf`). |
+| `storeOriginalFilename` | `true`  | Persist the original filename on the asset document.          |
 
-- `accept`: file input accept string (e.g. `image/*`, `application/pdf`).
-- `storeOriginalFilename` (default `true`): store original filename on the asset.
+### 3. Configure credentials
 
-### 3) Configure credentials (Studio Secrets)
+Credentials are stored through [Sanity Studio Secrets](https://github.com/sanity-io/sanity-studio-secrets) under the namespace `s3MediaCredentials`. When any required value is missing, the plugin automatically opens a credentials dialog in Studio.
 
-This plugin reads credentials from Sanity Studio Secrets under namespace
-`s3MediaCredentials`. When required values are missing, the plugin opens a
-credentials dialog in Studio.
+| Key                    | Required | Description                                   |
+| ---------------------- | -------- | --------------------------------------------- |
+| `bucketRegion`         | Yes      | AWS region of your S3 bucket.                 |
+| `bucketKey`            | Yes      | The S3 bucket name / key.                     |
+| `getSignedUrlEndpoint` | Yes      | URL of your signed-URL endpoint (see below).  |
+| `secret`               | Yes      | Shared secret sent to your endpoint for auth. |
+| `deleteEndpoint`       | No       | URL of your delete endpoint (see below).      |
+| `cloudfrontDomain`     | No       | CloudFront domain for asset delivery URLs.    |
 
-Required keys:
-
-- `bucketRegion`
-- `bucketKey`
-- `getSignedUrlEndpoint`
-- `secret`
-
-Optional keys:
-
-- `deleteEndpoint`
-- `cloudfrontDomain`
-
-Security note: avoid hardcoding `secret` in code. Prefer Studio Secrets so it
-does not end up in the Studio bundle.
+> Avoid hardcoding `secret` in source code. Studio Secrets keeps it out of the Studio bundle.
 
 ## Endpoint contracts
 
-### Signed URL endpoint (`getSignedUrlEndpoint`)
+You need to provide your own backend endpoints for signing upload URLs and (optionally) deleting assets.
 
-Request (POST JSON):
+### Signed URL endpoint
+
+**POST** to `getSignedUrlEndpoint`:
 
 ```json
 {
@@ -116,17 +120,17 @@ Request (POST JSON):
 }
 ```
 
-Response (JSON):
+**Response:**
 
 ```json
 {
-  "url": "<signed upload url>"
+  "url": "<presigned S3 upload URL>"
 }
 ```
 
-### Delete endpoint (`deleteEndpoint`)
+### Delete endpoint
 
-Request (POST JSON):
+**POST** to `deleteEndpoint`:
 
 ```json
 {
@@ -137,43 +141,55 @@ Request (POST JSON):
 }
 ```
 
-Response: any 2xx status is treated as success.
+**Response:** any `2xx` status is treated as success.
 
-## Utilities
+## Asset utilities
 
-The package also exports helpers for constructing asset URLs:
+URL-building and ID-parsing helpers live in a dedicated package so you can use them in frontends, serverless functions, or anywhere else without pulling in the full Studio plugin:
+
+```sh
+npm install sanity-plugin-s3-media-asset-utils
+```
 
 ```ts
-import {buildS3FileUrl, buildS3ImageUrl, buildS3VideoUrl} from 'sanity-plugin-s3-media'
+import {buildS3FileUrl, buildS3ImageUrl, buildS3VideoUrl} from 'sanity-plugin-s3-media-asset-utils'
 
-const fileUrl = buildS3FileUrl('s3File-<assetId>-<ext>', {baseUrl})
-const imageUrl = buildS3ImageUrl('s3Image-<assetId>-<width>x<height>-<ext>', {baseUrl})
-const videoUrl = buildS3VideoUrl('s3Video-<assetId>-<width>x<height>-<ext>', {baseUrl})
+const baseUrl = 'https://cdn.example.com'
+
+const fileUrl = buildS3FileUrl('s3File-abc123-pdf', {baseUrl})
+const imageUrl = buildS3ImageUrl('s3Image-abc123-1920x1080-jpg', {baseUrl})
+const videoUrl = buildS3VideoUrl('s3Video-abc123-1920x1080-mp4', {baseUrl})
 ```
+
+See the [asset-utils README](./packages/asset-utils) for the full API reference.
 
 ## Troubleshooting
 
-- Credentials dialog keeps opening: verify all required keys are set in
-  Studio Secrets (`s3MediaCredentials`).
-- Uploads disabled: `directUploads` is `false` or missing required secrets.
-- File too large: increase `maxSize` (bytes).
-- CORS issues: ensure your S3 bucket and signed URL endpoint allow Studio origin.
+| Symptom                          | Fix                                                                        |
+| -------------------------------- | -------------------------------------------------------------------------- |
+| Credentials dialog keeps opening | Verify all required keys are set in Studio Secrets (`s3MediaCredentials`). |
+| Uploads are disabled             | Set `directUploads: true` and ensure all required secrets are present.     |
+| File too large                   | Increase the `maxSize` option (in bytes).                                  |
+| CORS errors                      | Ensure your S3 bucket and signed-URL endpoint allow your Studio's origin.  |
 
-## Develop & test
+## Development
 
-This plugin uses [@sanity/plugin-kit](https://github.com/sanity-io/plugin-kit)
-with default configuration for build & watch scripts.
+This plugin uses [@sanity/plugin-kit](https://github.com/sanity-io/plugin-kit) with default configuration for build and watch scripts. See [Testing a plugin in Sanity Studio](https://github.com/sanity-io/plugin-kit#testing-a-plugin-in-sanity-studio) for hot-reload setup.
 
-See [Testing a plugin in Sanity Studio](https://github.com/sanity-io/plugin-kit#testing-a-plugin-in-sanity-studio)
-on how to run this plugin with hotreload in the studio.
+```sh
+# Install dependencies
+pnpm install
+
+# Run tests
+pnpm test
+
+# Build all packages
+pnpm build:all
+
+# Lint
+pnpm lint
+```
 
 ## License
 
-[MIT](LICENSE) © Ameen Aburayya
-
-### Release new version
-
-Releases are automatic on pushes to `main` via the "CI & Release" workflow.
-Use workflow dispatch only to run CI manually (and optionally skip tests).
-
-Semantic release will only release on configured branches, so it is safe to run release on any branch.
+[MIT](LICENSE) &copy; Ameen Aburayya

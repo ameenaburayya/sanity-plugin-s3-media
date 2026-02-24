@@ -3,7 +3,11 @@ import {
   type S3FileAssetIdParts,
   type S3ImageAssetIdParts,
   type S3VideoAssetIdParts,
-} from '../../types'
+} from 'sanity-plugin-s3-media-types'
+
+const fileAssetIdPattern = /^s3File-([a-zA-Z0-9_-]+)-([a-z0-9]+)$/
+const imageAssetIdPattern = /^s3Image-([a-zA-Z0-9_-]+)-(\d+)x(\d+)-([a-z0-9]+)$/
+const videoAssetIdPattern = /^s3Video-([a-zA-Z0-9_-]+)-(\d+)x(\d+)-([a-z0-9]+)$/
 
 /**
  * Parses a S3 file asset document ID into individual parts (type, id, extension)
@@ -14,11 +18,12 @@ import {
  * @throws If document ID invalid
  */
 export function parseFileAssetId(documentId: string): S3FileAssetIdParts {
-  const [, assetId, extension] = documentId.split('-')
+  const match = fileAssetIdPattern.exec(documentId)
 
-  if (!assetId || !extension) {
+  if (!match) {
     throw new Error(`Malformed file asset ID '${documentId}'.`)
   }
+  const [, assetId, extension] = match
 
   return {type: S3AssetType.FILE, assetId, extension}
 }
@@ -32,10 +37,16 @@ export function parseFileAssetId(documentId: string): S3FileAssetIdParts {
  * @throws If document ID invalid
  */
 export function parseImageAssetId(documentId: string): S3ImageAssetIdParts {
-  const [, assetId, dimensionString, extension] = documentId.split('-')
-  const [width, height] = (dimensionString || '').split('x').map(Number)
+  const match = imageAssetIdPattern.exec(documentId)
 
-  if (!assetId || !dimensionString || !extension || !(width > 0) || !(height > 0)) {
+  if (!match) {
+    throw new Error(`Malformed asset ID '${documentId}'.`)
+  }
+  const [, assetId, widthString, heightString, extension] = match
+  const width = Number(widthString)
+  const height = Number(heightString)
+
+  if (!(width > 0) || !(height > 0)) {
     throw new Error(`Malformed asset ID '${documentId}'.`)
   }
 
@@ -51,10 +62,16 @@ export function parseImageAssetId(documentId: string): S3ImageAssetIdParts {
  * @throws If document ID invalid
  */
 export function parseVideoAssetId(documentId: string): S3VideoAssetIdParts {
-  const [, assetId, dimensionString, extension] = documentId.split('-')
-  const [width, height] = (dimensionString || '').split('x').map(Number)
+  const match = videoAssetIdPattern.exec(documentId)
 
-  if (!assetId || !dimensionString || !extension || !(width > 0) || !(height > 0)) {
+  if (!match) {
+    throw new Error(`Malformed asset ID '${documentId}'.`)
+  }
+  const [, assetId, widthString, heightString, extension] = match
+  const width = Number(widthString)
+  const height = Number(heightString)
+
+  if (!(width > 0) || !(height > 0)) {
     throw new Error(`Malformed asset ID '${documentId}'.`)
   }
 

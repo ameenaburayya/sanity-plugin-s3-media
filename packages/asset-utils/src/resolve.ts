@@ -1,9 +1,7 @@
-import {isReference} from 'sanity'
-
+import {S3AssetType} from 'sanity-plugin-s3-media-types'
 import {
   type S3Asset,
   type S3AssetObjectStub,
-  S3AssetType,
   type S3FileAsset,
   type S3FileSource,
   type S3FileUploadStub,
@@ -15,7 +13,8 @@ import {
   type S3VideoDimensions,
   type S3VideoSource,
   type S3VideoUploadStub,
-} from '../types'
+} from 'sanity-plugin-s3-media-types'
+
 import {parseFileAssetId, parseImageAssetId, parseVideoAssetId} from './asset/parse'
 import {isObject} from './isObject'
 
@@ -49,6 +48,10 @@ const inProgressAssetId = 'upload-in-progress-placeholder'
  */
 const inProgressAssetExtension = 'tmp'
 
+function isReferenceLike(source: unknown): source is {_ref: string} {
+  return isObject(source) && typeof (source as {_ref?: unknown})._ref === 'string'
+}
+
 /**
  * Error type thrown when the library fails to resolve a value, such as an asset ID,
  * filename or project ID/dataset information.
@@ -77,7 +80,7 @@ class UnresolvableError extends Error {
  * @returns True if the passed error instance appears to be an unresolvable error
  * @public
  */
-function isUnresolvableError(err: unknown): err is UnresolvableError {
+export function isUnresolvableError(err: unknown): err is UnresolvableError {
   const error = err as UnresolvableError
   return Boolean(error.unresolvable && 'input' in error)
 }
@@ -155,10 +158,10 @@ export function getS3AssetDocumentId(src: S3FileSource | S3ImageSource | S3Video
 
   let id = ''
 
-  if (isReference(source)) {
+  if (isReferenceLike(source)) {
     id = source._ref
   } else {
-    id = source._id
+    id = (source as {_id?: string})._id || ''
   }
 
   const hasId = id && idPattern.test(id)
@@ -227,19 +230,8 @@ export function getS3VideoDimensions(src: S3VideoSource): S3VideoDimensions {
   return {width, height, aspectRatio, _type: 's3VideoDimensions'}
 }
 
-/**
- * {@inheritDoc getS3ImageDimensions}
- * @returns Returns `undefined` instead of throwing if a value cannot be resolved
- * @public
- */
-export const tryGetS3ImageDimensions = getForgivingResolver(getS3ImageDimensions)
-
-/**
- * {@inheritDoc getS3VideoDimensions}
- * @returns Returns `undefined` instead of throwing if a value cannot be resolved
- * @public
- */
-export const tryGetS3VideoDimensions = getForgivingResolver(getS3VideoDimensions)
+const forgivingGetS3ImageDimensions = getForgivingResolver(getS3ImageDimensions)
+const forgivingGetS3VideoDimensions = getForgivingResolver(getS3VideoDimensions)
 
 /**
  * Returns the file extension for a given asset
@@ -271,12 +263,36 @@ export function getS3AssetExtension(src: S3FileSource | S3ImageSource | S3VideoS
   return parseImageAssetId(assetId).extension
 }
 
+const forgivingGetS3AssetExtension = getForgivingResolver(getS3AssetExtension)
+
+/**
+ * {@inheritDoc getS3ImageDimensions}
+ * @returns Returns `undefined` instead of throwing if a value cannot be resolved
+ * @public
+ */
+export function tryGetS3ImageDimensions(src: S3ImageSource): S3ImageDimensions | undefined {
+  return forgivingGetS3ImageDimensions(src)
+}
+
+/**
+ * {@inheritDoc getS3VideoDimensions}
+ * @returns Returns `undefined` instead of throwing if a value cannot be resolved
+ * @public
+ */
+export function tryGetS3VideoDimensions(src: S3VideoSource): S3VideoDimensions | undefined {
+  return forgivingGetS3VideoDimensions(src)
+}
+
 /**
  * {@inheritDoc getS3AssetExtension}
  * @returns Returns `undefined` instead of throwing if a value cannot be resolved
  * @public
  */
-export const tryGetS3AssetExtension = getForgivingResolver(getS3AssetExtension)
+export function tryGetS3AssetExtension(
+  src: S3FileSource | S3ImageSource | S3VideoSource,
+): string | undefined {
+  return forgivingGetS3AssetExtension(src)
+}
 
 /**
  * Return whether or not the passed source is an s3 file source
@@ -316,14 +332,71 @@ export function isS3VideoSource(src: unknown): src is S3VideoSource {
   return assetId ? assetId.startsWith(`${S3AssetType.VIDEO}-`) : false
 }
 
+/**
+ * Return whether or not the passed asset document is an s3 file asset
+ *
+ * @param asset - Asset document to check
+ * @returns Whether or not the given asset is an s3 file asset
+ * @public
+ */
 export const isS3FileAsset = (asset: S3Asset): asset is S3FileAsset => {
   return (asset as S3FileAsset)._type === 's3FileAsset'
 }
 
+/**
+ * Return whether or not the passed asset document is an s3 image asset
+ *
+ * @param asset - Asset document to check
+ * @returns Whether or not the given asset is an s3 image asset
+ * @public
+ */
 export const isS3ImageAsset = (asset: S3Asset): asset is S3ImageAsset => {
   return (asset as S3ImageAsset)._type === 's3ImageAsset'
 }
 
+/**
+ * Return whether or not the passed asset document is an s3 video asset
+ *
+ * @param asset - Asset document to check
+ * @returns Whether or not the given asset is an s3 video asset
+ * @public
+ */
 export const isS3VideoAsset = (asset: S3Asset): asset is S3VideoAsset => {
   return (asset as S3VideoAsset)._type === 's3VideoAsset'
+}
+
+/**
+ * Returns image dimensions (without aspect ratio metadata wrapper) from any image source.
+ *
+ * @param src - Input source (image object, asset, reference, id)
+ * @returns Object with width and height
+ * @public
+ */
+export function getS3ImageDimensionsFromSource(src: S3ImageSource): {
+  width: number
+  height: number
+} {
+  if (isInProgressUpload(src)) {
+    return {width: 0, height: 0}
+  }
+  const {width, height} = parseImageAssetId(getS3AssetDocumentId(src))
+  return {width, height}
+}
+
+/**
+ * Returns video dimensions (without aspect ratio metadata wrapper) from any video source.
+ *
+ * @param src - Input source (video object, asset, reference, id)
+ * @returns Object with width and height
+ * @public
+ */
+export function getS3VideoDimensionsFromSource(src: S3VideoSource): {
+  width: number
+  height: number
+} {
+  if (isInProgressUpload(src)) {
+    return {width: 0, height: 0}
+  }
+  const {width, height} = parseVideoAssetId(getS3AssetDocumentId(src))
+  return {width, height}
 }

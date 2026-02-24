@@ -1,8 +1,8 @@
 import type {Observable} from 'rxjs'
 import type {FormPatch, SanityClient, UploadOptions} from 'sanity'
+import type {S3AssetDocument, S3AssetType} from 'sanity-plugin-s3-media-types'
 
 import type {S3Client} from '../lib'
-import type {S3AssetDocument, S3AssetType} from './asset'
 
 export type S3Uploader = (options: {
   sanityClient: SanityClient

@@ -6,3 +6,4 @@ export {
   buildS3VideoPath,
   buildS3VideoUrl,
 } from './paths'
+export {parseFileAssetId, parseImageAssetId, parseVideoAssetId} from './parse'

@@ -2,6 +2,7 @@
   "name": "sanity-plugin-s3-media",
   "version": "1.3.1",
   "description": "Adding the ability to have s3 bucket stored media",
+  "packageManager": "pnpm@10.10.0",
   "keywords": [
     "sanity",
     "sanity-plugin"
@@ -25,11 +26,6 @@
       "import": "./dist/client.mjs",
       "default": "./dist/client.js"
     },
-    "./asset-utils": {
-      "source": "./src/asset-utils.ts",
-      "import": "./dist/asset-utils.mjs",
-      "default": "./dist/asset-utils.js"
-    },
     "./package.json": "./package.json"
   },
   "main": "./dist/index.js",
@@ -40,13 +36,22 @@
     "v2-incompatible.js"
   ],
   "scripts": {
-    "build": "plugin-kit verify-package --silent && pkg-utils build --strict --check --clean",
+    "build": "pnpm --filter sanity-plugin-s3-media-asset-utils run build && plugin-kit verify-package --silent && pkg-utils build --strict --check --clean",
+    "build:all": "pnpm -r --filter './packages/**' --if-present --sort run build && pnpm run build",
+    "changeset": "changeset",
     "format": "prettier --write --cache --ignore-unknown .",
+    "lint:all": "pnpm run lint && pnpm -r --filter './packages/**' --if-present lint",
     "link-watch": "plugin-kit link-watch",
     "lint": "eslint .",
-    "test": "vitest run",
+    "pack:check": "npm pack --dry-run && pnpm --filter sanity-plugin-s3-media-asset-utils exec npm pack --dry-run",
     "prepare": "husky",
-    "prepublishOnly": "npm run build",
+    "test": "vitest run",
+    "test:all": "pnpm run test && pnpm -r --filter './packages/**' --if-present test",
+    "test:coverage": "vitest run --coverage",
+    "test:coverage:all": "pnpm run test:coverage && pnpm -r --filter './packages/**' --if-present test:coverage",
+    "prepublishOnly": "pnpm run build",
+    "release": "changeset publish",
+    "version-packages": "changeset version",
     "watch": "pkg-utils watch --strict"
   },
   "dependencies": {
@@ -76,17 +81,17 @@
     "redux-observable": "3.0.0-rc.2",
     "rxjs": "^7.8.1",
     "sanity": "^5",
+    "sanity-plugin-s3-media": "link:.yalc/sanity-plugin-s3-media",
     "styled-components": "^6.3.8"
   },
   "devDependencies": {
     "@babel/parser": "^7.29.0",
+    "@changesets/cli": "^2.29.6",
     "@commitlint/cli": "^20.4.1",
     "@commitlint/config-conventional": "^20.4.1",
     "@eslint/js": "^9.39.2",
     "@sanity/pkg-utils": "^10.4.4",
     "@sanity/plugin-kit": "^4.0.20",
-    "@sanity/semantic-release-preset": "^6.0.0",
-    "@semantic-release/github": "^12.0.3",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
     "@types/is-hotkey": "^0.1.10",
@@ -100,7 +105,6 @@
     "@typescript-eslint/eslint-plugin": "^8.54.0",
     "@typescript-eslint/parser": "^8.54.0",
     "@vitest/coverage-v8": "^2.1.9",
-    "conventional-changelog-conventionalcommits": "^5.0.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-config-sanity": "^7.1.4",
@@ -120,7 +124,8 @@
     "react-dom": "^19.2.4",
     "react-is": "^19.2.4",
     "rimraf": "^3.0.2",
-    "standard-version": "^9.5.0",
+    "sanity-plugin-s3-media-asset-utils": "workspace:^",
+    "sanity-plugin-s3-media-types": "workspace:*",
     "typescript": "^5.9.3",
     "vitest": "^2.1.9"
   },
@@ -131,7 +136,6 @@
     "sanity": "^5",
     "styled-components": "^6.3.8"
   },
-  "packageManager": "npm@10.9.2",
   "engines": {
     "node": ">=18"
   },

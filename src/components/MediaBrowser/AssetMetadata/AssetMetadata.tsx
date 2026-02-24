@@ -2,10 +2,11 @@ import {DownloadIcon} from '@sanity/icons'
 import {Box, Button, Flex, Inline, Stack, Text} from '@sanity/ui'
 import {filesize} from 'filesize'
 import {type FC, type ReactNode} from 'react'
+import {isS3ImageAsset, isS3VideoAsset} from 'sanity-plugin-s3-media-asset-utils'
 
 import {useS3MediaContext} from '../../../contexts'
 import {type AssetItem, type S3Asset, S3AssetType} from '../../../types'
-import {downloadAsset, getAssetResolution, isS3ImageAsset, isS3VideoAsset} from '../../../utils'
+import {downloadAsset, getAssetResolution} from '../../../utils'
 import {ButtonAssetCopy} from '../ButtonAssetCopy'
 
 type AssetMetadataProps = {

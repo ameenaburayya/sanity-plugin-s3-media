@@ -1,26 +1,11 @@
-import * as assetUtils from '../asset-utils'
-import * as paths from '../utils/asset/paths'
-import * as resolve from '../utils/resolve'
+import * as assetUtils from '../index'
 
-describe('asset-utils exports', () => {
+describe('public api', () => {
   const fileId = 's3File-abcdefghijklmnopqrstuvwx-pdf'
   const imageId = 's3Image-abcdefghijklmnopqrstuvwx-100x50-png'
   const videoId = 's3Video-abcdefghijklmnopqrstuvwx-1920x1080-mp4'
 
-  it('re-exports path and resolve helpers', () => {
-    expect(assetUtils.buildS3FileUrl).toBe(paths.buildS3FileUrl)
-    expect(assetUtils.buildS3ImageUrl).toBe(paths.buildS3ImageUrl)
-    expect(assetUtils.buildS3VideoUrl).toBe(paths.buildS3VideoUrl)
-
-    expect(assetUtils.getS3AssetExtension).toBe(resolve.getS3AssetExtension)
-    expect(assetUtils.getS3ImageDimensions).toBe(resolve.getS3ImageDimensions)
-    expect(assetUtils.getS3VideoDimensions).toBe(resolve.getS3VideoDimensions)
-    expect(assetUtils.tryGetS3AssetExtension).toBe(resolve.tryGetS3AssetExtension)
-    expect(assetUtils.tryGetS3ImageDimensions).toBe(resolve.tryGetS3ImageDimensions)
-    expect(assetUtils.tryGetS3VideoDimensions).toBe(resolve.tryGetS3VideoDimensions)
-  })
-
-  it('uses real helper behavior', () => {
+  it('exports all utility helpers with real behavior', () => {
     expect(assetUtils.buildS3FileUrl(fileId, {baseUrl: 'https://cdn.example.com'})).toBe(
       'https://cdn.example.com/abcdefghijklmnopqrstuvwx.pdf',
     )
@@ -48,5 +33,23 @@ describe('asset-utils exports', () => {
     expect(assetUtils.tryGetS3AssetExtension({} as any)).toBeUndefined()
     expect(assetUtils.tryGetS3ImageDimensions({} as any)).toBeUndefined()
     expect(assetUtils.tryGetS3VideoDimensions({} as any)).toBeUndefined()
+  })
+
+  it('re-exports S3AssetType', () => {
+    expect(assetUtils.S3AssetType.FILE).toBe('s3File')
+    expect(assetUtils.S3AssetType.IMAGE).toBe('s3Image')
+    expect(assetUtils.S3AssetType.VIDEO).toBe('s3Video')
+  })
+
+  it('does not pull in sanity at runtime', async () => {
+    vi.resetModules()
+
+    vi.doMock('sanity', () => {
+      throw new Error('sanity runtime import is not allowed in asset-utils')
+    })
+
+    await expect(import('../resolve')).resolves.toBeDefined()
+
+    vi.doUnmock('sanity')
   })
 })

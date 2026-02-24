@@ -2,6 +2,7 @@ import {Box, Card} from '@sanity/ui'
 import {type FC, type FocusEvent, useCallback, useMemo} from 'react'
 import type {Observable} from 'rxjs'
 import {ChangeIndicator} from 'sanity'
+import {isS3FileSource, isS3VideoSource} from 'sanity-plugin-s3-media-asset-utils'
 
 import {
   BrowserButton,
@@ -17,7 +18,6 @@ import {
   type S3FileAsset as S3FileAssetType,
   type S3VideoAsset,
 } from '../../../types'
-import {isS3FileSource, isS3VideoSource} from '../../../utils'
 import {type S3FileInputProps} from '../types'
 import {InvalidFileWarning} from './InvalidFileWarning'
 import {S3FileInputPreview} from './S3FileInputPreview'

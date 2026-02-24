@@ -5,10 +5,8 @@ import {
   buildS3ImageUrl,
   buildS3VideoPath,
   buildS3VideoUrl,
-  parseFileAssetId,
-  parseImageAssetId,
-  parseVideoAssetId,
-} from 'sanity-plugin-s3-media-asset-utils'
+} from '../asset'
+import {parseFileAssetId, parseImageAssetId, parseVideoAssetId} from '../asset/parse'
 
 const fileId = 's3File-abcdefghijklmnopqrstuvwx-pdf'
 const imageId = 's3Image-abcdefghijklmnopqrstuvwx-120x80-jpg'

@@ -2,7 +2,9 @@ import {
   getS3AssetDocumentId,
   getS3AssetExtension,
   getS3ImageDimensions,
+  getS3ImageDimensionsFromSource,
   getS3VideoDimensions,
+  getS3VideoDimensionsFromSource,
   isInProgressUpload,
   isS3AssetObjectStub,
   isS3FileAsset,
@@ -84,6 +86,23 @@ describe('resolve helpers', () => {
       height: 1080,
       aspectRatio: 1920 / 1080,
     })
+  })
+
+  it('extracts dimensions directly from source helpers', () => {
+    expect(getS3ImageDimensionsFromSource({_id: imageId} as any)).toEqual({
+      width: 100,
+      height: 200,
+    })
+    expect(getS3VideoDimensionsFromSource({_id: videoId} as any)).toEqual({
+      width: 1920,
+      height: 1080,
+    })
+  })
+
+  it('returns placeholder dimensions from source helpers for in-progress uploads', () => {
+    const stub = {_upload: {}} as any
+    expect(getS3ImageDimensionsFromSource(stub)).toEqual({width: 0, height: 0})
+    expect(getS3VideoDimensionsFromSource(stub)).toEqual({width: 0, height: 0})
   })
 
   it('identifies file and image sources', () => {

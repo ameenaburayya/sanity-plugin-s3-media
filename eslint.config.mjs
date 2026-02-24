@@ -21,6 +21,7 @@ const ignores = [
   '.eslintrc.js',
   'commitlint.config.js',
   'dist',
+  '**/dist/**',
   'lint-staged.config.js',
   'package.config.ts',
 ]

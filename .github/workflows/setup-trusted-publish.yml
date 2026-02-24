@@ -1,0 +1,22 @@
+name: Setup npm Trusted Publishing
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: Package name, for example sanity-plugin-s3-media-asset-utils
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  setup-trusted-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Authenticate npm
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_PUBLISH_TOKEN || secrets.NPM_TOKEN }}" > ~/.npmrc
+      - name: Configure trusted publishing for package
+        run: pnpm dlx setup-npm-trusted-publish ${{ inputs.package }}

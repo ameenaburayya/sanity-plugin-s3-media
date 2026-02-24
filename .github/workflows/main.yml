@@ -57,11 +57,24 @@ jobs:
           node-version: lts/*
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - uses: changesets/action@v1
-        with:
-          version: pnpm version-packages
-          publish: pnpm release
+      - name: Configure Git User
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Version Packages
+        run: pnpm version-packages
         env:
           HUSKY: 0
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit And Push Version Updates
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -A
+            git commit -m "chore(release): version packages [skip ci]"
+            git push origin HEAD:main
+          fi
+        env:
+          HUSKY: 0
+      - name: Publish Packages
+        run: pnpm release
+        env:
           NPM_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN || secrets.NPM_TOKEN }}

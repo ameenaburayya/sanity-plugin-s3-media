@@ -11,7 +11,67 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.10.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:all
+      - run: pnpm pack:check
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.10.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -r --filter './packages/types' --filter './packages/asset-utils' --sort run build
+      - run: pnpm test:coverage:all
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            coverage
+            packages/**/coverage
+          if-no-files-found: error
+
+  lint:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.10.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint:all
+
+  typecheck:
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -30,53 +90,12 @@ jobs:
           pnpm exec tsc -p tsconfig.json --pretty false
           pnpm --filter sanity-plugin-s3-media-asset-utils exec tsc -p tsconfig.json --pretty false
           pnpm --filter sanity-plugin-s3-media-types exec tsc -p tsconfig.json --pretty false
-      - run: pnpm lint:all
-
-  test:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.10.0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm test:coverage:all
-      - uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: |
-            coverage
-            packages/**/coverage
-          if-no-files-found: error
-
-  build:
-    needs:
-      - quality
-      - test
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.10.0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build:all
-      - run: pnpm pack:check
 
   release:
-    needs: build
+    needs:
+      - test
+      - lint
+      - typecheck
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:

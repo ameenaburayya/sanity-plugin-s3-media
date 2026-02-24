@@ -1,4 +1,3 @@
-export * from 'sanity-plugin-s3-media-types'
 export * from './asset'
 export * from './browser'
 export * from './file'

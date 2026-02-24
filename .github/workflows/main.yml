@@ -76,6 +76,13 @@ jobs:
           HUSKY: 0
       - name: Build Internal Types Package
         run: pnpm --filter sanity-plugin-s3-media-types run build
+      - name: Configure npm auth
+        run: |
+          if [ -n "${NPM_TOKEN}" ]; then
+            echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+          fi
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN || secrets.NPM_TOKEN }}
       - name: Publish Packages
         run: pnpm release
         env:

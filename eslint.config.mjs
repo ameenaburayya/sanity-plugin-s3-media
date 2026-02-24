@@ -18,6 +18,8 @@ import globals from 'globals'
 
 const ignores = [
   '*.js',
+  '.yalc',
+  '.yalc/**',
   '.eslintrc.js',
   'commitlint.config.js',
   'dist',

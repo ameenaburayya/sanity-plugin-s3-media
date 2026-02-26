@@ -2,12 +2,12 @@ import {S3AssetType} from 'sanity-plugin-s3-media-types'
 
 import {
   s3AssetFilenamePattern,
-  s3FileAssetIdPattern,
   s3FileAssetFilenamePattern,
-  s3ImageAssetIdPattern,
+  s3FileAssetIdPattern,
   s3ImageAssetFilenamePattern,
-  s3VideoAssetIdPattern,
+  s3ImageAssetIdPattern,
   s3VideoAssetFilenamePattern,
+  s3VideoAssetIdPattern,
   s3VideoExtensions,
 } from './constants'
 import type {S3FileAssetIdParts, S3ImageAssetIdParts, S3UrlType, S3VideoAssetIdParts} from './types'
@@ -32,8 +32,9 @@ function getFilename(input: string): string {
     }
   }
 
-  const withoutQuery = raw.split('?')[0]?.split('#')[0] ?? raw
-  const normalized = withoutQuery.replace(/^\/+/, '')
+  const [withoutQuery = ''] = raw.split('?')
+  const [withoutHash = ''] = withoutQuery.split('#')
+  const normalized = withoutHash.replace(/^\/+/, '')
   const parts = normalized.split('/').filter(Boolean)
 
   return parts[parts.length - 1] ?? ''
@@ -218,7 +219,7 @@ export function parseS3AssetFilename(filename: string): S3AssetIdParts {
 
   const match = s3ImageAssetFilenamePattern.exec(file)
   if (match) {
-    const extension = match[4]?.toLowerCase() || ''
+    const extension = match[4].toLowerCase()
 
     if (s3VideoExtensions.has(extension)) {
       return parseS3VideoAssetFilename(file)

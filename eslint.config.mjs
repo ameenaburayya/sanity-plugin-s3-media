@@ -112,6 +112,8 @@ export default defineConfig([
     },
     rules: {
       ...vitestPlugin.configs.recommended.rules,
+      'vitest/expect-expect': ['error', {assertFunctionNames: ['expect', 'expectTypeOf']}],
+      'max-nested-callbacks': 'off',
     },
   },
   eslintConfigPrettier,

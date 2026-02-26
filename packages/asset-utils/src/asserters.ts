@@ -2,8 +2,8 @@ import type {S3Asset, S3FileAsset, S3ImageAsset, S3VideoAsset} from 'sanity-plug
 
 import {s3FileAssetIdPattern, s3ImageAssetIdPattern, s3VideoAssetIdPattern} from './constants'
 import type {
-  S3AssetObjectStub,
   Reference,
+  S3AssetObjectStub,
   S3FileUploadStub,
   S3ImageUploadStub,
   S3VideoUploadStub,

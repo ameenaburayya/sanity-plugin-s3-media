@@ -1,12 +1,4 @@
-import {S3AssetType} from 'sanity-plugin-s3-media-types'
-import type {
-  S3AssetSource,
-  S3FileSource,
-  S3ImageDimensions,
-  S3ImageSource,
-  S3VideoDimensions,
-  S3VideoSource,
-} from './types'
+import {type S3Asset, S3AssetType} from 'sanity-plugin-s3-media-types'
 
 import {
   isInProgressUpload,
@@ -25,6 +17,14 @@ import {
   parseS3VideoAssetId,
 } from './parse'
 import {tryGetS3UrlFilename} from './paths'
+import type {
+  S3AssetSource,
+  S3FileSource,
+  S3ImageDimensions,
+  S3ImageSource,
+  S3VideoDimensions,
+  S3VideoSource,
+} from './types'
 import {getForgivingResolver} from './utils'
 
 /**
@@ -85,7 +85,7 @@ export function getS3AssetDocumentId(src: S3AssetSource): string {
   } else if (isReference(source)) {
     id = source._ref
   } else {
-    const maybeAsset = source as any
+    const maybeAsset = source as S3Asset
 
     if (isS3FileAsset(maybeAsset) || isS3ImageAsset(maybeAsset) || isS3VideoAsset(maybeAsset)) {
       id = maybeAsset._id

@@ -38,6 +38,9 @@ export default defineConfig([
         vi: 'readonly',
       },
     },
+    rules: {
+      'max-nested-callbacks': 'off',
+    },
   },
   eslintConfigPrettier,
 ])

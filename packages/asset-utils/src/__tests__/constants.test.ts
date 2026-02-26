@@ -1,8 +1,8 @@
 import {
   s3AssetFilenamePattern,
+  s3AssetIdPattern,
   s3FileAssetFilenamePattern,
   s3FileAssetIdPattern,
-  s3AssetIdPattern,
   s3ImageAssetFilenamePattern,
   s3ImageAssetIdPattern,
   s3InProgressAssetExtension,

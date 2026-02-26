@@ -177,7 +177,7 @@ export const tryGetS3UrlPath = getForgivingResolver(getS3UrlPath)
 export function getS3UrlFilename(urlOrPath: string): string {
   const path = getS3UrlPath(urlOrPath)
   const parts = path.split('/').filter(Boolean)
-  const filename = parts[parts.length - 1] || ''
+  const filename = parts[parts.length - 1]
 
   if (!isValidS3Filename(filename)) {
     throw new UnresolvableError(
@@ -233,7 +233,7 @@ export function tryGetS3AssetPath(src: S3AssetSource): string | undefined {
     return isValidS3Filename(asPath) ? asPath : undefined
   }
 
-  const maybeAsset = source as any
+  const maybeAsset = source
 
   if (isS3FileAsset(maybeAsset) || isS3ImageAsset(maybeAsset) || isS3VideoAsset(maybeAsset)) {
     return tryGetS3AssetPathFromId(maybeAsset._id)

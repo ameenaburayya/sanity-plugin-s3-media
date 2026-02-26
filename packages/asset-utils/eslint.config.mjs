@@ -40,6 +40,7 @@ export default defineConfig([
     },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
+      'max-nested-callbacks': 'off',
     },
   },
   eslintConfigPrettier,

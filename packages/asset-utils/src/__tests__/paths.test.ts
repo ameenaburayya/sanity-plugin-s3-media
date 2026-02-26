@@ -45,6 +45,11 @@ describe('getS3UrlPath', () => {
     expect(() => getS3UrlPath('   ')).toThrow()
   })
 
+  it('throws on path inputs that normalize to empty', () => {
+    expect(() => getS3UrlPath('/')).toThrow()
+    expect(() => getS3UrlPath('///')).toThrow()
+  })
+
   it('throws on URL with no pathname', () => {
     expect(() => getS3UrlPath('https://cdn.example.com')).toThrow()
     expect(() => getS3UrlPath('https://cdn.example.com/')).toThrow()
@@ -110,6 +115,10 @@ describe('tryGetS3AssetPath', () => {
 
   it('resolves path from filenames', () => {
     expect(tryGetS3AssetPath('abc123.pdf' as any)).toBe('abc123.pdf')
+  })
+
+  it('resolves relative nested paths with query/hash', () => {
+    expect(tryGetS3AssetPath('folder/abc123.pdf?query=1#hash' as any)).toBe('folder/abc123.pdf')
   })
 
   it('returns undefined for references', () => {

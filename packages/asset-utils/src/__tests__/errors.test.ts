@@ -1,4 +1,4 @@
-import {UnresolvableError, isUnresolvableError} from '../errors'
+import {isUnresolvableError, UnresolvableError} from '../errors'
 
 describe('errors', () => {
   it('creates unresolvable errors with input payload', () => {

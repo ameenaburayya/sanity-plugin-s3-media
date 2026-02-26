@@ -1,17 +1,17 @@
 import {expectTypeOf} from 'vitest'
 
 import type {
-  S3AssetSource,
-  S3AssetObjectStub,
-  S3AssetStringSource,
-  S3FileSource,
   Reference,
+  S3AssetObjectStub,
+  S3AssetSource,
+  S3AssetStringSource,
   S3FileAssetIdParts,
+  S3FileSource,
   S3ImageDimensions,
   S3ImageSource,
+  S3UrlType,
   S3VideoDimensions,
   S3VideoSource,
-  S3UrlType,
   SafeFunction,
 } from '../types'
 

@@ -1,4 +1,11 @@
 import {
+  isInProgressUpload,
+  isS3AssetObjectStub,
+  isS3FileAsset,
+  isS3ImageAsset,
+  isS3VideoAsset,
+} from '../asserters'
+import {
   getS3AssetDocumentId,
   getS3AssetExtension,
   getS3IdFromString,
@@ -14,13 +21,6 @@ import {
   tryGetS3ImageDimensions,
   tryGetS3VideoDimensions,
 } from '../resolve'
-import {
-  isInProgressUpload,
-  isS3AssetObjectStub,
-  isS3FileAsset,
-  isS3ImageAsset,
-  isS3VideoAsset,
-} from '../asserters'
 
 const fileId = 's3File-abcdefghijklmnopqrstuvwx-pdf'
 const imageId = 's3Image-abcdefghijklmnopqrstuvwx-100x200-jpg'
@@ -69,6 +69,13 @@ describe('resolve helpers', () => {
 
     const videoRef = {_type: 'reference', _ref: videoId} as any
     expect(getS3AssetDocumentId(videoRef)).toBe(videoId)
+  })
+
+  it('resolves ids from string sources', () => {
+    expect(getS3AssetDocumentId(fileId as any)).toBe(fileId)
+    expect(
+      getS3AssetDocumentId(`https://cdn.example.com/abcdefghijklmnopqrstuvwx-100x200.jpg` as any),
+    ).toBe(imageId)
   })
 
   it('throws on invalid ids', () => {

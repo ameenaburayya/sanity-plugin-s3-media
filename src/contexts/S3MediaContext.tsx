@@ -6,9 +6,11 @@ import {S3AssetType} from 'sanity-plugin-s3-media-types'
 import {createS3Client, type S3Client} from '../lib'
 import type {S3Credentials} from '../types'
 
+type S3AssetTypeValue = `${S3AssetType}`
+
 type IS3MediaContext = {
   s3Client: S3Client
-  buildAssetUrl: ({assetId, assetType}: {assetId: string; assetType: S3AssetType}) => string
+  buildAssetUrl: ({assetId, assetType}: {assetId: string; assetType: S3AssetTypeValue}) => string
 }
 
 const credentialsNamespace = 's3MediaCredentials'
@@ -64,7 +66,7 @@ export const S3MediaContextProvider: FC<PropsWithChildren> = (props) => {
   })
 
   const buildAssetUrl = useCallback(
-    ({assetId, assetType}: {assetId: string; assetType: S3AssetType}) => {
+    ({assetId, assetType}: {assetId: string; assetType: S3AssetTypeValue}) => {
       if (!assetId || !assetType) {
         throw new Error('')
       }

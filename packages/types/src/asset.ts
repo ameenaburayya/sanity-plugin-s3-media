@@ -1,5 +1,3 @@
-import type {S3ImageMetaData, S3VideoMetaData} from './schema'
-
 /** @internal */
 interface SanityDocument {
   _id: string
@@ -41,27 +39,30 @@ export enum S3AssetType {
   VIDEO = 's3Video',
 }
 
-/** @public */
-export interface S3FileAssetIdParts {
-  type: 's3File'
-  assetId: string
-  extension: string
+/** @internal */
+interface S3ImageDimensions {
+  _type: 's3ImageDimensions'
+  height: number
+  width: number
+  aspectRatio: number
 }
 
-/** @public */
-export interface S3ImageAssetIdParts {
-  type: 's3Image'
-  assetId: string
-  extension: string
-  width: number
-  height: number
+/** @internal */
+interface S3ImageMetaData {
+  _type: 's3ImageMetadata'
+  dimensions: S3ImageDimensions
 }
 
-/** @public */
-export interface S3VideoAssetIdParts {
-  type: 's3Video'
-  assetId: string
-  extension: string
-  width: number
+/** @internal */
+interface S3VideoDimensions {
+  _type: 's3VideoDimensions'
   height: number
+  width: number
+  aspectRatio: number
+}
+
+/** @internal */
+interface S3VideoMetaData {
+  _type: 's3VideoMetadata'
+  dimensions: S3VideoDimensions
 }

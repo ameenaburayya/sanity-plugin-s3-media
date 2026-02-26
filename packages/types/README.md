@@ -4,8 +4,7 @@ Internal, workspace-only type definitions for the [`sanity-plugin-s3-media`](htt
 
 ## What's inside
 
-- **Asset document types** — `S3ImageAsset`, `S3FileAsset`, `S3VideoAsset`, and their ID-part interfaces.
-- **Schema object types** — stubs, sources, upload placeholders, and metadata shapes used by the plugin's custom schema fields.
+- **Shared asset document types** — `S3Asset`, `S3AssetDocument`, `S3ImageAsset`, `S3FileAsset`, and `S3VideoAsset`.
 - **`S3AssetType` enum** — the canonical `s3Image` / `s3File` / `s3Video` discriminator.
 
 ## For consumers

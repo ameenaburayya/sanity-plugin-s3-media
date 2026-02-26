@@ -47,18 +47,30 @@ Decompose an asset document ID into its constituent parts.
 
 ```ts
 import {
-  parseFileAssetId,
-  parseImageAssetId,
-  parseVideoAssetId,
+  parseS3AssetId,
+  parseS3AssetFilename,
+  parseS3AssetUrl,
+  parseS3FileAssetId,
+  parseS3ImageAssetId,
+  parseS3VideoAssetId,
 } from 'sanity-plugin-s3-media-asset-utils'
 
-parseFileAssetId('s3File-abc123-pdf')
+parseS3FileAssetId('s3File-abc123-pdf')
 // → { type: 's3File', assetId: 'abc123', extension: 'pdf' }
 
-parseImageAssetId('s3Image-abc123-1920x1080-jpg')
+parseS3ImageAssetId('s3Image-abc123-1920x1080-jpg')
 // → { type: 's3Image', assetId: 'abc123', width: 1920, height: 1080, extension: 'jpg' }
 
-parseVideoAssetId('s3Video-abc123-1920x1080-mp4')
+parseS3VideoAssetId('s3Video-abc123-1920x1080-mp4')
+// → { type: 's3Video', assetId: 'abc123', width: 1920, height: 1080, extension: 'mp4' }
+
+parseS3AssetId('s3File-abc123-pdf')
+// → { type: 's3File', assetId: 'abc123', extension: 'pdf' }
+
+parseS3AssetFilename('abc123-1920x1080.mp4')
+// → { type: 's3Video', assetId: 'abc123', width: 1920, height: 1080, extension: 'mp4' }
+
+parseS3AssetUrl('https://cdn.example.com/assets/abc123-1920x1080.mp4')
 // → { type: 's3Video', assetId: 'abc123', width: 1920, height: 1080, extension: 'mp4' }
 ```
 
@@ -68,6 +80,7 @@ Resolve asset metadata from any source shape — document IDs, references, asset
 
 ```ts
 import {
+  getS3IdFromString,
   getS3AssetDocumentId,
   getS3AssetExtension,
   getS3ImageDimensions,
@@ -91,6 +104,9 @@ getS3ImageDimensions({_ref: 's3Image-abc123-1920x1080-jpg'})
 // Get plain width/height (no metadata wrapper)
 getS3ImageDimensionsFromSource({_ref: 's3Image-abc123-1920x1080-jpg'})
 // → { width: 1920, height: 1080 }
+
+getS3IdFromString('https://cdn.example.com/assets/abc123.pdf')
+// → "s3File-abc123-pdf"
 ```
 
 ### Safe variants
@@ -99,6 +115,8 @@ Each throwing resolver has a `try*` counterpart that returns `undefined` instead
 
 ```ts
 import {
+  tryGetS3IdFromString,
+  tryGetS3AssetDocumentId,
   tryGetS3AssetExtension,
   tryGetS3ImageDimensions,
   tryGetS3VideoDimensions,
@@ -107,6 +125,8 @@ import {
 tryGetS3AssetExtension(unknownValue) // string | undefined
 tryGetS3ImageDimensions(unknownValue) // S3ImageDimensions | undefined
 tryGetS3VideoDimensions(unknownValue) // S3VideoDimensions | undefined
+tryGetS3IdFromString(unknownValue) // string | undefined
+tryGetS3AssetDocumentId(unknownValue) // string | undefined
 ```
 
 ## Type guards
@@ -115,9 +135,14 @@ Narrow unknown values to specific S3 asset types.
 
 ```ts
 import {
+  isReference,
+  isS3AssetId,
   isS3FileAsset,
   isS3ImageAsset,
   isS3VideoAsset,
+  isS3FileUrl,
+  isS3ImageUrl,
+  isS3VideoUrl,
   isS3FileSource,
   isS3ImageSource,
   isS3VideoSource,

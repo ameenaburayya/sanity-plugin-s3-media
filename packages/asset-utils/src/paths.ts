@@ -1,17 +1,6 @@
-import {S3AssetType} from 'sanity-plugin-s3-media-types'
-
-import {
-  isReference,
-  isS3AssetId,
-  isS3AssetObjectStub,
-  isS3FileAsset,
-  isS3ImageAsset,
-  isS3VideoAsset,
-} from './asserters'
 import {s3AssetFilenamePattern} from './constants'
 import {UnresolvableError} from './errors'
-import {parseS3AssetId, parseS3FileAssetId, parseS3ImageAssetId, parseS3VideoAssetId} from './parse'
-import type {S3AssetSource} from './types'
+import {parseS3FileAssetId, parseS3ImageAssetId, parseS3VideoAssetId} from './parse'
 import {getForgivingResolver} from './utils'
 
 /**
@@ -23,20 +12,6 @@ export interface S3UrlBuilderOptions {
 
 function isAbsoluteUrl(value: string): boolean {
   return /^[a-zA-Z][a-zA-Z\d+.-]*:/.test(value)
-}
-
-function tryGetS3AssetPathFromId(documentId: string): string | undefined {
-  if (!isS3AssetId(documentId)) {
-    return undefined
-  }
-
-  const parsed = parseS3AssetId(documentId)
-
-  if (parsed.type === S3AssetType.FILE) {
-    return `${parsed.assetId}.${parsed.extension}`
-  }
-
-  return `${parsed.assetId}-${parsed.width}x${parsed.height}.${parsed.extension}`
 }
 
 /**
@@ -195,49 +170,3 @@ export function getS3UrlFilename(urlOrPath: string): string {
  * @public
  */
 export const tryGetS3UrlFilename = getForgivingResolver(getS3UrlFilename)
-
-/**
- * Tries to get the asset path from a given asset source
- *
- * @param src - The source asset to infer an asset path from
- * @returns A path if resolvable, undefined otherwise
- * @public
- */
-export function tryGetS3AssetPath(src: S3AssetSource): string | undefined {
-  if (isS3AssetObjectStub(src)) {
-    return tryGetS3AssetPath(src.asset as S3AssetSource)
-  }
-
-  if (isReference(src)) {
-    return undefined
-  }
-
-  const source = src as unknown
-
-  if (typeof source === 'string') {
-    const fromId = tryGetS3AssetPathFromId(source)
-    if (fromId) {
-      return fromId
-    }
-
-    if (isAbsoluteUrl(source)) {
-      return tryGetS3UrlPath(source)
-    }
-
-    const asPath = source.replace(/^\/+/, '')
-
-    if (asPath.includes('/')) {
-      return asPath.split('?')[0]?.split('#')[0]
-    }
-
-    return isValidS3Filename(asPath) ? asPath : undefined
-  }
-
-  const maybeAsset = source
-
-  if (isS3FileAsset(maybeAsset) || isS3ImageAsset(maybeAsset) || isS3VideoAsset(maybeAsset)) {
-    return tryGetS3AssetPathFromId(maybeAsset._id)
-  }
-
-  return undefined
-}

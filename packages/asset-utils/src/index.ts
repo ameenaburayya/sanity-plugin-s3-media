@@ -33,7 +33,6 @@ export {
   getS3UrlFilename,
   getS3UrlPath,
   isValidS3Filename,
-  tryGetS3AssetPath,
   tryGetS3UrlFilename,
   tryGetS3UrlPath,
 } from './paths'

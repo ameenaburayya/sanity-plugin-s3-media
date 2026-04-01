@@ -29,6 +29,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
+      - name: Build Workspace Packages
+        run: pnpm -r --filter './packages/**' --if-present --sort run build
       - name: Lint
         run: pnpm lint:ci
 

@@ -28,6 +28,7 @@ jobs:
           version: pnpm version-packages
           publish: pnpm release
         env:
+          HUSKY: '0'
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN || secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: ${{ github.event.repository.visibility == 'public' && 'true' || 'false' }}

@@ -1,9 +1,9 @@
-import {screen} from '@testing-library/react'
+import {LayerProvider, studioTheme, ThemeProvider} from '@sanity/ui'
+import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import {type ComponentProps} from 'react'
+import {type ComponentProps, type FC, type PropsWithChildren} from 'react'
 import {of} from 'rxjs'
 import {S3AssetType} from 'sanity-plugin-s3-media-types'
-import {renderWithStore} from 'src/test/renderWithStore'
 import type {S3AssetSource, S3AssetSourceComponentProps} from 'src/types'
 import {mockS3FileAsset} from 'test/fixtures'
 
@@ -11,21 +11,33 @@ import {S3FileInputAssetSource} from '../S3FileInputAssetSource'
 
 type S3FileInputAssetSourceProps = ComponentProps<typeof S3FileInputAssetSource>
 
+const Wrapper: FC<PropsWithChildren> = ({children}) => (
+  <ThemeProvider theme={studioTheme}>
+    <LayerProvider>{children}</LayerProvider>
+  </ThemeProvider>
+)
+
 const user = userEvent.setup()
 const resolvedAsset = {...mockS3FileAsset, _id: 'asset-resolved'}
 
 describe('S3FileInputAssetSource', () => {
   it('renders nothing when no source is selected', () => {
-    renderWithStore(
+    render(
       <S3FileInputAssetSource
         isUploading={false}
         observeAsset={vi.fn()}
         onSelectAssets={vi.fn()}
-        schemaType={{name: 's3File', options: {accept: 'application/pdf'}} as unknown as S3FileInputAssetSourceProps['schemaType']}
+        schemaType={
+          {
+            name: 's3File',
+            options: {accept: 'application/pdf'},
+          } as unknown as S3FileInputAssetSourceProps['schemaType']
+        }
         selectedAssetSource={null}
         setSelectedAssetSource={vi.fn()}
         value={{} as S3FileInputAssetSourceProps['value']}
       />,
+      {wrapper: Wrapper},
     )
 
     expect(screen.queryByText(/action:/)).not.toBeInTheDocument()
@@ -47,16 +59,22 @@ describe('S3FileInputAssetSource', () => {
       component: sourceComponentSpy,
     }
 
-    renderWithStore(
+    render(
       <S3FileInputAssetSource
         isUploading={false}
         observeAsset={vi.fn()}
         onSelectAssets={vi.fn()}
-        schemaType={{name: 's3File', options: {accept: 'application/pdf'}} as unknown as S3FileInputAssetSourceProps['schemaType']}
+        schemaType={
+          {
+            name: 's3File',
+            options: {accept: 'application/pdf'},
+          } as unknown as S3FileInputAssetSourceProps['schemaType']
+        }
         selectedAssetSource={selectedAssetSource}
         setSelectedAssetSource={vi.fn()}
         value={{_type: 's3File'} as S3FileInputAssetSourceProps['value']}
       />,
+      {wrapper: Wrapper},
     )
 
     expect(screen.getByText('action:select')).toBeInTheDocument()
@@ -88,7 +106,7 @@ describe('S3FileInputAssetSource', () => {
       component: sourceComponentSpy,
     }
 
-    renderWithStore(
+    render(
       <S3FileInputAssetSource
         isUploading
         observeAsset={observeAsset}
@@ -102,6 +120,7 @@ describe('S3FileInputAssetSource', () => {
           } as S3FileInputAssetSourceProps['value']
         }
       />,
+      {wrapper: Wrapper},
     )
 
     expect(screen.getByText('action:upload')).toBeInTheDocument()

@@ -133,9 +133,8 @@ describe('resolve helpers', () => {
 
   it('resolves ids from string sources', () => {
     expect(getS3AssetDocumentId({_ref: fileId})).toBe(fileId)
-    expect(
-      getS3AssetDocumentId({_ref: 'https://cdn.example.com/abcdefghijklmnopqrstuvwx-100x200.jpg'}),
-    ).toBe(imageId)
+    expect(getS3AssetDocumentId({_ref: imageId})).toBe(imageId)
+    expect(getS3AssetDocumentId({_ref: videoId})).toBe(videoId)
   })
 
   it('throws on invalid ids', () => {

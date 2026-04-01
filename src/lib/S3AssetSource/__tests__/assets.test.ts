@@ -1,8 +1,32 @@
 import {lastValueFrom, type Observable, of} from 'rxjs'
 import {toArray} from 'rxjs/operators'
+import {type SanityClient} from 'sanity'
 import {S3AssetType} from 'sanity-plugin-s3-media-types'
 
+import type {S3Client} from '../../S3Client'
 import {uploadS3Asset} from '../assets'
+
+const createSanityClient = (overrides: {
+  fetch: ReturnType<typeof vi.fn>
+  create: ReturnType<typeof vi.fn>
+}): SanityClient =>
+  ({
+    observable: {
+      fetch: overrides.fetch,
+      create: overrides.create,
+    },
+  }) as unknown as SanityClient
+
+const createS3Client = (overrides: {
+  uploadAsset: ReturnType<typeof vi.fn>
+}): S3Client =>
+  ({
+    observable: {
+      assets: {
+        uploadAsset: overrides.uploadAsset,
+      },
+    },
+  }) as unknown as S3Client
 
 const collectEvents = async <T>(stream$: Observable<T>): Promise<T[]> => {
   return lastValueFrom(stream$.pipe(toArray()))
@@ -43,8 +67,8 @@ describe('uploadS3Asset', () => {
       uploadS3Asset({
         file,
         assetType: S3AssetType.FILE,
-        sanityClient: {observable: {fetch, create}} as any,
-        s3Client: {observable: {assets: {uploadAsset}}} as any,
+        sanityClient: createSanityClient({fetch, create}),
+        s3Client: createS3Client({uploadAsset}),
       }),
     )
 
@@ -94,8 +118,8 @@ describe('uploadS3Asset', () => {
       uploadS3Asset({
         file,
         assetType: S3AssetType.FILE,
-        sanityClient: {observable: {fetch, create}} as any,
-        s3Client: {observable: {assets: {uploadAsset}}} as any,
+        sanityClient: createSanityClient({fetch, create}),
+        s3Client: createS3Client({uploadAsset}),
       }),
     )
 
@@ -132,20 +156,27 @@ describe('uploadS3Asset', () => {
 
     const createObjectURL = vi.fn(() => 'blob://image-preview')
     const revokeObjectURL = vi.fn()
+
     vi.stubGlobal('URL', {createObjectURL, revokeObjectURL})
 
     class ImageMock {
+      _src = ''
       width = 320
       height = 200
       onload: null | (() => void) = null
       onerror: null | (() => void) = null
 
+      get src() {
+        return this._src
+      }
+
       set src(_value: string) {
         this.onload?.()
+        this._src = _value
       }
     }
 
-    vi.stubGlobal('Image', ImageMock as any)
+    vi.stubGlobal('Image', ImageMock as unknown)
 
     const fetch = vi.fn(() => of(null))
     const createdAsset = {
@@ -174,8 +205,8 @@ describe('uploadS3Asset', () => {
         file,
         assetType: S3AssetType.IMAGE,
         options: {storeOriginalFilename: false},
-        sanityClient: {observable: {fetch, create}} as any,
-        s3Client: {observable: {assets: {uploadAsset}}} as any,
+        sanityClient: createSanityClient({fetch, create}),
+        s3Client: createS3Client({uploadAsset}),
       }),
     )
 
@@ -223,20 +254,27 @@ describe('uploadS3Asset', () => {
 
     const createObjectURL = vi.fn(() => 'blob://broken-preview')
     const revokeObjectURL = vi.fn()
+
     vi.stubGlobal('URL', {createObjectURL, revokeObjectURL})
 
     class BrokenImageMock {
+      _src = ''
       width = 0
       height = 0
       onload: null | (() => void) = null
       onerror: null | (() => void) = null
 
+      get src() {
+        return this._src
+      }
+
       set src(_value: string) {
         this.onerror?.()
+        this._src = _value
       }
     }
 
-    vi.stubGlobal('Image', BrokenImageMock as any)
+    vi.stubGlobal('Image', BrokenImageMock as unknown)
 
     const fetch = vi.fn(() => of(null))
     const create = vi.fn(() =>
@@ -251,8 +289,8 @@ describe('uploadS3Asset', () => {
       uploadS3Asset({
         file,
         assetType: S3AssetType.IMAGE,
-        sanityClient: {observable: {fetch, create}} as any,
-        s3Client: {observable: {assets: {uploadAsset}}} as any,
+        sanityClient: createSanityClient({fetch, create}),
+        s3Client: createS3Client({uploadAsset}),
       }),
     )
 
@@ -284,6 +322,7 @@ describe('uploadS3Asset', () => {
 
     const createObjectURL = vi.fn()
     const revokeObjectURL = vi.fn()
+
     vi.stubGlobal('URL', {createObjectURL, revokeObjectURL})
 
     const fetch = vi.fn(() => of(null))
@@ -299,8 +338,8 @@ describe('uploadS3Asset', () => {
       uploadS3Asset({
         file,
         assetType: S3AssetType.IMAGE,
-        sanityClient: {observable: {fetch, create}} as any,
-        s3Client: {observable: {assets: {uploadAsset}}} as any,
+        sanityClient: createSanityClient({fetch, create}),
+        s3Client: createS3Client({uploadAsset}),
       }),
     )
 
@@ -335,8 +374,8 @@ describe('uploadS3Asset', () => {
       uploadS3Asset({
         file,
         assetType: S3AssetType.FILE,
-        sanityClient: {observable: {fetch, create}} as any,
-        s3Client: {observable: {assets: {uploadAsset}}} as any,
+        sanityClient: createSanityClient({fetch, create}),
+        s3Client: createS3Client({uploadAsset}),
       }),
     )
 
@@ -371,17 +410,24 @@ describe('uploadS3Asset', () => {
 
     const createObjectURL = vi.fn(() => 'blob://video-preview')
     const revokeObjectURL = vi.fn()
+
     vi.stubGlobal('URL', {createObjectURL, revokeObjectURL})
 
     class VideoMock {
+      _src = ''
       videoWidth = 1920
       videoHeight = 1080
       preload = ''
       onloadedmetadata: null | (() => void) = null
       onerror: null | (() => void) = null
 
+      get src() {
+        return this._src
+      }
+
       set src(_value: string) {
         this.onloadedmetadata?.()
+        this._src = _value
       }
 
       removeAttribute = vi.fn()
@@ -425,8 +471,8 @@ describe('uploadS3Asset', () => {
         file,
         assetType: S3AssetType.VIDEO,
         options: {storeOriginalFilename: false},
-        sanityClient: {observable: {fetch, create}} as any,
-        s3Client: {observable: {assets: {uploadAsset}}} as any,
+        sanityClient: createSanityClient({fetch, create}),
+        s3Client: createS3Client({uploadAsset}),
       }),
     )
 
@@ -470,17 +516,24 @@ describe('uploadS3Asset', () => {
   it('throws when video dimensions cannot be read from a video file', async () => {
     const createObjectURL = vi.fn(() => 'blob://broken-video')
     const revokeObjectURL = vi.fn()
+
     vi.stubGlobal('URL', {createObjectURL, revokeObjectURL})
 
     class BrokenVideoMock {
+      _src = ''
       videoWidth = 0
       videoHeight = 0
       preload = ''
       onloadedmetadata: null | (() => void) = null
       onerror: null | (() => void) = null
 
+      get src() {
+        return this._src
+      }
+
       set src(_value: string) {
         this.onerror?.()
+        this._src = _value
       }
 
       removeAttribute = vi.fn()
@@ -506,8 +559,8 @@ describe('uploadS3Asset', () => {
         uploadS3Asset({
           file: new File(['video'], 'clip.mp4', {type: 'video/mp4'}),
           assetType: S3AssetType.VIDEO,
-          sanityClient: {observable: {fetch, create}} as any,
-          s3Client: {observable: {assets: {uploadAsset}}} as any,
+          sanityClient: createSanityClient({fetch, create}),
+          s3Client: createS3Client({uploadAsset}),
         }),
       ),
     ).rejects.toThrow('Unable to determine video dimensions')
@@ -524,8 +577,13 @@ describe('uploadS3Asset', () => {
         uploadS3Asset({
           file: new File(['txt'], 'notes.txt', {type: 'text/plain'}),
           assetType: S3AssetType.VIDEO,
-          sanityClient: {observable: {fetch: vi.fn(), create: vi.fn()}} as any,
-          s3Client: {observable: {assets: {uploadAsset: vi.fn()}}} as any,
+          sanityClient: createSanityClient({
+            fetch: vi.fn(() => of(null)),
+            create: vi.fn(() => of(null)),
+          }),
+          s3Client: createS3Client({
+            uploadAsset: vi.fn(() => of({type: 'response'})),
+          }),
         }),
       ),
     ).rejects.toThrow('Unable to determine video dimensions')

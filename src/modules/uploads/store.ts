@@ -30,6 +30,7 @@ const uploadsSlice = createSlice({
     builder //
       .addCase(UPLOADS_ACTIONS.uploadComplete, (state, action) => {
         const {asset} = action.payload
+
         if (state.byIds[asset.sha1hash]) {
           state.byIds[asset.sha1hash].status = 'complete'
         }
@@ -46,12 +47,14 @@ const uploadsSlice = createSlice({
 
       assetHashes.forEach((hash) => {
         const deleteIndex = state.allIds.indexOf(hash)
+
         if (deleteIndex >= 0) {
           state.allIds.splice(deleteIndex, 1)
         }
 
         if (state.byIds[hash]) {
           const blobUrl = state.byIds[hash].objectUrl
+
           if (blobUrl) {
             window.URL.revokeObjectURL(blobUrl)
           }
@@ -62,6 +65,7 @@ const uploadsSlice = createSlice({
     },
     previewReady(state, action: PayloadAction<{hash: string; blobUrl: string}>) {
       const {blobUrl, hash} = action.payload
+
       if (state.byIds[hash]) {
         state.byIds[hash].objectUrl = blobUrl
       }
@@ -69,6 +73,7 @@ const uploadsSlice = createSlice({
     uploadCancel(state, action: PayloadAction<{hash: string}>) {
       const {hash} = action.payload
       const deleteIndex = state.allIds.indexOf(hash)
+
       if (deleteIndex >= 0) {
         state.allIds.splice(deleteIndex, 1)
       }
@@ -79,6 +84,7 @@ const uploadsSlice = createSlice({
     uploadError(state, action: PayloadAction<{error: HttpError; hash: string}>) {
       const {hash} = action.payload
       const deleteIndex = state.allIds.indexOf(hash)
+
       if (deleteIndex >= 0) {
         state.allIds.splice(deleteIndex, 1)
       }
@@ -90,6 +96,7 @@ const uploadsSlice = createSlice({
     },
     uploadProgress(state, action: PayloadAction<{event: UploadProgressEvent; uploadHash: string}>) {
       const {event, uploadHash} = action.payload
+
       state.byIds[uploadHash].percent = event.percent
       state.byIds[uploadHash].status = 'uploading'
     },
@@ -194,6 +201,7 @@ export const uploadsAssetUploadEpic: Epic = (action$, state$) =>
         // Ignore if the file exists and is currently being uploaded
         filter((hash) => {
           const exists = !!state.uploads.byIds[hash]
+
           return !exists
         }),
         // Dispatch start action and begin upload process

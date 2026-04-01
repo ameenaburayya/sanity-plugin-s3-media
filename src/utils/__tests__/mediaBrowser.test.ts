@@ -1,4 +1,6 @@
+import type {SanityDocument} from '@sanity/client'
 import {hues} from '@sanity/color'
+import type {S3ImageAsset} from 'sanity-plugin-s3-media-types'
 import {S3AssetType} from 'sanity-plugin-s3-media-types'
 
 import {
@@ -18,10 +20,12 @@ describe('media browser helpers', () => {
     const baseFilter = constructFilter({
       assetTypes: [S3AssetType.FILE, S3AssetType.IMAGE, S3AssetType.VIDEO],
     })
+
     expect(baseFilter).toContain('_type in ["s3FileAsset","s3ImageAsset","s3VideoAsset"]')
     expect(baseFilter).toContain('!(_id in path("drafts.**"))')
 
     const searchFilter = constructFilter({assetTypes: [S3AssetType.FILE], searchQuery: '  cats '})
+
     expect(searchFilter).toContain("match '*cats*'")
   })
 
@@ -34,25 +38,30 @@ describe('media browser helpers', () => {
         {asset: {_type: 'reference', _ref: fileId}},
         {asset: {_type: 'reference', _ref: imageId}},
       ],
-    } as any
+    } as unknown as SanityDocument
 
     expect(getDocumentAssetIds(doc)).toEqual([fileId, imageId].sort())
   })
 
   it('prefers drafts over published documents', () => {
-    const docs = [{_id: 'drafts.alpha'}, {_id: 'alpha'}, {_id: 'beta'}] as any
-    expect(getUniqueDocuments(docs).map((doc: any) => doc._id)).toEqual(['drafts.alpha', 'beta'])
+    const docs = [{_id: 'drafts.alpha'}, {_id: 'alpha'}, {_id: 'beta'}] as unknown as SanityDocument[]
+
+    expect(getUniqueDocuments(docs).map((doc: SanityDocument) => doc._id)).toEqual([
+      'drafts.alpha',
+      'beta',
+    ])
   })
 
   it('formats asset resolution strings', () => {
-    const asset = {metadata: {dimensions: {width: 120, height: 80}}} as any
+    const asset = {metadata: {dimensions: {width: 120, height: 80}}} as S3ImageAsset
+
     expect(getAssetResolution(asset)).toBe('120x80px')
   })
 
   it('returns themed colors by scheme', () => {
     expect(getSchemeColor('dark', 'bg')).toBe(hues.gray[950].hex)
     expect(getSchemeColor('light', 'bg')).toBe(hues.gray[50].hex)
-    expect(getSchemeColor('dark', 'missing' as any)).toBeUndefined()
+    expect(getSchemeColor('dark', undefined as never)).toBeUndefined()
   })
 
   it('validates supported asset types', () => {

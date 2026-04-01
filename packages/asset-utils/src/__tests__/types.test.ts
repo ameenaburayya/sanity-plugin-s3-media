@@ -18,6 +18,7 @@ import type {
 describe('types', () => {
   it('has no runtime exports (type-only module)', async () => {
     const mod = await import('../types')
+
     expect(Object.keys(mod)).toHaveLength(0)
   })
 

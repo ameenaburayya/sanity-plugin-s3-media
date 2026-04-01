@@ -1,10 +1,15 @@
 import type {SanityDocument} from '@sanity/client'
+import {isReference} from 'sanity-plugin-s3-media-asset-utils'
 
-const isPlainObject = (value: any) =>
+type JsonPrimitive = string | number | boolean | null
+type JsonValue = JsonPrimitive | { [key: string]: JsonValue } | JsonValue[]
+
+const isPlainObject = (value: unknown): value is Record<string, JsonValue> =>
   value !== null && typeof value === 'object' && !Array.isArray(value)
 
+
 // Recursively search node for any linked asset ids (`asset._type === 'reference'`)
-const getAssetIds = (node: Record<string, any>, acc: string[] = []) => {
+const getAssetIds = (node: JsonValue, acc: string[] = []) => {
   if (Array.isArray(node)) {
     node.forEach((v) => {
       getAssetIds(v, acc)
@@ -12,8 +17,10 @@ const getAssetIds = (node: Record<string, any>, acc: string[] = []) => {
   }
 
   if (isPlainObject(node)) {
-    if (node?.asset?._type === 'reference' && node?.asset?._ref) {
-      acc.push(node.asset._ref)
+    const asset = isPlainObject(node.asset) ? (node.asset as Record<string, JsonValue>) : undefined
+
+    if (asset && isReference(asset)) {
+      acc.push(asset._ref)
     }
 
     Object.values(node).forEach((val) => {

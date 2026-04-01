@@ -1,3 +1,5 @@
+import type {RootReducerState} from 'src/types'
+
 import {selectCombinedItems} from '../selectors'
 
 describe('selectCombinedItems', () => {
@@ -5,7 +7,7 @@ describe('selectCombinedItems', () => {
     const state = {
       assets: {allIds: ['asset-1', 'asset-2']},
       uploads: {allIds: ['upload-1']},
-    } as any
+    } as unknown as RootReducerState
 
     expect(selectCombinedItems(state)).toEqual([
       {id: 'upload-1', type: 'upload'},
@@ -18,7 +20,7 @@ describe('selectCombinedItems', () => {
     const state = {
       assets: {allIds: []},
       uploads: {allIds: []},
-    } as any
+    } as unknown as RootReducerState
 
     expect(selectCombinedItems(state)).toEqual([])
   })

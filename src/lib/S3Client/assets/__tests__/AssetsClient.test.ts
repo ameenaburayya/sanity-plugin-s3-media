@@ -1,10 +1,14 @@
 import {lastValueFrom} from 'rxjs'
 import {S3AssetType} from 'sanity-plugin-s3-media-types'
 
+import type {ObservableS3Client} from '../../S3Client'
+import {type HttpRequestEvent, type S3ClientConfig} from '../../types'
 import * as validators from '../../validators'
 import {AssetsClient, ObservableAssetsClient} from '../AssetsClient'
 
-const baseConfig = {
+type XMLHttpRequestBodyInit = string | ArrayBuffer | Uint8Array | Blob | FormData | URLSearchParams | null
+
+const baseConfig: S3ClientConfig = {
   bucketRegion: 'us-east-1',
   bucketKey: 'bucket-key',
   getSignedUrlEndpoint: 'https://api.example.com/sign',
@@ -12,16 +16,14 @@ const baseConfig = {
   secret: 'top-secret',
 }
 
-const createClient = (overrides: Record<string, unknown> = {}) => {
+
+const createClient = (overrides: Partial<S3ClientConfig> = {}): ObservableS3Client => {
   return {
     config: vi.fn(() => ({...baseConfig, ...overrides})),
-  }
+  } as unknown as ObservableS3Client
 }
 
-const file = {
-  size: 100,
-  type: 'image/png',
-} as File
+const file = new File([new Uint8Array(100)], 'photo.png', {type: 'image/png'})
 
 const flush = async () => {
   await Promise.resolve()
@@ -32,7 +34,7 @@ class MockXMLHttpRequest {
   static instances: MockXMLHttpRequest[] = []
 
   upload = {
-    onprogress: null as null | ((event: any) => void),
+    onprogress: null as null | ((event: ProgressEvent<XMLHttpRequestEventTarget>) => void),
   }
   onload: null | (() => void) = null
   onerror: null | (() => void) = null
@@ -41,7 +43,7 @@ class MockXMLHttpRequest {
   method = ''
   url = ''
   requestHeaders: Record<string, string> = {}
-  body: unknown
+  body: XMLHttpRequestBodyInit | null = null
 
   constructor() {
     MockXMLHttpRequest.instances.push(this)
@@ -56,7 +58,7 @@ class MockXMLHttpRequest {
     this.requestHeaders[name] = value
   })
 
-  send = vi.fn((body: unknown) => {
+  send = vi.fn((body: XMLHttpRequestBodyInit | null) => {
     this.body = body
   })
 }
@@ -65,7 +67,7 @@ describe('AssetsClient upload', () => {
   beforeEach(() => {
     MockXMLHttpRequest.instances = []
     vi.stubGlobal('fetch', vi.fn())
-    vi.stubGlobal('XMLHttpRequest', MockXMLHttpRequest as any)
+    vi.stubGlobal('XMLHttpRequest', MockXMLHttpRequest)
     vi.spyOn(URL, 'canParse').mockReturnValue(true)
   })
 
@@ -87,7 +89,7 @@ describe('AssetsClient upload', () => {
     ],
     ['secret', {secret: undefined}, 'S3Client: Missing required config field: secret'],
   ])('throws when required config field %s is missing', (_field, overrides, message) => {
-    const observableClient = new ObservableAssetsClient(createClient(overrides) as any)
+    const observableClient = new ObservableAssetsClient(createClient(overrides))
 
     expect(() =>
       observableClient.uploadAsset({
@@ -99,7 +101,7 @@ describe('AssetsClient upload', () => {
   })
 
   it('throws when fileName is missing', () => {
-    const observableClient = new ObservableAssetsClient(createClient() as any)
+    const observableClient = new ObservableAssetsClient(createClient())
 
     expect(() =>
       observableClient.uploadAsset({
@@ -115,7 +117,7 @@ describe('AssetsClient upload', () => {
       .spyOn(validators, 'validateAssetType')
       .mockImplementation(() => undefined)
 
-    const observableClient = new ObservableAssetsClient(createClient() as any)
+    const observableClient = new ObservableAssetsClient(createClient())
 
     observableClient.uploadAsset({
       assetType: S3AssetType.IMAGE,
@@ -128,13 +130,14 @@ describe('AssetsClient upload', () => {
 
   it('emits upload progress and response events on successful upload', async () => {
     const fetchMock = vi.mocked(globalThis.fetch)
+
     fetchMock.mockResolvedValue({
       json: vi.fn().mockResolvedValue({url: 'https://s3.example.com/upload/photo.png'}),
-    } as any)
+    } as unknown as Response)
 
-    const observableClient = new ObservableAssetsClient(createClient() as any)
+    const observableClient = new ObservableAssetsClient(createClient())
 
-    const events: any[] = []
+    const events: HttpRequestEvent[] = []
     const completion = new Promise<void>((resolve, reject) => {
       observableClient
         .uploadAsset({
@@ -152,12 +155,13 @@ describe('AssetsClient upload', () => {
     await flush()
 
     const xhr = MockXMLHttpRequest.instances[0]
+
     expect(xhr).toBeDefined()
 
-    xhr.upload.onprogress?.({lengthComputable: false, loaded: 0, total: 0})
+    xhr.upload.onprogress?.({lengthComputable: false, loaded: 0, total: 0} as unknown as ProgressEvent<XMLHttpRequestEventTarget>)
     expect(events).toHaveLength(1)
 
-    xhr.upload.onprogress?.({lengthComputable: true, loaded: 25, total: 100})
+    xhr.upload.onprogress?.({lengthComputable: true, loaded: 25, total: 100} as unknown as ProgressEvent<XMLHttpRequestEventTarget>)
 
     xhr.status = 201
     xhr.statusText = 'Created'
@@ -174,7 +178,8 @@ describe('AssetsClient upload', () => {
       }),
     )
 
-    const requestBody = JSON.parse((fetchMock.mock.calls[0][1] as any).body)
+    const requestBody = JSON.parse(fetchMock.mock.calls[0][1]!.body as string)
+
     expect(requestBody).toEqual({
       secret: 'top-secret',
       fileName: 'photo.png',
@@ -190,7 +195,7 @@ describe('AssetsClient upload', () => {
     expect(events).toHaveLength(4)
     expect(events[0]).toMatchObject({type: 'progress', percent: 5, stage: 'upload'})
     expect(events[1]).toMatchObject({type: 'progress', stage: 'upload', loaded: 25, total: 100})
-    expect(events[1].percent).toBeCloseTo(32.5)
+    expect((events[1] as {percent?: number}).percent).toBeCloseTo(32.5)
     expect(events[2]).toMatchObject({type: 'progress', percent: 100, loaded: 100, total: 100})
     expect(events[3]).toEqual({
       type: 'response',
@@ -203,14 +208,15 @@ describe('AssetsClient upload', () => {
 
   it('treats missing file size as zero in progress events', async () => {
     const fetchMock = vi.mocked(globalThis.fetch)
+
     fetchMock.mockResolvedValue({
       json: vi.fn().mockResolvedValue({url: 'https://s3.example.com/upload/empty.png'}),
-    } as any)
+    } as unknown as Response)
 
-    const observableClient = new ObservableAssetsClient(createClient() as any)
-    const emptyFile = {size: 0, type: 'image/png'} as File
+    const observableClient = new ObservableAssetsClient(createClient())
+    const emptyFile = new File([], 'empty.png', {type: 'image/png'})
 
-    const events: any[] = []
+    const events: HttpRequestEvent[] = []
     const completion = new Promise<void>((resolve, reject) => {
       observableClient
         .uploadAsset({
@@ -228,6 +234,7 @@ describe('AssetsClient upload', () => {
     await flush()
 
     const xhr = MockXMLHttpRequest.instances[0]
+
     xhr.status = 200
     xhr.statusText = 'OK'
     xhr.onload?.()
@@ -242,11 +249,12 @@ describe('AssetsClient upload', () => {
     vi.spyOn(URL, 'canParse').mockReturnValue(false)
 
     const fetchMock = vi.mocked(globalThis.fetch)
+
     fetchMock.mockResolvedValue({
       json: vi.fn().mockResolvedValue({url: 'invalid-url'}),
-    } as any)
+    } as unknown as Response)
 
-    const observableClient = new ObservableAssetsClient(createClient() as any)
+    const observableClient = new ObservableAssetsClient(createClient())
 
     await expect(
       lastValueFrom(
@@ -263,9 +271,10 @@ describe('AssetsClient upload', () => {
 
   it('errors when signed URL request fails', async () => {
     const fetchMock = vi.mocked(globalThis.fetch)
+
     fetchMock.mockRejectedValue(new Error('signing endpoint unavailable'))
 
-    const observableClient = new ObservableAssetsClient(createClient() as any)
+    const observableClient = new ObservableAssetsClient(createClient())
 
     await expect(
       lastValueFrom(
@@ -280,11 +289,12 @@ describe('AssetsClient upload', () => {
 
   it('errors when S3 upload returns a non-2xx status', async () => {
     const fetchMock = vi.mocked(globalThis.fetch)
+
     fetchMock.mockResolvedValue({
       json: vi.fn().mockResolvedValue({url: 'https://s3.example.com/upload/photo.png'}),
-    } as any)
+    } as unknown as Response)
 
-    const observableClient = new ObservableAssetsClient(createClient() as any)
+    const observableClient = new ObservableAssetsClient(createClient())
 
     const promise = lastValueFrom(
       observableClient.uploadAsset({
@@ -297,6 +307,7 @@ describe('AssetsClient upload', () => {
     await flush()
 
     const xhr = MockXMLHttpRequest.instances[0]
+
     xhr.status = 403
     xhr.statusText = 'Forbidden'
     xhr.onload?.()
@@ -306,11 +317,12 @@ describe('AssetsClient upload', () => {
 
   it('errors on xhr network failures', async () => {
     const fetchMock = vi.mocked(globalThis.fetch)
+
     fetchMock.mockResolvedValue({
       json: vi.fn().mockResolvedValue({url: 'https://s3.example.com/upload/photo.png'}),
-    } as any)
+    } as unknown as Response)
 
-    const observableClient = new ObservableAssetsClient(createClient() as any)
+    const observableClient = new ObservableAssetsClient(createClient())
 
     const promise = lastValueFrom(
       observableClient.uploadAsset({
@@ -323,6 +335,7 @@ describe('AssetsClient upload', () => {
     await flush()
 
     const xhr = MockXMLHttpRequest.instances[0]
+
     xhr.onerror?.()
 
     await expect(promise).rejects.toThrow('S3 upload failed: Network error')
@@ -330,11 +343,12 @@ describe('AssetsClient upload', () => {
 
   it('returns only the final response event from promise-based uploadAsset', async () => {
     const fetchMock = vi.mocked(globalThis.fetch)
+
     fetchMock.mockResolvedValue({
       json: vi.fn().mockResolvedValue({url: 'https://s3.example.com/upload/photo.png'}),
-    } as any)
+    } as unknown as Response)
 
-    const client = new AssetsClient(createClient() as any)
+    const client = new AssetsClient(createClient() as unknown as import('../..').S3Client)
 
     const promise = client.uploadAsset({
       assetType: S3AssetType.IMAGE,
@@ -345,7 +359,8 @@ describe('AssetsClient upload', () => {
     await flush()
 
     const xhr = MockXMLHttpRequest.instances[0]
-    xhr.upload.onprogress?.({lengthComputable: true, loaded: 30, total: 100})
+
+    xhr.upload.onprogress?.({lengthComputable: true, loaded: 30, total: 100} as unknown as ProgressEvent<XMLHttpRequestEventTarget>)
     xhr.status = 200
     xhr.statusText = 'OK'
     xhr.onload?.()
@@ -371,7 +386,7 @@ describe('AssetsClient delete', () => {
 
   it('throws when deleteEndpoint is missing', () => {
     const observableClient = new ObservableAssetsClient(
-      createClient({deleteEndpoint: undefined}) as any,
+      createClient({deleteEndpoint: undefined}),
     )
 
     expect(() => observableClient.deleteAsset({fileName: 'photo.png'})).toThrow(
@@ -380,7 +395,7 @@ describe('AssetsClient delete', () => {
   })
 
   it('throws when fileName is missing', () => {
-    const observableClient = new ObservableAssetsClient(createClient() as any)
+    const observableClient = new ObservableAssetsClient(createClient())
 
     expect(() => observableClient.deleteAsset({fileName: ''})).toThrow(
       'S3Client: fileKey is required in options',
@@ -389,13 +404,14 @@ describe('AssetsClient delete', () => {
 
   it('emits response event when delete succeeds', async () => {
     const fetchMock = vi.mocked(globalThis.fetch)
+
     fetchMock.mockResolvedValue({
       ok: true,
       status: 204,
       statusText: 'No Content',
-    } as any)
+    } as Response)
 
-    const observableClient = new ObservableAssetsClient(createClient() as any)
+    const observableClient = new ObservableAssetsClient(createClient())
 
     await expect(
       lastValueFrom(observableClient.deleteAsset({fileName: 'photo.png'})),
@@ -416,7 +432,8 @@ describe('AssetsClient delete', () => {
       }),
     )
 
-    const requestBody = JSON.parse((fetchMock.mock.calls[0][1] as any).body)
+    const requestBody = JSON.parse(fetchMock.mock.calls[0][1]!.body as string)
+
     expect(requestBody).toEqual({
       fileKey: 'photo.png',
       secret: 'top-secret',
@@ -427,13 +444,14 @@ describe('AssetsClient delete', () => {
 
   it('errors when delete endpoint responds with non-ok status', async () => {
     const fetchMock = vi.mocked(globalThis.fetch)
+
     fetchMock.mockResolvedValue({
       ok: false,
       status: 500,
       statusText: 'Internal Server Error',
-    } as any)
+    } as Response)
 
-    const observableClient = new ObservableAssetsClient(createClient() as any)
+    const observableClient = new ObservableAssetsClient(createClient())
 
     await expect(
       lastValueFrom(observableClient.deleteAsset({fileName: 'photo.png'})),
@@ -442,9 +460,10 @@ describe('AssetsClient delete', () => {
 
   it('errors when delete request throws', async () => {
     const fetchMock = vi.mocked(globalThis.fetch)
+
     fetchMock.mockRejectedValue(new Error('delete endpoint unavailable'))
 
-    const observableClient = new ObservableAssetsClient(createClient() as any)
+    const observableClient = new ObservableAssetsClient(createClient())
 
     await expect(
       lastValueFrom(observableClient.deleteAsset({fileName: 'photo.png'})),
@@ -453,13 +472,14 @@ describe('AssetsClient delete', () => {
 
   it('returns final response event from promise-based deleteAsset', async () => {
     const fetchMock = vi.mocked(globalThis.fetch)
+
     fetchMock.mockResolvedValue({
       ok: true,
       status: 200,
       statusText: 'OK',
-    } as any)
+    } as Response)
 
-    const client = new AssetsClient(createClient() as any)
+    const client = new AssetsClient(createClient() as unknown as import('../..').S3Client)
 
     await expect(client.deleteAsset({fileName: 'photo.png'})).resolves.toEqual({
       type: 'response',

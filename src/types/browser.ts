@@ -4,7 +4,7 @@ import type {Epic as BaseEpic} from 'redux-observable'
 import type {S3Asset, S3AssetType} from 'sanity-plugin-s3-media-types'
 
 import type {S3Client} from '../lib'
-import type {RootReducerState} from '.'
+import type {RootReducerState} from './module'
 
 export type AssetItem = {
   _type: 'asset'

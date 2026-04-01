@@ -53,6 +53,7 @@ export const S3ImageInputAsset: FC<S3ImageInputAssetProps> = (props) => {
 
   const customProperties = useMemo(() => {
     const {width = 0, height = 0} = value?.asset ? tryGetS3ImageDimensions(value.asset) || {} : {}
+
     return {'--image-width': width, '--image-height': height} as CSSProperties
   }, [value])
 
@@ -66,24 +67,18 @@ export const S3ImageInputAsset: FC<S3ImageInputAssetProps> = (props) => {
     [onSelectFile],
   )
 
-  const handleFileTargetFocus = useCallback(
-    (event: FocusEvent) => {
-      // We want to handle focus when the file target element *itself* receives
-      // focus, not when an interactive child element receives focus. Since React has decided
-      // to let focus bubble, so this workaround is needed
-      // Background: https://github.com/facebook/react/issues/6410#issuecomment-671915381
-      if (
-        event.currentTarget === event.target &&
-        event.currentTarget === elementProps.ref?.current
-      ) {
-        inputProps.elementProps.onFocus(event)
-      }
-    },
-    [inputProps, elementProps.ref?.current],
-  )
+  const handleFileTargetFocus = (event: FocusEvent) => {
+    // We want to handle focus when the file target element *itself* receives
+    // focus, not when an interactive child element receives focus. Since React has decided
+    // to let focus bubble, so this workaround is needed
+    // Background: https://github.com/facebook/react/issues/6410#issuecomment-671915381
+    if (event.currentTarget === event.target && event.currentTarget === elementProps.ref?.current) {
+      inputProps.elementProps.onFocus(event)
+    }
+  }
 
   return (
-    <div style={customProperties}>
+    <div data-testid="s3-image-input-asset" style={customProperties}>
       {isStale && (
         <Box marginBottom={2}>
           <UploadWarning onClearStale={handleClearUploadState} />

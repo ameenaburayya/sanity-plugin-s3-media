@@ -25,7 +25,8 @@ describe('imageUrlToBlob', () => {
     }
 
     const createElement = vi.fn(() => canvas)
-    vi.stubGlobal('document', {createElement})
+
+    vi.stubGlobal('document', {createElement} as unknown as Pick<Document, 'createElement'>)
 
     class ImageMock {
       static lastInstance: ImageMock | null = null
@@ -40,11 +41,18 @@ describe('imageUrlToBlob', () => {
       }
 
       set src(_value: string) {
+        this.#srcValue = _value
         this.onload?.()
       }
+
+      get src() {
+        return this.#srcValue
+      }
+
+      #srcValue = ''
     }
 
-    vi.stubGlobal('Image', ImageMock as any)
+    vi.stubGlobal('Image', ImageMock as unknown as typeof Image)
 
     const result = await imageUrlToBlob('https://cdn.example.com/photo.jpg', 'image/png', 0.75)
 
@@ -69,7 +77,7 @@ describe('imageUrlToBlob', () => {
 
     vi.stubGlobal('document', {
       createElement: vi.fn(() => canvas),
-    })
+    } as unknown as Pick<Document, 'createElement'>)
 
     class ImageMock {
       width = 100
@@ -79,11 +87,18 @@ describe('imageUrlToBlob', () => {
       onload: null | (() => void) = null
 
       set src(_value: string) {
+        this.#srcValue = _value
         this.onload?.()
       }
+
+      get src() {
+        return this.#srcValue
+      }
+
+      #srcValue = ''
     }
 
-    vi.stubGlobal('Image', ImageMock as any)
+    vi.stubGlobal('Image', ImageMock as unknown as typeof Image)
 
     await expect(imageUrlToBlob('https://cdn.example.com/photo.jpg')).rejects.toThrow(
       'canvas serialization failed',

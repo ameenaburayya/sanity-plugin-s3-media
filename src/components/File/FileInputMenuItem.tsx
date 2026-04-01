@@ -58,6 +58,7 @@ export const FileInputMenuItem: FC<
         <input
           accept={accept}
           capture={capture}
+          data-testid="file-input"
           id={id}
           multiple={multiple}
           onChange={handleChange}

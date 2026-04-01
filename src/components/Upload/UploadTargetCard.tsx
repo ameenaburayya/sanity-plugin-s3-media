@@ -2,7 +2,7 @@ import {AccessDeniedIcon, UploadIcon} from '@sanity/icons'
 import {Box, Card, type CardTone, Flex, Inline, Layer, Text, useToast} from '@sanity/ui'
 import {uniqBy} from 'lodash'
 import {type FC, type ReactNode, useCallback, useMemo, useRef, useState} from 'react'
-import {type FileLike, type InputOnSelectFileFunctionProps, type SchemaType,useTranslation} from 'sanity'
+import {type FileLike, type InputOnSelectFileFunctionProps, type SchemaType} from 'sanity'
 import {styled} from 'styled-components'
 
 import type {FileInfo, S3AssetSource, S3FileSchemaType, S3ImageSchemaType} from '../../types'
@@ -129,7 +129,6 @@ export const UploadTargetCard: FC<UploadTargetCardProps> = (props) => {
   const FileTarget = UploadFileTarget(StyledCard)
 
   const {push: pushToast} = useToast()
-  const {t} = useTranslation()
 
   const [filesToUpload, setFilesToUpload] = useState<File[]>([])
   const [showAssetSourceDestinationPicker, setShowAssetSourceDestinationPicker] = useState(false)
@@ -141,15 +140,16 @@ export const UploadTargetCard: FC<UploadTargetCardProps> = (props) => {
 
   const alertRejectedFiles = useCallback(
     (rejected: FileEntry[]) => {
+      const isSingle = rejected.length === 1
+
       pushToast({
         closable: true,
         status: 'warning',
-        title: t('inputs.array.error.cannot-upload-unable-to-convert', {
-          count: rejected.length,
-        }),
-        description: rejected.map((task, i) => (
-          // oxlint-disable-next-line no-array-index-key
-          <Flex key={i} gap={2} padding={2}>
+        title: isSingle
+          ? "The following item can't be uploaded because there's no known conversion from content type to array item:"
+          : "The following items can't be uploaded because there's no known conversion from content types to array item:",
+        description: rejected.map((task) => (
+          <Flex key={`${task.file.name}-${task.file.type}`} gap={2} padding={2}>
             <Box>
               <Text weight="medium">{task.file.name}</Text>
             </Box>
@@ -160,7 +160,7 @@ export const UploadTargetCard: FC<UploadTargetCardProps> = (props) => {
         )),
       })
     },
-    [pushToast, t],
+    [pushToast],
   )
 
   // This is called after the user has dropped or pasted files and selected an asset source destination (if applicable)
@@ -217,6 +217,7 @@ export const UploadTargetCard: FC<UploadTargetCardProps> = (props) => {
       }
 
       const uniqueAssetSources = uniqBy(assetSourcesWithUpload, 'name')
+
       if (uniqueAssetSources.length > 1 && !assetSourceDestinationName.current) {
         setShowAssetSourceDestinationPicker(true)
         setFilesToUpload(files)
@@ -300,12 +301,7 @@ export const UploadTargetCard: FC<UploadTargetCardProps> = (props) => {
     assetSourceDestinationName.current = null
   }, [handleFilesOver])
 
-  const uploadDestinationPickerText = t(
-    'inputs.files.common.placeholder.select-asset-source-upload-destination',
-    {
-      context: schemaType.name,
-    },
-  )
+  const uploadDestinationPickerText = 'Upload files to:'
 
   const acceptedFiles = hoveringFiles.filter((file) => fileMatchesSchema(file, schemaType))
 
@@ -339,7 +335,7 @@ export const UploadTargetCard: FC<UploadTargetCardProps> = (props) => {
                     <Text>
                       <UploadIcon />
                     </Text>
-                    {t('inputs.files.common.drop-message.drop-to-upload')}
+                    Drop to upload
                     <Text />
                   </Inline>
 
@@ -350,12 +346,9 @@ export const UploadTargetCard: FC<UploadTargetCardProps> = (props) => {
                           <AccessDeniedIcon />
                         </Text>
                         <Text muted size={1}>
-                          {t(
-                            'inputs.files.common.drop-message.drop-to-upload.rejected-file-message',
-                            {
-                              count: rejectedFilesCount,
-                            },
-                          )}
+                          {rejectedFilesCount === 1
+                            ? `${rejectedFilesCount} file can't be uploaded here`
+                            : `${rejectedFilesCount} files can't be uploaded here`}
                         </Text>
                       </Inline>
                     </Box>
@@ -367,9 +360,9 @@ export const UploadTargetCard: FC<UploadTargetCardProps> = (props) => {
                     <AccessDeniedIcon />
                   </Text>
                   <Text>
-                    {t('inputs.files.common.drop-message.drop-to-upload.no-accepted-file-message', {
-                      count: hoveringFiles.length,
-                    })}
+                    {hoveringFiles.length === 1
+                      ? "Can't upload this file here"
+                      : "Can't upload any of these files here"}
                   </Text>
                 </Inline>
               )}

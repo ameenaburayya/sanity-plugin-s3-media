@@ -90,15 +90,40 @@ export default defineConfig([
       'import/no-unresolved': 'off',
       'no-unused-vars': 'off',
       'simple-import-sort/imports': 'error',
+      'newline-after-var': 'error',
       '@typescript-eslint/no-shadow': 'error',
-      '@typescript-eslint/no-explicit-any': ['warn'],
+      '@typescript-eslint/no-explicit-any': ['error'],
       '@typescript-eslint/no-unused-vars': [
         'error',
         {ignoreRestSiblings: true, argsIgnorePattern: '^_'},
       ],
       'react/require-default-props': 'off',
-      'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/exhaustive-deps': 'error',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '.',
+              message: "Use explicit import paths (for example './foo') instead of importing from '.'.",
+            },
+            {
+              name: '..',
+              message:
+                "Use explicit import paths (for example '../foo' or '../../foo') instead of importing from '..'.",
+            },
+            {
+              name: './index',
+              message: "Use a non-bare file path instead of importing from './index'.",
+            },
+            {
+              name: '../index',
+              message: "Use a non-bare file path instead of importing from '../index'.",
+            },
+          ],
+        },
+      ],
     },
   },
   {

@@ -28,6 +28,7 @@ export const TableHeaderItem: FC<TableHeaderItemProps> = (props) => {
 
     if (isActive) {
       const direction = order.direction === 'asc' ? 'desc' : 'asc'
+
       dispatch(assetsActions.orderSet({order: {field, direction}}))
     } else {
       dispatch(assetsActions.orderSet({order: {field, direction: 'asc'}}))

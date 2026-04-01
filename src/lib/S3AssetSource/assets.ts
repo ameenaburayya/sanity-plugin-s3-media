@@ -100,6 +100,7 @@ const getVideoDimensions = (file: File): Observable<ImageDimensions | null> => {
 
 const getFileExtension = (filename: string): string => {
   const segments = filename.split('.')
+
   return segments[segments.length - 1]
 }
 

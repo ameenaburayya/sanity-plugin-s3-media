@@ -1,4 +1,5 @@
 import {of} from 'rxjs'
+import type {DocumentPreviewStore} from 'sanity'
 
 import {observeFileAsset, observeImageAsset, observeVideoAsset} from '../observe'
 
@@ -7,11 +8,11 @@ const PATHS = ['originalFilename', 'url', 'metadata', 'size', 'mimeType', 'exten
 describe('observe helpers', () => {
   it('observes image and file assets with shared paths', () => {
     const observePaths = vi.fn(() => of({}))
-    const store = {observePaths}
+    const store = {observePaths} as unknown as DocumentPreviewStore
 
-    observeImageAsset(store as any, 'img-id')
-    observeFileAsset(store as any, 'file-id')
-    observeVideoAsset(store as any, 'video-id')
+    observeImageAsset(store, 'img-id')
+    observeFileAsset(store, 'file-id')
+    observeVideoAsset(store, 'video-id')
 
     expect(observePaths).toHaveBeenCalledWith({_type: 'reference', _ref: 'img-id'}, PATHS)
     expect(observePaths).toHaveBeenCalledWith({_type: 'reference', _ref: 'file-id'}, PATHS)

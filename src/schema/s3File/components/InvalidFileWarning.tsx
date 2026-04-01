@@ -10,7 +10,7 @@ interface InvalidFileWarningProps {
 
 export const InvalidFileWarning: FC<InvalidFileWarningProps> = ({onClearValue}) => {
   return (
-    <Card tone="caution" padding={4} border radius={2}>
+    <Card tone="caution" padding={4} border radius={2} data-testid="invalid-file-warning">
       <Flex gap={4} marginBottom={4}>
         <Box>
           <Text size={1}>

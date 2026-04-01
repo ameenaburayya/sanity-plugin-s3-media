@@ -7,18 +7,18 @@ import {S3MediaContextProvider, S3MediaOptionsContextProvider} from '../contexts
 import {s3Media} from '../plugin'
 import {s3File, s3FileAsset, s3Image, s3ImageAsset, s3Video, s3VideoAsset} from '../schema'
 
-const definePluginMock = vi.hoisted(() => vi.fn((factory) => factory))
+type SanityPluginMock = {
+  definePlugin: (factory: (...args: unknown[]) => unknown) => unknown
+}
 
-vi.mock('sanity', async () => {
-  const actual = await vi.importActual<typeof import('sanity')>('sanity')
-
-  return {
-    ...actual,
-    definePlugin: definePluginMock,
-  }
-})
+const {definePlugin: definePluginMock} = (globalThis as {__sanityMock: SanityPluginMock})
+  .__sanityMock
 
 describe('s3Media plugin', () => {
+  type PluginConfig = ReturnType<typeof s3Media>
+  type ToolRenderer = (...args: unknown[]) => unknown
+  type LayoutRenderer = (props: {renderDefault: (...args: unknown[]) => unknown}) => unknown
+
   beforeEach(() => {
     vi.stubGlobal('React', React)
   })
@@ -30,10 +30,10 @@ describe('s3Media plugin', () => {
   it('builds plugin config with custom title and layout wrappers', () => {
     expect(definePluginMock).toHaveBeenCalledTimes(1)
 
-    const config = s3Media({title: 'Library'}) as any
+    const config: PluginConfig = s3Media({title: 'Library'})
 
     expect(config.name).toBe('s3Media')
-    expect(config.schema.types).toEqual([
+    expect(config.schema!.types).toEqual([
       s3File,
       s3FileAsset,
       s3Image,
@@ -42,7 +42,9 @@ describe('s3Media plugin', () => {
       s3VideoAsset,
     ])
 
-    const tools = (config.tools as (prev: any[]) => any[])([{name: 'desk'}])
+    const tools =
+      typeof config.tools === 'function' ? (config.tools as ToolRenderer)([{name: 'desk'}]) : []
+
     expect(tools).toEqual([
       {name: 'desk'},
       {
@@ -54,25 +56,35 @@ describe('s3Media plugin', () => {
     ])
 
     const renderDefault = vi.fn(() => 'default-layout')
-    const layout = (config.studio.components.layout as (props: any) => any)({
-      renderDefault,
-      test: true,
-    })
+    const layout = config.studio?.components?.layout
+      ? (config.studio.components.layout as LayoutRenderer)({
+          renderDefault,
+        })
+      : null
 
-    expect(renderDefault).toHaveBeenCalledWith({renderDefault, test: true})
+    expect(layout).not.toBeNull()
     expect(isValidElement(layout)).toBe(true)
-    expect(layout.type).toBe(S3MediaOptionsContextProvider)
-    expect(layout.props.options).toEqual({title: 'Library'})
 
-    const innerLayout = layout.props.children
+    type LayoutProps = {
+      options: {title?: string}
+      children: React.ReactElement<{children: unknown}>
+    }
+    const layoutEl = layout as React.ReactElement<LayoutProps>
+
+    expect(layoutEl.type).toBe(S3MediaOptionsContextProvider)
+    expect(layoutEl.props.options).toEqual({title: 'Library'})
+
+    const innerLayout = layoutEl.props.children
+
     expect(innerLayout.type).toBe(S3MediaContextProvider)
     expect(innerLayout.props.children).toBe('default-layout')
   })
 
   it('uses default tool title when options are omitted', () => {
-    const config = s3Media() as any
+    const config: PluginConfig = s3Media()
 
-    const tools = (config.tools as (prev: any[]) => any[])([])
+    const tools = typeof config.tools === 'function' ? (config.tools as ToolRenderer)([]) : []
+
     expect(tools).toEqual([
       {
         icon: ImageIcon,

@@ -1,7 +1,7 @@
 import {WarningOutlineIcon} from '@sanity/icons'
 import {Text} from '@sanity/ui'
 import {type FC, memo, useCallback, useState} from 'react'
-import {LoadingBlock, useTranslation} from 'sanity'
+import {LoadingBlock} from 'sanity'
 import {S3AssetType} from 'sanity-plugin-s3-media-types'
 
 import {useS3MediaContext} from '../../../contexts'
@@ -19,8 +19,6 @@ const LoadingOverlay = () => {
 }
 
 const AccessWarningOverlay = () => {
-  const {t} = useTranslation()
-
   return (
     <Overlay padding={3} tone="critical" border>
       <FlexOverlay direction="column" align="center" justify="center" gap={2}>
@@ -28,7 +26,7 @@ const AccessWarningOverlay = () => {
           <WarningOutlineIcon />
         </ErrorIconWrapper>
         <Text muted size={1}>
-          {t('inputs.image.error.possible-access-restriction')}
+          Could not load image. This may be due to access restrictions.
         </Text>
       </FlexOverlay>
     </Overlay>
@@ -39,8 +37,6 @@ type S3ImageInputPreviewProps = Pick<S3ImageInputProps, 'readOnly' | 'value'>
 
 export const S3ImageInputPreview: FC<S3ImageInputPreviewProps> = memo((props) => {
   const {readOnly, value} = props
-
-  const {t} = useTranslation()
 
   const {buildAssetUrl} = useS3MediaContext()
 
@@ -64,15 +60,19 @@ export const S3ImageInputPreview: FC<S3ImageInputPreviewProps> = memo((props) =>
   const showAccessWarning = hasError
   const showLoading = !isLoaded && !showAccessWarning
 
+  if (!url) {
+    return null
+  }
+
   return (
-    <RatioBox readOnly={readOnly} tone="transparent">
+    <RatioBox readOnly={readOnly} tone="transparent" data-testid="s3-image-input-preview">
       {showAccessWarning && <AccessWarningOverlay />}
       {showLoading && <LoadingOverlay />}
 
       {url && (
         <img
           src={url}
-          alt={t('inputs.image.preview-uploaded-image')}
+          alt="Preview of uploaded image"
           onLoad={onLoadChange}
           onError={onErrorChange}
           referrerPolicy="strict-origin-when-cross-origin"

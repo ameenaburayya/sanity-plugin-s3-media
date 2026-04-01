@@ -89,6 +89,7 @@ export const DialogAssetEdit: FC<PropsWithChildren<{dialog: DialogAssetEditProps
           <WithReferringDocuments documentStore={documentStore} id={currentAsset._id}>
             {({isLoading, referringDocuments}) => {
               const uniqueReferringDocuments = getUniqueDocuments(referringDocuments)
+
               return (
                 <>
                   <Heading>

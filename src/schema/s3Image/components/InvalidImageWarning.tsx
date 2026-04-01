@@ -16,7 +16,7 @@ export const InvalidImageWarning: FC<InvalidImageWarningProps> = (props) => {
   }, [onClearValue])
 
   return (
-    <Card tone="caution" padding={4} border radius={2}>
+    <Card tone="caution" padding={4} border radius={2} data-testid="invalid-image-warning">
       <Flex gap={3}>
         <Box>
           <Text size={2}>

@@ -1,15 +1,17 @@
+import type {ResponseEvent} from '../../types'
 import {ClientError, ServerError} from '../errors'
 
-const createResponse = (overrides: Record<string, unknown> = {}) => {
+const createResponse = (overrides: Record<string, unknown> = {}): ResponseEvent => {
   return {
+    type: 'response',
     method: 'GET',
     url: 'https://api.example.com/items',
     statusCode: 400,
-    statusMessage: null,
+    statusMessage: undefined,
     headers: {'content-type': 'application/json'},
     body: {},
     ...overrides,
-  }
+  } as unknown as ResponseEvent
 }
 
 describe('ClientError', () => {
@@ -27,7 +29,7 @@ describe('ClientError', () => {
     expect(error.statusCode).toBe(400)
     expect(error.response).toBe(response)
     expect(error.responseBody).toBe(JSON.stringify(response.body, null, 2))
-    expect(error.details).toBeUndefined()
+    expect(error.details).toBeNull()
   })
 
   it('uses the error string directly when no message field exists', () => {
@@ -68,7 +70,9 @@ describe('ClientError', () => {
 
     const error = new ClientError(response)
 
-    expect(error.message).toBe('PATCH-request to https://api.example.com/items resulted in HTTP 422')
+    expect(error.message).toBe(
+      'PATCH-request to https://api.example.com/items resulted in HTTP 422',
+    )
   })
 })
 
@@ -108,7 +112,9 @@ describe('ServerError', () => {
     const error = new ServerError(response)
 
     expect(error.responseBody).toBe(longBody)
-    expect(error.message).toContain('POST-request to https://api.example.com/upload resulted in HTTP 502')
+    expect(error.message).toContain(
+      'POST-request to https://api.example.com/upload resulted in HTTP 502',
+    )
     expect(error.message).toContain('Bad Gateway')
     expect(error.message).toContain('…')
   })

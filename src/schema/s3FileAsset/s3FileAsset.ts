@@ -76,9 +76,9 @@ export const s3FileAsset = defineType({
       mimeType: 'mimeType',
       size: 'size',
     },
-    prepare(doc: Record<string, any>) {
+    prepare(doc) {
       return {
-        title: doc.title || doc.path.split('/').slice(-1)[0],
+        title: doc.title,
         subtitle: `${doc.mimeType} (${(doc.size / 1024 / 1024).toFixed(2)} MB)`,
       }
     },

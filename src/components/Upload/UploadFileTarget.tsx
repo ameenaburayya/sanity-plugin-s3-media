@@ -21,18 +21,6 @@ const extractPastedFiles = async (clipboardData: DataTransfer): Promise<File[]> 
   return Array.from(clipboardData.files)
 }
 
-type CamelToKebab<S extends string> = S extends `${infer P1}${infer P2}`
-  ? P2 extends Uncapitalize<P2>
-    ? `${Lowercase<P1>}${CamelToKebab<P2>}`
-    : `${Lowercase<P1>}-${CamelToKebab<Uncapitalize<P2>>}`
-  : S
-
-type DataAttribute<S extends string> = `data-${CamelToKebab<S>}`
-
-const fileTargetDataAttribute: Record<DataAttribute<'isFileTarget'>, 'true'> = {
-  'data-is-file-target': 'true',
-}
-
 // this is a hack for Safari that reads pasted image(s) from an ContentEditable div instead of the onpaste event
 const convertImagesToFilesAndClearContentEditable = (
   element: HTMLElement,
@@ -60,8 +48,10 @@ const convertImagesToFilesAndClearContentEditable = (
 // needed by Edge
 const select = (el: Element) => {
   const range = document.createRange()
+
   range.selectNodeContents(el)
   const sel = window.getSelection()
+
   sel?.removeAllRanges()
   sel?.addRange(range)
 }
@@ -149,6 +139,7 @@ export function UploadFileTarget<ComponentProps>(Component: ComponentType<Compon
           // If we have both text and html on the clipboard, the intention is probably to paste text, so ignore the files.
           const hasHtml = !!event.clipboardData?.getData('text/html')
           const hasText = !!event.clipboardData?.getData('text/plain')
+
           if (hasHtml && hasText) {
             console.warn(
               'Clipboard contains both text and HTML, ignoring additional file data on the clipboard.',
@@ -157,6 +148,7 @@ export function UploadFileTarget<ComponentProps>(Component: ComponentType<Compon
           }
           handlePaste(event as unknown as ClipboardEvent)
         }
+
         pasteTarget.addEventListener('paste', pasteTargetElementListener)
         return () => {
           pasteTarget.removeEventListener('paste', pasteTargetElementListener)
@@ -221,6 +213,7 @@ export function UploadFileTarget<ComponentProps>(Component: ComponentType<Compon
       (event: DragEvent) => {
         event.stopPropagation()
         const idx = enteredElements.current.indexOf(event.currentTarget)
+
         if (idx > -1) {
           enteredElements.current.splice(idx, 1)
         }
@@ -253,11 +246,18 @@ export function UploadFileTarget<ComponentProps>(Component: ComponentType<Compon
           onDragEnter={disabled ? undefined : handleDragEnter}
           onDragLeave={disabled ? undefined : handleDragLeave}
           onDrop={disabled ? undefined : handleDrop}
-          {...fileTargetDataAttribute}
+          data-is-file-target="true"
+          data-testid="upload-file-target"
         />
 
         {!disabled && showPasteInput && (
-          <div contentEditable onPaste={handlePaste} ref={pasteInput} style={PASTE_INPUT_STYLE} />
+          <div
+            contentEditable
+            data-testid="paste-input"
+            onPaste={handlePaste}
+            ref={pasteInput}
+            style={PASTE_INPUT_STYLE}
+          />
         )}
       </>
     )

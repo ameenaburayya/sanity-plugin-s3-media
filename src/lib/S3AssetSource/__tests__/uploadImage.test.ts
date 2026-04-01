@@ -1,22 +1,38 @@
 import {lastValueFrom, of} from 'rxjs'
 import {toArray} from 'rxjs/operators'
+import type {SanityClient} from 'sanity'
 import {S3AssetType} from 'sanity-plugin-s3-media-types'
+import {mockS3ImageAsset} from 'test/fixtures'
 
+import type {S3Client} from '../../S3Client'
 import {uploadImage} from '../uploadImage'
 
-const setMock = vi.hoisted(() => vi.fn((value, path) => ({type: 'set', value, path})))
-const unsetMock = vi.hoisted(() => vi.fn((path) => ({type: 'unset', path})))
 const exifMock = vi.hoisted(() => vi.fn())
 
-vi.mock('sanity', async () => {
-  const actual = await vi.importActual<typeof import('sanity')>('sanity')
+type MockSanityClient = Pick<SanityClient, 'observable'>
+type MockS3Client = Pick<S3Client, 'observable'>
 
-  return {
-    ...actual,
-    set: setMock,
-    unset: unsetMock,
-  }
-})
+const createSanityClient = (overrides: {
+  fetch: unknown
+  create: unknown
+}): MockSanityClient =>
+  ({
+    observable: {
+      fetch: overrides.fetch,
+      create: overrides.create,
+    },
+  }) as unknown as MockSanityClient
+
+const createS3Client = (overrides: {
+  uploadAsset: unknown
+}): MockS3Client =>
+  ({
+    observable: {
+      assets: {
+        uploadAsset: overrides.uploadAsset,
+      },
+    },
+  }) as unknown as MockS3Client
 
 vi.mock('exif-component', () => ({
   default: exifMock,
@@ -32,7 +48,7 @@ class FileReaderMock {
   }
 
   abort(): void {
-    // noop
+    void this
   }
 }
 
@@ -64,9 +80,15 @@ describe('uploadImage', () => {
       set src(_value: string) {
         this.onload?.()
       }
+
+      get src(): string {
+        return this.#srcValue
+      }
+
+      #srcValue = ''
     }
 
-    vi.stubGlobal('Image', ImageMock as any)
+    vi.stubGlobal('Image', ImageMock as unknown as typeof Image)
 
     const uploadS3ProgressEvents = [
       {
@@ -85,23 +107,15 @@ describe('uploadImage', () => {
 
     const fetch = vi.fn(() => of(null))
     const create = vi.fn(() =>
-      of({
-        _id: 's3Image-asset-200x200-png',
-        _type: 's3ImageAsset',
-        assetId: 'asset',
-        extension: 'png',
-        mimeType: 'image/png',
-        sha1hash: 'asset',
-        size: 3,
-      }),
+      of({...mockS3ImageAsset, _id: 's3Image-asset-200x200-png', assetId: 'asset', size: 3}),
     )
     const uploadAsset = vi.fn(() => of(...uploadS3ProgressEvents, {type: 'response'}))
 
     const events = await lastValueFrom(
       uploadImage({
         file,
-        sanityClient: {observable: {fetch, create}} as any,
-        s3Client: {observable: {assets: {uploadAsset}}} as any,
+        sanityClient: createSanityClient({fetch, create}) as unknown as SanityClient,
+        s3Client: createS3Client({uploadAsset}) as unknown as S3Client,
         options: {storeOriginalFilename: true},
       }).pipe(toArray()),
     )
@@ -158,6 +172,7 @@ describe('uploadImage', () => {
     const file = new File(['img'], 'photo.png', {type: 'image/png'})
 
     const poisonedError = {}
+
     Object.defineProperty(poisonedError, 'message', {
       get() {
         throw new Error('bad exif payload')
@@ -188,29 +203,27 @@ describe('uploadImage', () => {
       set src(_value: string) {
         this.onload?.()
       }
+
+      get src(): string {
+        return this.#srcValue
+      }
+
+      #srcValue = ''
     }
 
-    vi.stubGlobal('Image', ImageMock as any)
+    vi.stubGlobal('Image', ImageMock as unknown as typeof Image)
 
     const fetch = vi.fn(() => of(null))
     const create = vi.fn(() =>
-      of({
-        _id: 's3Image-asset-200x200-png',
-        _type: 's3ImageAsset',
-        assetId: 'asset',
-        extension: 'png',
-        mimeType: 'image/png',
-        sha1hash: 'asset',
-        size: 3,
-      }),
+      of({...mockS3ImageAsset, _id: 's3Image-asset-200x200-png', assetId: 'asset', size: 3}),
     )
     const uploadAsset = vi.fn(() => of({type: 'response'}))
 
     const events = await lastValueFrom(
       uploadImage({
         file,
-        sanityClient: {observable: {fetch, create}} as any,
-        s3Client: {observable: {assets: {uploadAsset}}} as any,
+        sanityClient: createSanityClient({fetch, create}) as unknown as SanityClient,
+        s3Client: createS3Client({uploadAsset}) as unknown as S3Client,
       }).pipe(toArray()),
     )
 
@@ -221,6 +234,7 @@ describe('uploadImage', () => {
     )
 
     const flattenedPatches = events.flatMap((event) => event.patches || [])
+
     expect(flattenedPatches).not.toContainEqual({
       type: 'set',
       value: expect.anything(),

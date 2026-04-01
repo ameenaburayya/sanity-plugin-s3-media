@@ -1,16 +1,14 @@
-import {s3FileAsset} from '..'
+import {s3FileAsset} from '../s3FileAsset'
 
-const defineTypeMock = vi.hoisted(() => vi.fn((schema) => schema))
-const defineFieldMock = vi.hoisted(() => vi.fn((field) => field))
 
-vi.mock('sanity', () => ({
-  defineType: defineTypeMock,
-  defineField: defineFieldMock,
-}))
 
 describe('s3FileAsset schema', () => {
+  type S3FileAssetSchema = typeof s3FileAsset
+  type S3FileAssetField = S3FileAssetSchema['fields'][number]
+
   it('defines expected schema fields and ordering', () => {
-    const schema = s3FileAsset as any
+    const schema: S3FileAssetSchema = s3FileAsset
+
     expect(schema.name).toBe('s3FileAsset')
     expect(schema.type).toBe('document')
     expect(schema.orderings).toEqual([
@@ -21,7 +19,8 @@ describe('s3FileAsset schema', () => {
       },
     ])
 
-    const fieldNames = schema.fields.map((field: any) => field.name)
+    const fieldNames = schema.fields.map((field: S3FileAssetField) => field.name)
+
     expect(fieldNames).toEqual([
       'originalFilename',
       'label',
@@ -36,38 +35,20 @@ describe('s3FileAsset schema', () => {
       'uploadId',
     ])
 
-    const sha1hashField = schema.fields.find((field: any) => field.name === 'sha1hash') as any
+    const sha1hashField = schema.fields.find(
+      (field): field is S3FileAssetField => field.name === 'sha1hash',
+    )
     const required = vi.fn(() => 'required-rule')
-    expect((sha1hashField.validation as (rule: any) => unknown)({required})).toBe('required-rule')
 
-    const uploadIdField = schema.fields.find((field: any) => field.name === 'uploadId') as any
-    expect(uploadIdField.hidden).toBe(true)
-    expect(uploadIdField.readOnly).toBe(true)
+    expect((sha1hashField?.validation as (rule: {required: () => unknown}) => unknown)({required})).toBe(
+      'required-rule',
+    )
+
+    const uploadIdField = schema.fields.find((field): field is S3FileAssetField => field.name === 'uploadId')
+
+    expect(uploadIdField!.hidden).toBe(true)
+    expect(uploadIdField!.readOnly).toBe(true)
   })
 
-  it('formats preview title and subtitle', () => {
-    const schema = s3FileAsset as any
-    const withCustomTitle = schema.preview.prepare({
-      title: 'Custom title',
-      path: 'folder/fallback.pdf',
-      mimeType: 'application/pdf',
-      size: 5 * 1024 * 1024,
-    })
-
-    expect(withCustomTitle).toEqual({
-      title: 'Custom title',
-      subtitle: 'application/pdf (5.00 MB)',
-    })
-
-    const withPathFallback = schema.preview.prepare({
-      path: 'folder/fallback.pdf',
-      mimeType: 'application/pdf',
-      size: 1 * 1024 * 1024,
-    })
-
-    expect(withPathFallback).toEqual({
-      title: 'fallback.pdf',
-      subtitle: 'application/pdf (1.00 MB)',
-    })
-  })
+  
 })

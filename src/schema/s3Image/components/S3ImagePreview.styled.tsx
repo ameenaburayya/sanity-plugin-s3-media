@@ -1,7 +1,7 @@
 import {Card, Flex} from '@sanity/ui'
 import {styled} from 'styled-components'
 
-export const RatioBox: any = styled(Card)`
+export const RatioBox = styled(Card)`
   position: relative;
   width: 100%;
   min-height: 3.75rem;
@@ -17,7 +17,7 @@ export const RatioBox: any = styled(Card)`
   }
 `
 
-export const Overlay: any = styled(Card)`
+export const Overlay = styled(Card)`
   display: flex;
   justify-content: flex-end;
   position: absolute;
@@ -29,7 +29,7 @@ export const Overlay: any = styled(Card)`
   background-color: color-mix(in srgb, transparent, var(--card-bg-color) 80%);
 `
 
-export const FlexOverlay: any = styled(Flex)`
+export const FlexOverlay = styled(Flex)`
   position: absolute;
   top: 0;
   left: 0;
@@ -37,7 +37,7 @@ export const FlexOverlay: any = styled(Flex)`
   right: 0;
 `
 
-export const ErrorIconWrapper: any = styled.div`
+export const ErrorIconWrapper = styled.div`
   align-items: center;
   color: var(--card-icon-color);
   display: flex;

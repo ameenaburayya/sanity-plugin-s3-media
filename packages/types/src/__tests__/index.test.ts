@@ -1,4 +1,4 @@
-import {S3AssetType} from '..'
+import {S3AssetType} from '../asset'
 
 describe('S3AssetType', () => {
   it('exports stable enum values', () => {

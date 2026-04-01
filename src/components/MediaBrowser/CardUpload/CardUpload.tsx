@@ -47,6 +47,7 @@ export const CardUpload: FC<CardUploadProps> = (props) => {
   const isQueued = item.status === 'queued'
 
   let status
+
   if (isComplete) {
     status = 'Verifying'
   }

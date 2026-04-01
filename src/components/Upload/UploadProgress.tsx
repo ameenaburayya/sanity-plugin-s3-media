@@ -1,6 +1,6 @@
 import {Card, Code, Flex, Inline, Stack, Text} from '@sanity/ui'
 import {type FC, useEffect} from 'react'
-import {LinearProgress, Translate, type UploadState, useTranslation} from 'sanity'
+import {LinearProgress, type UploadState} from 'sanity'
 import {styled} from 'styled-components'
 
 import {STALE_UPLOAD_MS} from '../../constants'
@@ -49,8 +49,6 @@ export const UploadProgress: FC<UploadProgressProps> = (props) => {
     }
   }, [uploadState.updatedAt, onStale])
 
-  const {t} = useTranslation()
-
   return (
     <Card tone="primary" border>
       <FlexWrapper
@@ -65,13 +63,8 @@ export const UploadProgress: FC<UploadProgressProps> = (props) => {
           <Flex justify="center" gap={[3, 3, 2, 2]} direction={['column', 'column', 'row']}>
             <Text size={1}>
               <Inline space={2}>
-                <Translate
-                  t={t}
-                  i18nKey="input.files.common.upload-progress"
-                  components={{
-                    FileName: () => <CodeWrapper size={1}>{filename ? filename : '…'}</CodeWrapper>,
-                  }}
-                />
+                    {`Uploading `}
+                    <CodeWrapper size={1}>{filename ? filename : '…'}</CodeWrapper>
               </Inline>
             </Text>
           </Flex>
@@ -81,14 +74,7 @@ export const UploadProgress: FC<UploadProgressProps> = (props) => {
           </Card>
         </LeftSection>
 
-        {onCancel ? (
-          <Button
-            mode="ghost"
-            onClick={onCancel}
-            text={t('input.files.common.cancel-upload')}
-            tone="critical"
-          />
-        ) : null}
+        {onCancel ? <Button mode="ghost" onClick={onCancel} text="Cancel" tone="critical" /> : null}
       </FlexWrapper>
     </Card>
   )

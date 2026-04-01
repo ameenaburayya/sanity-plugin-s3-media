@@ -12,5 +12,6 @@ import {SUPPORTED_ASSET_TYPES} from '../../constants'
  */
 export function isSupportedAssetType(assetType?: string): assetType is S3AssetType {
   const supported = SUPPORTED_ASSET_TYPES as unknown as string[]
+
   return assetType ? supported.includes(assetType) : false
 }

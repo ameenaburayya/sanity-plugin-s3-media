@@ -2,7 +2,6 @@ import {ImageIcon, SearchIcon, UploadIcon} from '@sanity/icons'
 import {get, startCase} from 'lodash'
 import {type FC, type MouseEvent, type ReactNode, useCallback, useMemo, useState} from 'react'
 import type {Observable} from 'rxjs'
-import {useTranslation} from 'sanity'
 import {S3AssetType, type S3FileAsset, type S3VideoAsset} from 'sanity-plugin-s3-media-types'
 
 import {
@@ -46,21 +45,23 @@ const S3FileInputPreviewContent: FC<S3FileInputPreviewContentProps> = (props) =>
   })
 
   return (
-    <S3FileActionsMenu
-      fileAsset={fileAsset}
-      muted={!readOnly}
-      disabled={readOnly}
-      onMenuOpen={setIsMenuOpen}
-      isMenuOpen={isMenuOpen}
-    >
-      <ActionsMenu
-        browse={browseMenuItem}
-        upload={uploadMenuItem}
-        onReset={clearField}
-        url={url}
-        readOnly={readOnly}
-      />
-    </S3FileActionsMenu>
+    <div data-testid="s3-file-input-preview">
+      <S3FileActionsMenu
+        fileAsset={fileAsset}
+        muted={!readOnly}
+        disabled={readOnly}
+        onMenuOpen={setIsMenuOpen}
+        isMenuOpen={isMenuOpen}
+      >
+        <ActionsMenu
+          browse={browseMenuItem}
+          upload={uploadMenuItem}
+          onReset={clearField}
+          url={url}
+          readOnly={readOnly}
+        />
+      </S3FileActionsMenu>
+    </div>
   )
 }
 
@@ -84,7 +85,6 @@ export const S3FileInputPreview: FC<S3FileInputPreviewProps> = (props) => {
     value,
   } = props
 
-  const {t} = useTranslation()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const asset = value?.asset
 
@@ -99,6 +99,7 @@ export const S3FileInputPreview: FC<S3FileInputPreviewProps> = (props) => {
       setIsMenuOpen(false)
       const assetSourceNameData = event.currentTarget.getAttribute('data-asset-source-name')
       const assetSource = assetSources.find((source) => source.name === assetSourceNameData)
+
       if (assetSource) {
         setSelectedAssetSource(assetSource)
       } else {
@@ -134,7 +135,7 @@ export const S3FileInputPreview: FC<S3FileInputPreviewProps> = (props) => {
       return (
         <MenuItem
           icon={SearchIcon}
-          text={t('inputs.file.browse-button.text')}
+          text="Browse"
           onClick={handleSelectFileMenuItemClicked}
           disabled={readOnly}
           data-asset-source-name={assetSources[0].name}
@@ -153,7 +154,7 @@ export const S3FileInputPreview: FC<S3FileInputPreviewProps> = (props) => {
         />
       )
     })
-  }, [assetSources, handleSelectFileMenuItemClicked, readOnly, t])
+  }, [assetSources, handleSelectFileMenuItemClicked, readOnly])
 
   const uploadMenuItem: ReactNode = useMemo(() => {
     switch (assetSourcesWithUpload.length) {
@@ -166,7 +167,7 @@ export const S3FileInputPreview: FC<S3FileInputPreviewProps> = (props) => {
             onSelect={handleSelectFilesFromAssetSourceSingle}
             accept={accept}
             data-asset-source-name={assetSourcesWithUpload[0].name}
-            text={t('inputs.files.common.actions-menu.upload.label')}
+            text="Upload"
             disabled={readOnly || directUploads === false}
           />
         )
@@ -189,7 +190,6 @@ export const S3FileInputPreview: FC<S3FileInputPreviewProps> = (props) => {
     handleSelectFilesFromAssetSource,
     handleSelectFilesFromAssetSourceSingle,
     readOnly,
-    t,
   ])
 
   if (!asset) {

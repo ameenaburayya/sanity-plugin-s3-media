@@ -14,7 +14,6 @@ import {
   type UploadState,
   useClient,
   useDocumentPreviewStore,
-  useTranslation,
 } from 'sanity'
 import {isInProgressUpload, isS3ImageSource} from 'sanity-plugin-s3-media-asset-utils'
 import {S3AssetType} from 'sanity-plugin-s3-media-types'
@@ -52,7 +51,6 @@ export const S3ImageInput: FC<S3ImageInputProps> = (props) => {
 
   const sanityClient = useClient(DEFAULT_STUDIO_CLIENT_OPTIONS)
   const {push} = useToast()
-  const {t} = useTranslation()
 
   const {s3Client} = useS3MediaContext()
   const {directUploads} = useS3MediaOptionsContext()
@@ -170,6 +168,7 @@ export const S3ImageInput: FC<S3ImageInputProps> = (props) => {
         const run = () => {
           const uploader = new assetSource.Uploader!()
           // Unsubscribe from the previous uploader
+
           assetSourceUploader?.unsubscribe()
           setAssetSourceUploader({
             unsubscribe: uploader.subscribe((event) => {
@@ -188,8 +187,8 @@ export const S3ImageInput: FC<S3ImageInputProps> = (props) => {
                   })
                   push({
                     status: 'error',
-                    description: t('asset-sources.common.uploader.upload-failed.description'),
-                    title: t('asset-sources.common.uploader.upload-failed.title'),
+                    description: 'See the console for more information.',
+                    title: 'Upload failed',
                   })
                   break
                 case 'all-complete': {
@@ -206,6 +205,7 @@ export const S3ImageInput: FC<S3ImageInputProps> = (props) => {
           onChange(PatchEvent.from(createInitialUploadPatches(file)))
           uploader.upload([file], {schemaType, onChange: onChange as (patch: unknown) => void})
         }
+
         try {
           run()
         } catch (err) {
@@ -216,14 +216,14 @@ export const S3ImageInput: FC<S3ImageInputProps> = (props) => {
           setAssetSourceUploader(null)
           push({
             status: 'error',
-            description: t('asset-sources.common.uploader.upload-failed.description'),
-            title: t('asset-sources.common.uploader.upload-failed.title'),
+            description: 'See the console for more information.',
+            title: 'Upload failed',
           })
           console.error(err)
         }
       }
     },
-    [assetSourceUploader, onChange, push, schemaType, t],
+    [assetSourceUploader, onChange, push, schemaType],
   )
 
   // Abort asset source uploads and unsubscribe from the uploader is the component unmounts
@@ -396,7 +396,7 @@ export const S3ImageInput: FC<S3ImageInputProps> = (props) => {
   ])
 
   return (
-    <Stack space={5}>
+    <Stack data-testid="s3-image-input" space={5}>
       {members.map((member) => {
         if (member.kind === 'field') {
           return (
@@ -417,7 +417,7 @@ export const S3ImageInput: FC<S3ImageInputProps> = (props) => {
         return null
       })}
 
-      {selectedAssetSource && renderAssetSource()}
+      {selectedAssetSource && <div data-testid="s3-image-input-asset-source">{renderAssetSource()}</div>}
     </Stack>
   )
 }

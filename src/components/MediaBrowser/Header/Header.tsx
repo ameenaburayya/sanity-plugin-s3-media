@@ -3,9 +3,11 @@ import {Box, Button, Flex, Inline, Text} from '@sanity/ui'
 import pluralize from 'pluralize'
 import type {FC} from 'react'
 
-import {useS3MediaOptionsContext} from '../../../contexts'
-import {useDropzoneActions} from '../../../contexts/DropzoneDispatchContext'
-import {useAssetSourceActions} from '../../../contexts/S3AssetSourceDispatchContext'
+import {
+  useAssetSourceActions,
+  useDropzoneActions,
+  useS3MediaOptionsContext,
+} from '../../../contexts'
 import {useTypedSelector} from '../../../hooks'
 
 type HeaderProps = {
@@ -23,6 +25,7 @@ export const Header: FC<HeaderProps> = (props) => {
   const selectedDocument = useTypedSelector((state) => state.selected.document)
 
   const {directUploads} = useS3MediaOptionsContext()
+  const friendlyAssetTypes = assetTypes.map((type) => type.replace(/^s3/, '').toLowerCase())
 
   // Row: Current document / close button
   return (
@@ -32,7 +35,7 @@ export const Header: FC<HeaderProps> = (props) => {
         <Box flex={1} marginX={3}>
           <Inline style={{whiteSpace: 'nowrap'}}>
             <Text textOverflow="ellipsis" weight="semibold">
-              <span>{onSelect ? `Insert ${assetTypes.join(' or ')}` : 'Browse Assets'}</span>
+              <span>{onSelect ? `Insert ${friendlyAssetTypes.join(' or ')}` : 'Browse Assets'}</span>
             </Text>
 
             {selectedDocument && (
@@ -56,7 +59,7 @@ export const Header: FC<HeaderProps> = (props) => {
               icon={UploadIcon}
               mode="bleed"
               onClick={open}
-              text={`Upload ${assetTypes.length === 1 ? pluralize(assetTypes[0]) : 'assets'}`}
+              text={`Upload ${assetTypes.length === 1 ? pluralize(friendlyAssetTypes[0]) : 'assets'}`}
             />
           )}
 

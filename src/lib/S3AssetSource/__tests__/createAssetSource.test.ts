@@ -1,17 +1,24 @@
 import {DocumentsIcon, ImageIcon} from '@sanity/icons'
+import type {SanityClient} from 'sanity'
 
 import {S3AssetSource as S3AssetSourceComponent} from '../../../components'
+import type {S3Client} from '../../S3Client'
 import {
   createS3FileAssetSource,
   createS3ImageAssetSource,
   createS3VideoAssetSource,
 } from '../createAssetSource'
 
+const createProps = (title: string) => {
+  const sanityClient = {} as SanityClient
+  const s3Client = {} as S3Client
+
+  return {title, sanityClient, s3Client}
+}
+
 describe('createS3AssetSource', () => {
   it('creates an image asset source with image icon and uploader', () => {
-    const props = {title: 'Image source', sanityClient: {}, s3Client: {}} as any
-
-    const source = createS3ImageAssetSource(props)
+    const source = createS3ImageAssetSource(createProps('Image source'))
 
     expect(source.name).toBe('s3-media')
     expect(source.title).toBe('Image source')
@@ -22,9 +29,7 @@ describe('createS3AssetSource', () => {
   })
 
   it('creates a file asset source with documents icon and uploader', () => {
-    const props = {title: 'File source', sanityClient: {}, s3Client: {}} as any
-
-    const source = createS3FileAssetSource(props)
+    const source = createS3FileAssetSource(createProps('File source'))
 
     expect(source.name).toBe('s3-media')
     expect(source.title).toBe('File source')
@@ -35,9 +40,7 @@ describe('createS3AssetSource', () => {
   })
 
   it('creates a video asset source with documents icon and uploader', () => {
-    const props = {title: 'Video source', sanityClient: {}, s3Client: {}} as any
-
-    const source = createS3VideoAssetSource(props)
+    const source = createS3VideoAssetSource(createProps('Video source'))
 
     expect(source.name).toBe('s3-media')
     expect(source.title).toBe('Video source')

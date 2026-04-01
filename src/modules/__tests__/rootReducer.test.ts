@@ -1,3 +1,7 @@
+import type {S3Asset} from 'sanity-plugin-s3-media-types'
+import {S3AssetType} from 'sanity-plugin-s3-media-types'
+import type {UploadItem} from 'src/types'
+
 import {assetsActions} from '../assets'
 import {rootReducer} from '../rootReducer'
 import {searchActions} from '../search'
@@ -5,7 +9,7 @@ import {uploadsActions} from '../uploads'
 
 describe('rootReducer', () => {
   it('returns full initial state shape', () => {
-    const state = rootReducer(undefined, {type: 'unknown'} as any)
+    const state = rootReducer(undefined, {type: 'unknown'})
 
     expect(state).toEqual({
       assets: expect.any(Object),
@@ -25,7 +29,7 @@ describe('rootReducer', () => {
   })
 
   it('delegates to nested reducers', () => {
-    let state = rootReducer(undefined, {type: 'unknown'} as any)
+    let state = rootReducer(undefined, {type: 'unknown'})
 
     state = rootReducer(state, searchActions.querySet({searchQuery: 'kittens'}))
     expect(state.search.query).toBe('kittens')
@@ -33,15 +37,15 @@ describe('rootReducer', () => {
     state = rootReducer(
       state,
       uploadsActions.uploadStart({
-        file: {name: 'a.jpg', size: 10} as any,
+        file: new File(['a'], 'a.jpg', {type: 'image/jpeg'}),
         uploadItem: {
           _type: 'upload',
-          assetType: 's3Image',
+          assetType: S3AssetType.IMAGE,
           hash: 'hash-1',
           name: 'a.jpg',
           size: 10,
           status: 'queued',
-        } as any,
+        } satisfies UploadItem,
       }),
     )
 
@@ -60,8 +64,8 @@ describe('rootReducer', () => {
             mimeType: 'application/pdf',
             sha1hash: 'hash-2',
             size: 20,
-          },
-        ] as any,
+          } as unknown as S3Asset,
+        ],
       }),
     )
 

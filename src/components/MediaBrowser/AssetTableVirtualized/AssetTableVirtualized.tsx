@@ -68,6 +68,7 @@ export const AssetTableVirtualized: FC<AssetTableVirtualizedProps> = (props) => 
       itemContent={(index) => {
         const item = items[index]
         const selected = selectedIds.includes(item?.id)
+
         return <VirtualRow item={item} selected={selected} />
       }}
       style={{overflowX: 'hidden'}}

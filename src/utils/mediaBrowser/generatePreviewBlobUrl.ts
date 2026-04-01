@@ -10,6 +10,7 @@ const createBlob = (img: HTMLImageElement): Promise<Blob | null> => {
     // Create a canvas element which we'll use to generate a low resolution preview.
     // Ensure that the canvas is at least 1 pixel high as blob generation will fail otherwise.
     const canvas: HTMLCanvasElement = document.createElement('canvas')
+
     canvas.width = PREVIEW_WIDTH
     canvas.height = Math.max(PREVIEW_WIDTH / imageAspect, 1)
 
@@ -17,6 +18,7 @@ const createBlob = (img: HTMLImageElement): Promise<Blob | null> => {
     // This can often be the case when trying to render SVGs containing `<foreignObject>` elements.
     try {
       const ctx = canvas.getContext('2d')
+
       ctx?.drawImage(img, 0, 0, PREVIEW_WIDTH, PREVIEW_WIDTH / imageAspect)
       canvas.toBlob(resolve, 'image/jpeg')
     } catch (err) {
@@ -30,6 +32,7 @@ const createImageEl = (file: File): Promise<HTMLImageElement> => {
   return new Promise((resolve) => {
     const blobUrlLarge = window.URL.createObjectURL(file)
     const img = new Image()
+
     img.onload = () => {
       window.URL.revokeObjectURL(blobUrlLarge)
       resolve(img)

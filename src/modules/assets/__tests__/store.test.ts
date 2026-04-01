@@ -1,6 +1,15 @@
+import type {Action} from '@reduxjs/toolkit'
+import type {StateObservable} from 'redux-observable'
 import {BehaviorSubject, EMPTY, lastValueFrom, of, Subject, throwError} from 'rxjs'
 import {toArray} from 'rxjs/operators'
+import type {
+  S3FileAsset,
+  S3ImageAsset,
+  S3VideoAsset,
+} from 'sanity-plugin-s3-media-types'
 import {S3AssetType} from 'sanity-plugin-s3-media-types'
+import type {RootReducerState} from 'src/types'
+import type {Mock} from 'vitest'
 
 import {searchActions} from '../../search'
 import {UPLOADS_ACTIONS} from '../../uploads/actions'
@@ -44,7 +53,7 @@ const makeImageAsset = (overrides: Record<string, unknown> = {}) =>
     size: 1024,
     _updatedAt: 1,
     ...overrides,
-  }) as any
+  }) as unknown as S3ImageAsset
 
 const makeFileAsset = (overrides: Record<string, unknown> = {}) =>
   ({
@@ -57,7 +66,7 @@ const makeFileAsset = (overrides: Record<string, unknown> = {}) =>
     size: 2048,
     _updatedAt: 2,
     ...overrides,
-  }) as any
+  }) as unknown as S3FileAsset
 
 const makeVideoAsset = (overrides: Record<string, unknown> = {}) =>
   ({
@@ -77,11 +86,11 @@ const makeVideoAsset = (overrides: Record<string, unknown> = {}) =>
     size: 4096,
     _updatedAt: 3,
     ...overrides,
-  }) as any
+  }) as unknown as S3VideoAsset
 
 const makeRootState = (overrides: Record<string, unknown> = {}) =>
   ({
-    assets: assetsReducer(undefined, {type: 'unknown'} as any),
+    assets: assetsReducer(undefined, {type: 'unknown'} as Action),
     dialog: {items: []},
     notifications: {items: []},
     search: {query: ''},
@@ -95,7 +104,24 @@ const makeRootState = (overrides: Record<string, unknown> = {}) =>
       byIds: {},
     },
     ...overrides,
-  }) as any
+  }) as unknown as RootReducerState
+
+type TestDeps = {
+  sanityClient: {
+    observable: {
+      delete: Mock
+      fetch: Mock
+    }
+    patch: Mock
+  }
+  s3Client: {
+    observable: {
+      assets: {
+        deleteAsset: Mock
+      }
+    }
+  }
+}
 
 const makeDeps = () =>
   ({
@@ -113,7 +139,9 @@ const makeDeps = () =>
         },
       },
     },
-  }) as any
+  }) as unknown as TestDeps & Parameters<typeof assetsDeleteEpic>[2]
+
+const EMPTY_STATE$ = EMPTY as unknown as StateObservable<RootReducerState>
 
 describe('assetsReducer', () => {
   it('handles uploadComplete in extraReducers', () => {
@@ -134,6 +162,7 @@ describe('assetsReducer', () => {
     const asset2 = makeImageAsset({_id: 'asset-2'})
 
     let state = assetsReducer(undefined, assetsActions.fetchComplete({assets: [asset1, asset2]}))
+
     state = assetsReducer(
       state,
       assetsActions.deleteSkipped({
@@ -165,7 +194,7 @@ describe('assetsReducer', () => {
               },
             },
           },
-        } as any,
+        } as unknown as import('@sanity/client').ClientError,
       }),
     )
 
@@ -212,7 +241,7 @@ describe('assetsReducer', () => {
     expect(state.fetchingError).toBeUndefined()
 
     state = assetsReducer(
-      {...state, pageSize: 2} as any,
+      {...state, pageSize: 2},
       assetsActions.deleteComplete({assetIds: ['asset-1']}),
     )
 
@@ -241,7 +270,7 @@ describe('assetsReducer', () => {
     state = assetsReducer(
       state,
       assetsActions.orderSet({
-        order: {direction: 'asc', field: 'size'} as any,
+        order: {direction: 'asc', field: 'size'},
       }),
     )
     state = assetsReducer(state, assetsActions.sort())
@@ -279,21 +308,19 @@ describe('assetsReducer', () => {
     expect(requestSelectorOnly.payload.query).toContain('|')
 
     let state = assetsReducer(undefined, assetsActions.fetchComplete({assets: [asset]}))
+
     state = assetsReducer(
-      {...state, fetchingError: {message: 'oops', statusCode: 500}} as any,
+      {...state, fetchingError: {message: 'oops', statusCode: 500}},
       requestDefault,
     )
 
     expect(state.fetching).toBe(true)
     expect(state.fetchingError).toBeUndefined()
 
-    state = assetsReducer(state, {
-      payload: undefined,
-      type: assetsActions.fetchComplete.type,
-    } as any)
+    state = assetsReducer(state, {payload: {assets: []}, type: assetsActions.fetchComplete.type})
     expect(state.fetchCount).toBe(0)
 
-    state = assetsReducer(state, assetsActions.fetchComplete({assets: [] as any}))
+    state = assetsReducer(state, assetsActions.fetchComplete({assets: []}))
     expect(state.fetchCount).toBe(0)
 
     state = assetsReducer(state, assetsActions.clear())
@@ -315,9 +342,10 @@ describe('assetsReducer', () => {
     expect(state.allIds).toContain('asset-4')
 
     const duplicateState = assetsReducer(
-      {...state, allIds: ['hash-1']} as any,
+      {...state, allIds: ['hash-1']},
       assetsActions.insertUploads({results: {'hash-1': 'asset-5'}}),
     )
+
     expect(duplicateState.allIds).toEqual(['hash-1'])
 
     state = assetsReducer(
@@ -395,7 +423,7 @@ describe('assetsReducer', () => {
 
     state = assetsReducer(
       state,
-      assetsActions.orderSet({order: {direction: 'desc', field: 'size'} as any}),
+      assetsActions.orderSet({order: {direction: 'desc', field: 'size'}}),
     )
     state = assetsReducer(state, assetsActions.sort())
     expect(state.allIds).toEqual(['asset-2', 'asset-3'])
@@ -406,9 +434,10 @@ describe('assetsReducer', () => {
     const asset2 = makeImageAsset({_id: 'asset-2', size: 5})
 
     let state = assetsReducer(undefined, assetsActions.fetchComplete({assets: [asset1, asset2]}))
+
     state = assetsReducer(
       state,
-      assetsActions.orderSet({order: {direction: 'asc', field: 'size'} as any}),
+      assetsActions.orderSet({order: {direction: 'asc', field: 'size'}}),
     )
     state = assetsReducer(state, assetsActions.sort())
 
@@ -425,6 +454,7 @@ describe('assets selectors', () => {
       undefined,
       assetsActions.fetchComplete({assets: [asset1, asset2]}),
     )
+
     assetsState = assetsReducer(assetsState, assetsActions.pick({assetId: 'asset-2', picked: true}))
 
     const state = makeRootState({assets: assetsState})
@@ -450,8 +480,8 @@ describe('assets epics', () => {
 
     const result = await lastValueFrom(
       assetsDeleteEpic(
-        of(assetsActions.deleteRequest({assets: [imageAsset]})) as any,
-        EMPTY as any,
+        of(assetsActions.deleteRequest({assets: [imageAsset]})),
+        EMPTY_STATE$,
         deps,
       ).pipe(toArray()),
     )
@@ -474,8 +504,8 @@ describe('assets epics', () => {
 
     const result = await lastValueFrom(
       assetsDeleteEpic(
-        of(assetsActions.deleteRequest({assets: [videoAsset]})) as any,
-        EMPTY as any,
+        of(assetsActions.deleteRequest({assets: [videoAsset]})),
+        EMPTY_STATE$,
         deps,
       ).pipe(toArray()),
     )
@@ -503,8 +533,8 @@ describe('assets epics', () => {
 
     const result = await lastValueFrom(
       assetsDeleteEpic(
-        of(assetsActions.deleteRequest({assets: [blockedAsset, deletableAsset]})) as any,
-        EMPTY as any,
+        of(assetsActions.deleteRequest({assets: [blockedAsset, deletableAsset]})),
+        EMPTY_STATE$,
         deps,
       ).pipe(toArray()),
     )
@@ -532,8 +562,8 @@ describe('assets epics', () => {
 
     const result = await lastValueFrom(
       assetsDeleteEpic(
-        of(assetsActions.deleteRequest({assets: [blockedAsset]})) as any,
-        EMPTY as any,
+        of(assetsActions.deleteRequest({assets: [blockedAsset]})),
+        EMPTY_STATE$,
         deps,
       ).pipe(toArray()),
     )
@@ -550,14 +580,14 @@ describe('assets epics', () => {
   it('assetsDeleteEpic maps reference lookup errors to deleteError', async () => {
     const asset = makeImageAsset({_id: 'asset-1'})
     const deps = makeDeps()
-    const error = {message: 'lookup failed'} as any
+    const error = {message: 'lookup failed', statusCode: 500} as unknown as import('@sanity/client').ClientError
 
     deps.sanityClient.observable.fetch.mockReturnValue(throwError(() => error))
 
     const result = await lastValueFrom(
       assetsDeleteEpic(
-        of(assetsActions.deleteRequest({assets: [asset]})) as any,
-        EMPTY as any,
+        of(assetsActions.deleteRequest({assets: [asset]})),
+        EMPTY_STATE$,
         deps,
       ).pipe(toArray()),
     )
@@ -569,7 +599,7 @@ describe('assets epics', () => {
     const deletableAsset = makeFileAsset({_id: 's3File-abcdefghijklmnopqrstuvwx-pdf'})
 
     const deps = makeDeps()
-    const error = {message: 'delete failed'} as any
+    const error = {message: 'delete failed', statusCode: 500} as unknown as import('@sanity/client').ClientError
 
     deps.sanityClient.observable.fetch.mockReturnValue(
       of([{_id: deletableAsset._id, referenceCount: 0}]),
@@ -578,8 +608,8 @@ describe('assets epics', () => {
 
     const result = await lastValueFrom(
       assetsDeleteEpic(
-        of(assetsActions.deleteRequest({assets: [deletableAsset]})) as any,
-        EMPTY as any,
+        of(assetsActions.deleteRequest({assets: [deletableAsset]})),
+        EMPTY_STATE$,
         deps,
       ).pipe(toArray()),
     )
@@ -594,20 +624,24 @@ describe('assets epics', () => {
 
   it('assetsDeleteEpic maps unsupported asset types to deleteError', async () => {
     const deps = makeDeps()
-    const badAsset = {_id: 'asset-unknown', _type: 'unsupportedAsset'} as any
+    const badAsset = {
+      _id: 'asset-unknown',
+      _type: 'unsupportedAsset',
+    } as unknown as ReturnType<typeof assetsActions.deleteRequest>['payload']['assets'][number]
 
     deps.sanityClient.observable.fetch.mockReturnValue(of([{_id: badAsset._id, referenceCount: 0}]))
 
     const result = await lastValueFrom(
       assetsDeleteEpic(
-        of(assetsActions.deleteRequest({assets: [badAsset]})) as any,
-        EMPTY as any,
+        of(assetsActions.deleteRequest({assets: [badAsset]})),
+        EMPTY_STATE$,
         deps,
       ).pipe(toArray()),
     )
 
     expect(result).toHaveLength(1)
     const deleteErrorAction = result[0] as ReturnType<typeof assetsActions.deleteError>
+
     expect(deleteErrorAction.type).toBe(assetsActions.deleteError.type)
     expect(deleteErrorAction.payload.assetIds).toEqual(['asset-unknown'])
     expect(deleteErrorAction.payload.error.message).toBe('Unsupported asset type')
@@ -624,8 +658,8 @@ describe('assets epics', () => {
 
     let result = await lastValueFrom(
       assetsFetchEpic(
-        of(assetsActions.fetchRequest({queryFilter: '_type in ["s3ImageAsset"]'})) as any,
-        new BehaviorSubject(makeRootState()) as any,
+        of(assetsActions.fetchRequest({queryFilter: '_type in ["s3ImageAsset"]'})),
+        new BehaviorSubject(makeRootState()) as unknown as StateObservable<RootReducerState>,
         deps,
       ).pipe(toArray()),
     )
@@ -640,8 +674,8 @@ describe('assets epics', () => {
 
     result = await lastValueFrom(
       assetsFetchEpic(
-        of(assetsActions.fetchRequest({queryFilter: '_type in ["s3ImageAsset"]'})) as any,
-        new BehaviorSubject(makeRootState()) as any,
+        of(assetsActions.fetchRequest({queryFilter: '_type in ["s3ImageAsset"]'})),
+        new BehaviorSubject(makeRootState()) as unknown as StateObservable<RootReducerState>,
         deps,
       ).pipe(toArray()),
     )
@@ -652,8 +686,8 @@ describe('assets epics', () => {
 
     result = await lastValueFrom(
       assetsFetchEpic(
-        of(assetsActions.fetchRequest({queryFilter: '_type in ["s3ImageAsset"]'})) as any,
-        new BehaviorSubject(makeRootState()) as any,
+        of(assetsActions.fetchRequest({queryFilter: '_type in ["s3ImageAsset"]'})),
+        new BehaviorSubject(makeRootState()) as unknown as StateObservable<RootReducerState>,
         deps,
       ).pipe(toArray()),
     )
@@ -664,7 +698,7 @@ describe('assets epics', () => {
   it('assetsFetchPageIndexEpic and assetsFetchNextPageEpic derive next fetch actions from state', async () => {
     const state = makeRootState({
       assets: {
-        ...assetsReducer(undefined, {type: 'unknown'} as any),
+        ...assetsReducer(undefined, {type: 'unknown'} as Action),
         assetTypes: [S3AssetType.IMAGE],
         order: {
           direction: 'asc',
@@ -682,14 +716,15 @@ describe('assets epics', () => {
 
     const pageResult = await lastValueFrom(
       assetsFetchPageIndexEpic(
-        of(assetsActions.loadPageIndex({pageIndex: 2})) as any,
-        new BehaviorSubject(state) as any,
+        of(assetsActions.loadPageIndex({pageIndex: 2})),
+        new BehaviorSubject(state) as unknown as StateObservable<RootReducerState>,
         makeDeps(),
       ).pipe(toArray()),
     )
 
     expect(pageResult).toHaveLength(1)
     const fetchPageAction = pageResult[0] as ReturnType<typeof assetsActions.fetchRequest>
+
     expect(fetchPageAction.type).toBe(assetsActions.fetchRequest.type)
     expect(fetchPageAction.payload.params).toEqual({
       documentAssetIds: ['asset-1'],
@@ -699,15 +734,15 @@ describe('assets epics', () => {
 
     const nextPageResult = await lastValueFrom(
       assetsFetchNextPageEpic(
-        of(assetsActions.loadNextPage()) as any,
+        of(assetsActions.loadNextPage()),
         new BehaviorSubject(
           makeRootState({
             assets: {
-              ...assetsReducer(undefined, {type: 'unknown'} as any),
+              ...assetsReducer(undefined, {type: 'unknown'} as Action),
               pageIndex: 3,
             },
           }),
-        ) as any,
+        ) as unknown as StateObservable<RootReducerState>,
         makeDeps(),
       ).pipe(toArray()),
     )
@@ -718,7 +753,7 @@ describe('assets epics', () => {
   it('assetsFetchPageIndexEpic omits documentId when it is missing', async () => {
     const state = makeRootState({
       assets: {
-        ...assetsReducer(undefined, {type: 'unknown'} as any),
+        ...assetsReducer(undefined, {type: 'unknown'} as Action),
         pageSize: 10,
       },
       selected: {
@@ -730,13 +765,14 @@ describe('assets epics', () => {
 
     const result = await lastValueFrom(
       assetsFetchPageIndexEpic(
-        of(assetsActions.loadPageIndex({pageIndex: 1})) as any,
-        new BehaviorSubject(state) as any,
+        of(assetsActions.loadPageIndex({pageIndex: 1})),
+        new BehaviorSubject(state) as unknown as StateObservable<RootReducerState>,
         makeDeps(),
       ).pipe(toArray()),
     )
 
     const fetchPageAction = result[0] as ReturnType<typeof assetsActions.fetchRequest>
+
     expect(fetchPageAction.payload.params).toEqual({
       documentAssetIds: ['asset-1'],
     })
@@ -746,16 +782,16 @@ describe('assets epics', () => {
   it('assetsFetchAfterDeleteAllEpic emits only when current page is empty', async () => {
     let result = await lastValueFrom(
       assetsFetchAfterDeleteAllEpic(
-        of(assetsActions.deleteComplete({assetIds: ['asset-1']})) as any,
+        of(assetsActions.deleteComplete({assetIds: ['asset-1']})),
         new BehaviorSubject(
           makeRootState({
             assets: {
-              ...assetsReducer(undefined, {type: 'unknown'} as any),
+              ...assetsReducer(undefined, {type: 'unknown'} as Action),
               allIds: [],
               pageSize: 50,
             },
           }),
-        ) as any,
+        ) as unknown as StateObservable<RootReducerState>,
         makeDeps(),
       ).pipe(toArray()),
     )
@@ -764,16 +800,16 @@ describe('assets epics', () => {
 
     result = await lastValueFrom(
       assetsFetchAfterDeleteAllEpic(
-        of(assetsActions.deleteComplete({assetIds: ['asset-1']})) as any,
+        of(assetsActions.deleteComplete({assetIds: ['asset-1']})),
         new BehaviorSubject(
           makeRootState({
             assets: {
-              ...assetsReducer(undefined, {type: 'unknown'} as any),
+              ...assetsReducer(undefined, {type: 'unknown'} as Action),
               allIds: ['asset-2'],
               pageSize: 50,
             },
           }),
-        ) as any,
+        ) as unknown as StateObservable<RootReducerState>,
         makeDeps(),
       ).pipe(toArray()),
     )
@@ -784,8 +820,8 @@ describe('assets epics', () => {
   it('assetsOrderSetEpic and assetsSortEpic emit expected follow-up actions', async () => {
     let result = await lastValueFrom(
       assetsOrderSetEpic(
-        of(assetsActions.orderSet({order: {direction: 'desc', field: '_updatedAt'} as any})) as any,
-        EMPTY as any,
+        of(assetsActions.orderSet({order: {direction: 'desc', field: '_updatedAt'}})),
+        EMPTY_STATE$,
         makeDeps(),
       ).pipe(toArray()),
     )
@@ -794,8 +830,8 @@ describe('assets epics', () => {
 
     result = await lastValueFrom(
       assetsSortEpic(
-        of(assetsActions.insertUploads({results: {'hash-1': 'asset-1'}})) as any,
-        EMPTY as any,
+        of(assetsActions.insertUploads({results: {'hash-1': 'asset-1'}})),
+        EMPTY_STATE$,
         makeDeps(),
       ).pipe(toArray()),
     )
@@ -806,10 +842,10 @@ describe('assets epics', () => {
   it('assetsSearchEpic debounces before emitting clear and page reset', async () => {
     vi.useFakeTimers()
 
-    const action$ = new Subject<any>()
-    const emitted: any[] = []
+    const action$ = new Subject<Action>()
+    const emitted: Action[] = []
 
-    assetsSearchEpic(action$ as any, EMPTY as any, makeDeps()).subscribe((action) => {
+    assetsSearchEpic(action$, EMPTY_STATE$, makeDeps()).subscribe((action) => {
       emitted.push(action)
     })
 
@@ -829,16 +865,16 @@ describe('assets epics', () => {
   it('listener queue epics batch events and skip empty queues', async () => {
     vi.useFakeTimers()
 
-    const action$ = new Subject<any>()
+    const action$ = new Subject<Action>()
 
     const createResultPromise = lastValueFrom(
-      assetsListenerCreateQueueEpic(action$ as any, EMPTY as any, makeDeps()).pipe(toArray()),
+      assetsListenerCreateQueueEpic(action$, EMPTY_STATE$, makeDeps()).pipe(toArray()),
     )
     const deleteResultPromise = lastValueFrom(
-      assetsListenerDeleteQueueEpic(action$ as any, EMPTY as any, makeDeps()).pipe(toArray()),
+      assetsListenerDeleteQueueEpic(action$, EMPTY_STATE$, makeDeps()).pipe(toArray()),
     )
     const updateResultPromise = lastValueFrom(
-      assetsListenerUpdateQueueEpic(action$ as any, EMPTY as any, makeDeps()).pipe(toArray()),
+      assetsListenerUpdateQueueEpic(action$, EMPTY_STATE$, makeDeps()).pipe(toArray()),
     )
 
     action$.next(assetsActions.listenerCreateQueue({asset: makeImageAsset({_id: 'asset-1'})}))
@@ -873,7 +909,7 @@ describe('assets epics', () => {
     ])
 
     const emptyResult = await lastValueFrom(
-      assetsListenerCreateQueueEpic(EMPTY as any, EMPTY as any, makeDeps()).pipe(toArray()),
+      assetsListenerCreateQueueEpic(EMPTY, EMPTY_STATE$, makeDeps()).pipe(toArray()),
     )
 
     expect(emptyResult).toEqual([])
@@ -884,10 +920,10 @@ describe('assets epics', () => {
       assetsUnpickEpic(
         of(
           assetsActions.viewSet({view: 'table'}),
-          assetsActions.orderSet({order: {direction: 'asc', field: '_updatedAt'} as any}),
+          assetsActions.orderSet({order: {direction: 'asc', field: '_updatedAt'}}),
           searchActions.querySet({searchQuery: 'cat'}),
-        ) as any,
-        EMPTY as any,
+        ),
+        EMPTY_STATE$,
         makeDeps(),
       ).pipe(toArray()),
     )
@@ -920,8 +956,8 @@ describe('assets epics', () => {
             closeDialogId: 'dialog-1',
             formData: {title: 'Updated'},
           }),
-        ) as any,
-        new BehaviorSubject(makeRootState()) as any,
+        ),
+        new BehaviorSubject(makeRootState()) as unknown as StateObservable<RootReducerState>,
         successDeps,
       ).pipe(toArray()),
     )
@@ -950,8 +986,8 @@ describe('assets epics', () => {
             asset,
             formData: {title: 'Updated'},
           }),
-        ) as any,
-        new BehaviorSubject(makeRootState()) as any,
+        ),
+        new BehaviorSubject(makeRootState()) as unknown as StateObservable<RootReducerState>,
         errorDeps,
       ).pipe(toArray()),
     )
@@ -982,8 +1018,8 @@ describe('assets epics', () => {
             asset,
             formData: {title: 'Updated'},
           }),
-        ) as any,
-        new BehaviorSubject(makeRootState()) as any,
+        ),
+        new BehaviorSubject(makeRootState()) as unknown as StateObservable<RootReducerState>,
         defaultErrorDeps,
       ).pipe(toArray()),
     )

@@ -12,7 +12,7 @@ import {
 } from '@sanity/ui'
 import {filesize} from 'filesize'
 import {type FC, type ReactNode, useCallback, useEffect, useState} from 'react'
-import {ContextMenuButton, useTranslation} from 'sanity'
+import {ContextMenuButton} from 'sanity'
 import {S3AssetType, type S3FileAsset, type S3VideoAsset} from 'sanity-plugin-s3-media-types'
 import {styled} from 'styled-components'
 
@@ -46,7 +46,7 @@ export const S3FileActionsMenu: FC<S3FileActionsMenuProps> = (props) => {
 
   const filename = originalFilename || `${assetId}.${extension}`
 
-  const handleClick = useCallback(() => onMenuOpen(true), [onMenuOpen])
+  const handleClick = useCallback(() => onMenuOpen(!isMenuOpen), [isMenuOpen, onMenuOpen])
 
   useGlobalKeyDown(
     useCallback(
@@ -83,8 +83,6 @@ export const S3FileActionsMenu: FC<S3FileActionsMenuProps> = (props) => {
     }
   }, [isMenuOpen, menuElement])
 
-  const {t} = useTranslation()
-
   const {buildAssetUrl} = useS3MediaContext()
 
   const assetUrl = buildAssetUrl({
@@ -102,6 +100,7 @@ export const S3FileActionsMenu: FC<S3FileActionsMenuProps> = (props) => {
           {isVideoFile ? (
             <video
               controls
+              data-testid="file-actions-video"
               loop
               autoPlay
               muted
@@ -113,7 +112,7 @@ export const S3FileActionsMenu: FC<S3FileActionsMenuProps> = (props) => {
             />
           ) : null}
 
-          {isAudioFile ? <audio controls src={assetUrl} style={{width: '100%'}} /> : null}
+          {isAudioFile ? <audio controls data-testid="file-actions-audio" src={assetUrl} style={{width: '100%'}} /> : null}
         </Flex>
       )
     }
@@ -148,7 +147,12 @@ export const S3FileActionsMenu: FC<S3FileActionsMenuProps> = (props) => {
   }, [disabled, filename, isVideoFile, isAudioFile, muted, size, assetUrl])
 
   return (
-    <Flex wrap="nowrap" justify="space-between" align="center">
+    <Flex
+      wrap="nowrap"
+      justify="space-between"
+      align="center"
+      data-testid="s3-file-actions-menu"
+    >
       {renderPreview()}
 
       <MenuActionsWrapper padding={2} $isAbsolute={isAudioFile || isVideoFile}>
@@ -160,7 +164,7 @@ export const S3FileActionsMenu: FC<S3FileActionsMenuProps> = (props) => {
           constrainSize
         >
           <ContextMenuButton
-            aria-label={t('inputs.file.actions-menu.file-options.aria-label')}
+            aria-label="Open file options menu"
             onClick={handleClick}
             ref={setOptionsButtonRef}
           />

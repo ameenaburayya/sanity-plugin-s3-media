@@ -11,7 +11,6 @@ import {
   unset,
   useClient,
   useDocumentPreviewStore,
-  useTranslation,
 } from 'sanity'
 import {S3AssetType} from 'sanity-plugin-s3-media-types'
 
@@ -67,8 +66,6 @@ export const S3FileInput: FC<S3FileInputProps> = (props) => {
   )
 
   const {push} = useToast()
-  const {t} = useTranslation()
-
   const [isStale, setIsStale] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [selectedAssetSource, setSelectedAssetSource] = useState<S3AssetSource | null>(null)
@@ -130,6 +127,7 @@ export const S3FileInput: FC<S3FileInputProps> = (props) => {
       if (assetSource.Uploader) {
         const uploader = new assetSource.Uploader()
         // Unsubscribe from the previous uploader
+
         assetSourceUploader?.unsubscribe()
         try {
           setAssetSourceUploader({
@@ -149,8 +147,8 @@ export const S3FileInput: FC<S3FileInputProps> = (props) => {
                   })
                   push({
                     status: 'error',
-                    description: t('asset-sources.common.uploader.upload-failed.description'),
-                    title: t('asset-sources.common.uploader.upload-failed.title'),
+                    description: 'See the console for more information.',
+                    title: 'Upload failed',
                   })
                   break
                 case 'all-complete': {
@@ -172,14 +170,14 @@ export const S3FileInput: FC<S3FileInputProps> = (props) => {
           assetSourceUploader?.unsubscribe()
           push({
             status: 'error',
-            description: t('asset-sources.common.uploader.upload-failed.description'),
-            title: t('asset-sources.common.uploader.upload-failed.title'),
+            description: 'See the console for more information.',
+            title: 'Upload failed',
           })
           console.error(err)
         }
       }
     },
-    [assetSourceUploader, onChange, push, schemaType, t],
+    [assetSourceUploader, onChange, push, schemaType],
   )
 
   // Abort asset source uploads and unsubscribe from the uploader is the component unmounts
@@ -236,7 +234,7 @@ export const S3FileInput: FC<S3FileInputProps> = (props) => {
   ])
 
   return (
-    <>
+    <div data-testid="s3-file-input">
       {members.map((member) => {
         if (member.kind === 'field') {
           return (
@@ -267,6 +265,6 @@ export const S3FileInput: FC<S3FileInputProps> = (props) => {
           setSelectedAssetSource={setSelectedAssetSource}
         />
       )}{' '}
-    </>
+    </div>
   )
 }

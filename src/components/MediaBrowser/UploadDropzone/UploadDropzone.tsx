@@ -97,11 +97,13 @@ export const UploadDropzone: FC<PropsWithChildren> = (props) => {
   // Use custom file selector to obtain files on file drop + change events (excluding folders and packages)
   const handleFileGetter = async (event: DropEvent) => {
     let fileList: FileList | undefined
+
     if (event.type === 'drop' && 'dataTransfer' in event) {
       fileList = event?.dataTransfer?.files
     }
     if (event.type === 'change') {
       const target = event?.target as HTMLInputElement
+
       if (target?.files) {
         fileList = target.files
       }

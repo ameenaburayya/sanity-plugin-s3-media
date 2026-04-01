@@ -1,21 +1,36 @@
 import {lastValueFrom, of} from 'rxjs'
 import {toArray} from 'rxjs/operators'
+import type {SanityClient} from 'sanity'
 import {S3AssetType} from 'sanity-plugin-s3-media-types'
+import {mockS3VideoAsset} from 'test/fixtures'
 
+import type {S3Client} from '../../S3Client'
 import {uploadVideo} from '../uploadVideo'
 
-const setMock = vi.hoisted(() => vi.fn((value, path) => ({type: 'set', value, path})))
-const unsetMock = vi.hoisted(() => vi.fn((path) => ({type: 'unset', path})))
+type MockSanityClient = Pick<SanityClient, 'observable'>
+type MockS3Client = Pick<S3Client, 'observable'>
 
-vi.mock('sanity', async () => {
-  const actual = await vi.importActual<typeof import('sanity')>('sanity')
+const createSanityClient = (overrides: {
+  fetch: unknown
+  create: unknown
+}): MockSanityClient =>
+  ({
+    observable: {
+      fetch: overrides.fetch,
+      create: overrides.create,
+    },
+  }) as unknown as MockSanityClient
 
-  return {
-    ...actual,
-    set: setMock,
-    unset: unsetMock,
-  }
-})
+const createS3Client = (overrides: {
+  uploadAsset: unknown
+}): MockS3Client =>
+  ({
+    observable: {
+      assets: {
+        uploadAsset: overrides.uploadAsset,
+      },
+    },
+  }) as unknown as MockS3Client
 
 describe('uploadVideo', () => {
   afterEach(() => {
@@ -41,6 +56,12 @@ describe('uploadVideo', () => {
         this.onloadedmetadata?.()
       }
 
+      get src(): string {
+        return this.#srcValue
+      }
+
+      #srcValue = ''
+
       removeAttribute = vi.fn()
       load = vi.fn()
     }
@@ -56,24 +77,7 @@ describe('uploadVideo', () => {
       lengthComputable: true,
     }
 
-    const createdAsset = {
-      _id: 's3Video-assethash-1920x1080-mp4',
-      _type: 's3VideoAsset',
-      assetId: 'assethash',
-      extension: 'mp4',
-      mimeType: 'video/mp4',
-      sha1hash: 'assethash',
-      size: 11,
-      metadata: {
-        _type: 's3VideoMetadata',
-        dimensions: {
-          _type: 's3VideoDimensions',
-          width: 1920,
-          height: 1080,
-          aspectRatio: 1920 / 1080,
-        },
-      },
-    }
+    const createdAsset = {...mockS3VideoAsset, _id: 's3Video-assethash-1920x1080-mp4', assetId: 'assethash', size: 11}
 
     const fetch = vi.fn(() => of(null))
     const create = vi.fn(() => of(createdAsset))
@@ -82,8 +86,8 @@ describe('uploadVideo', () => {
     const events = await lastValueFrom(
       uploadVideo({
         file,
-        sanityClient: {observable: {fetch, create}} as any,
-        s3Client: {observable: {assets: {uploadAsset}}} as any,
+        sanityClient: createSanityClient({fetch, create}) as unknown as SanityClient,
+        s3Client: createS3Client({uploadAsset}) as unknown as S3Client,
         options: {storeOriginalFilename: false},
       }).pipe(toArray()),
     )

@@ -26,6 +26,7 @@ const dialogSlice = createSlice({
     // Remove dialog by id
     remove(state, action: PayloadAction<{id: string}>) {
       const id = action.payload?.id
+
       state.items = state.items.filter((item) => item.id !== id)
     },
     showConfirmDeleteAssets(
@@ -52,6 +53,7 @@ const dialogSlice = createSlice({
     },
     showAssetEdit(state, action: PayloadAction<{assetId: string}>) {
       const {assetId} = action.payload
+
       state.items.push({
         assetId,
         id: assetId,

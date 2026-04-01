@@ -9,7 +9,6 @@ import {Flex, Text, useElementSize} from '@sanity/ui'
 import {get} from 'lodash'
 import {type FC, type ReactNode, useCallback, useMemo, useState} from 'react'
 import {type SchemaType} from 'sanity'
-import {useTranslation} from 'sanity'
 import {S3AssetType} from 'sanity-plugin-s3-media-types'
 import {styled} from 'styled-components'
 
@@ -42,8 +41,6 @@ export const UploadPlaceholder: FC<UploadPlaceholderProps> = (props) => {
 
   const isFileType = type === S3AssetType.FILE
   const isVideoType = type === S3AssetType.VIDEO
-
-  const {t} = useTranslation()
 
   const assetSourcesWithUpload = useMemo(() => {
     const result: S3AssetSource[] = assetSources.filter((s) => Boolean(s.Uploader))
@@ -82,7 +79,7 @@ export const UploadPlaceholder: FC<UploadPlaceholderProps> = (props) => {
                 onUpload(assetSourcesWithUpload[0], files)
               }
             }}
-            text={t('input.files.common.upload-placeholder.file-input-button.text')}
+            text="Upload"
           />
         )
       default:
@@ -96,7 +93,7 @@ export const UploadPlaceholder: FC<UploadPlaceholderProps> = (props) => {
           />
         )
     }
-  }, [accept, assetSourcesWithUpload, directUploads, handleSelectFiles, onUpload, readOnly, t])
+  }, [accept, assetSourcesWithUpload, directUploads, handleSelectFiles, onUpload, readOnly])
 
   const messageIcon = useMemo(() => {
     if (readOnly) {
@@ -132,6 +129,7 @@ export const UploadPlaceholder: FC<UploadPlaceholderProps> = (props) => {
 
   return assetSourcesWithUpload.length === 0 ? null : (
     <Flex
+      data-testid="upload-placeholder"
       align={collapsed ? undefined : 'center'}
       direction={collapsed ? 'column' : 'row'}
       gap={4}

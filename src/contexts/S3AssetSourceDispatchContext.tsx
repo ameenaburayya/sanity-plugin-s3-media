@@ -30,6 +30,7 @@ export const AssetBrowserDispatchProvider: FC<
 
 export const useAssetSourceActions = () => {
   const context = useContext(AssetSourceDispatchContext)
+
   if (context === undefined) {
     throw new Error('useAssetSourceActions must be used within an AssetSourceDispatchProvider')
   }

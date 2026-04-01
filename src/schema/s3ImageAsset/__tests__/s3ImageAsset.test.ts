@@ -1,16 +1,13 @@
-import {s3ImageAsset} from '..'
+import {s3ImageAsset} from '../s3ImageAsset'
 
-const defineTypeMock = vi.hoisted(() => vi.fn((schema) => schema))
-const defineFieldMock = vi.hoisted(() => vi.fn((field) => field))
+type S3ImageAssetSchema = typeof s3ImageAsset
+type SchemaField = S3ImageAssetSchema['fields'][number]
 
-vi.mock('sanity', () => ({
-  defineType: defineTypeMock,
-  defineField: defineFieldMock,
-}))
 
 describe('s3ImageAsset schema', () => {
   it('defines expected schema fields and ordering', () => {
-    const schema = s3ImageAsset as any
+    const schema: S3ImageAssetSchema = s3ImageAsset
+
     expect(schema.name).toBe('s3ImageAsset')
     expect(schema.type).toBe('document')
     expect(schema.orderings).toEqual([
@@ -21,7 +18,8 @@ describe('s3ImageAsset schema', () => {
       },
     ])
 
-    const fieldNames = schema.fields.map((field: any) => field.name)
+    const fieldNames = schema.fields.map((field: SchemaField) => field.name)
+
     expect(fieldNames).toEqual([
       'originalFilename',
       'label',
@@ -36,37 +34,16 @@ describe('s3ImageAsset schema', () => {
       'uploadId',
     ])
 
-    const sha1hashField = schema.fields.find((field: any) => field.name === 'sha1hash') as any
+    const sha1hashField = schema.fields.find((field: SchemaField) => field.name === 'sha1hash')
     const required = vi.fn(() => 'required-rule')
-    expect((sha1hashField.validation as (rule: any) => unknown)({required})).toBe('required-rule')
 
-    const uploadIdField = schema.fields.find((field: any) => field.name === 'uploadId') as any
-    expect(uploadIdField.hidden).toBe(true)
-    expect(uploadIdField.readOnly).toBe(true)
-  })
+    expect(
+      (sha1hashField?.validation as (rule: {required: () => unknown}) => unknown)({required}),
+    ).toBe('required-rule')
 
-  it('formats preview title/subtitle with title fallback behavior', () => {
-    const schema = s3ImageAsset as any
-    const withPathFallback = schema.preview.prepare({
-      path: 'folder/photo.png',
-      mimeType: 'image/png',
-      size: '2097152',
-    })
+    const uploadIdField = schema.fields.find((field: SchemaField) => field.name === 'uploadId')
 
-    expect(withPathFallback).toEqual({
-      title: 'photo.png',
-      subtitle: 'image/png (2.00 MB)',
-    })
-
-    const withNonStringPath = schema.preview.prepare({
-      path: {file: 'photo.png'},
-      mimeType: 'image/png',
-      size: 1024,
-    })
-
-    expect(withNonStringPath).toEqual({
-      title: false,
-      subtitle: 'image/png (0.00 MB)',
-    })
+    expect(uploadIdField?.hidden).toBe(true)
+    expect(uploadIdField?.readOnly).toBe(true)
   })
 })

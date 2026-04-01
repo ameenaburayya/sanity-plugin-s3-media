@@ -1,26 +1,18 @@
-import {s3Image} from '..'
 import {S3ImageInput} from '../components'
+import {s3Image} from '../s3Image'
 
-const defineTypeMock = vi.hoisted(() => vi.fn((schema) => schema))
-const defineFieldMock = vi.hoisted(() => vi.fn((field) => field))
+type S3ImageSchema = typeof s3Image
 
-vi.mock('sanity', async () => {
-  const actual = await vi.importActual<typeof import('sanity')>('sanity')
-
-  return {
-    ...actual,
-    defineType: defineTypeMock,
-    defineField: defineFieldMock,
-  }
-})
 
 describe('s3Image schema', () => {
   it('defines object schema with required image reference and custom field renderer', () => {
-    const schema = s3Image as any
+    const schema: S3ImageSchema = s3Image
+
     expect(schema.name).toBe('s3Image')
     expect(schema.type).toBe('object')
 
-    const [assetField] = schema.fields as any[]
+    const [assetField] = schema.fields
+
     expect(assetField).toMatchObject({
       name: 'asset',
       type: 'reference',
@@ -28,14 +20,30 @@ describe('s3Image schema', () => {
     })
 
     const required = vi.fn(() => 'required-rule')
-    expect((assetField.validation as (rule: any) => unknown)({required})).toBe('required-rule')
-    expect(required).toHaveBeenCalledTimes(1)
 
-    expect(schema.components.input).toBe(S3ImageInput)
+    expect(
+      (assetField.validation as (rule: {required: () => unknown}) => unknown)({required}),
+    ).toBe('required-rule')
+    expect(required).toHaveBeenCalledTimes(1)
+    expect(required).toHaveBeenCalledWith()
+
+    expect(schema.components?.input).toBe(S3ImageInput)
 
     const renderDefault = vi.fn(() => 'rendered-field')
-    const result = (schema.components.field as (props: any) => unknown)({name: 'asset', renderDefault})
+    const fieldRenderer = schema.components?.field as ((props: unknown) => unknown) | undefined
+    const result = fieldRenderer?.({
+      name: 'asset',
+      renderDefault,
+    })
+
     expect(result).toBe('rendered-field')
-    expect(renderDefault).toHaveBeenCalledWith({name: 'asset', renderDefault, level: 0})
+    expect(renderDefault).toHaveBeenCalledTimes(1)
+    expect(renderDefault).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'asset',
+        renderDefault,
+        level: 0,
+      }),
+    )
   })
 })

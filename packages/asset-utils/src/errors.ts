@@ -28,5 +28,6 @@ export class UnresolvableError extends Error {
  */
 export function isUnresolvableError(err: unknown): err is UnresolvableError {
   const error = err as UnresolvableError
+
   return Boolean(error.unresolvable && 'input' in error)
 }

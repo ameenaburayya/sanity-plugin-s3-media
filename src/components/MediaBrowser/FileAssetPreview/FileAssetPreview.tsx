@@ -22,7 +22,7 @@ export const FileAssetPreview: FC<FileAssetPreviewProps> = (props) => {
   if (asset.mimeType.search('audio') === 0) {
     return (
       <Flex align="center" justify="center" style={{height: '100%'}}>
-        <audio controls src={assetUrl} style={{width: '100%'}} />
+        <audio controls data-testid="file-preview-audio" src={assetUrl} style={{width: '100%'}} />
       </Flex>
     )
   }
@@ -32,6 +32,7 @@ export const FileAssetPreview: FC<FileAssetPreviewProps> = (props) => {
       <video
         controls
         autoPlay
+        data-testid="file-preview-video"
         muted
         loop
         src={assetUrl}

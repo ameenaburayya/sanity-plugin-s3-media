@@ -5,6 +5,7 @@ const CONTENT_DISPOSITION_FILENAME_RE = /filename\s*=\s*"([^"]+)"|filename\s*=\s
 
 function resolveFileName(url: string, contentDispositionHeader?: string | null): string {
   const filenameStar = contentDispositionHeader?.match(CONTENT_DISPOSITION_FILENAME_STAR_RE)?.[1]
+
   if (filenameStar) {
     return decodeURIComponent(filenameStar)
   }
@@ -12,6 +13,7 @@ function resolveFileName(url: string, contentDispositionHeader?: string | null):
   const filename =
     contentDispositionHeader?.match(CONTENT_DISPOSITION_FILENAME_RE)?.[1] ||
     contentDispositionHeader?.match(CONTENT_DISPOSITION_FILENAME_RE)?.[2]
+
   if (filename) {
     return filename.trim()
   }
@@ -19,6 +21,7 @@ function resolveFileName(url: string, contentDispositionHeader?: string | null):
   try {
     const pathname = new URL(url).pathname
     const basename = pathname.split('/').pop()
+
     if (basename) {
       return decodeURIComponent(basename)
     }
@@ -31,6 +34,7 @@ function resolveFileName(url: string, contentDispositionHeader?: string | null):
 
 function triggerDownload(href: string, filename: string): void {
   const anchor = document.createElement('a')
+
   anchor.href = href
   anchor.download = filename
 
@@ -46,6 +50,7 @@ export async function downloadAsset(url?: string): Promise<void> {
 
   try {
     const response = await fetch(url, {method: 'GET'})
+
     if (!response.ok) {
       throw new Error(`Unexpected download response: ${response.status}`)
     }

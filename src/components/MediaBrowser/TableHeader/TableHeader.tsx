@@ -75,6 +75,7 @@ export const TableHeader: FC = () => {
       ) : (
         <ContextActionContainer
           align="center"
+          data-testid="context-action"
           justify="center"
           onClick={handleContextActionClick}
           $scheme={scheme}

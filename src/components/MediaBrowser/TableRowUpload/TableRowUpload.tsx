@@ -40,6 +40,7 @@ export const TableRowUpload: FC<TableRowUploadProps> = (props) => {
   const isQueued = item.status === 'queued'
 
   let status
+
   if (isComplete) {
     status = 'Verifying'
   }

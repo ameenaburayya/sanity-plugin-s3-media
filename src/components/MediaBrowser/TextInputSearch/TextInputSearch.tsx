@@ -22,6 +22,7 @@ export const TextInputSearch: FC = () => {
   return (
     <Box style={{position: 'relative'}}>
       <TextInput
+        data-testid="text-input-search-input"
         fontSize={1}
         icon={SearchIcon}
         onChange={handleChange}
@@ -34,6 +35,7 @@ export const TextInputSearch: FC = () => {
       {searchQuery.length > 0 && (
         <Flex
           align="center"
+          data-testid="text-input-search-clear"
           justify="center"
           onClick={handleClear}
           style={{

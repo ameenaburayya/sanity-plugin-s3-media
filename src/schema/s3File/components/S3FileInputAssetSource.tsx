@@ -1,7 +1,7 @@
 import {get} from 'lodash'
 import {type FC, useCallback, useMemo} from 'react'
 import type {Observable} from 'rxjs'
-import {type AssetFromSource, type AssetSourceComponentAction, useTranslation} from 'sanity'
+import {type AssetFromSource, type AssetSourceComponentAction} from 'sanity'
 import {S3AssetType, type S3FileAsset, type S3VideoAsset} from 'sanity-plugin-s3-media-types'
 
 import {WithReferencedAsset} from '../../../components'
@@ -28,8 +28,6 @@ export const S3FileInputAssetSource: FC<S3FileInputAssetSourceProps> = (props) =
     value,
   } = props
 
-  const {t} = useTranslation()
-
   const isVideoField = schemaType.name === 's3Video'
 
   const accept = get(schemaType, 'options.accept', isVideoField ? 'video/*' : '')
@@ -44,7 +42,7 @@ export const S3FileInputAssetSource: FC<S3FileInputAssetSourceProps> = (props) =
   )
 
   const assetType = isVideoField ? S3AssetType.VIDEO : S3AssetType.FILE
-  const dialogHeaderTitle = isVideoField ? 'S3 Video' : t('inputs.file.dialog.title')
+  const dialogHeaderTitle = isVideoField ? 'S3 Video' : 'Select file'
 
   if (!selectedAssetSource) {
     return null

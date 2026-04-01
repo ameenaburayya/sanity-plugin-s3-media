@@ -56,6 +56,7 @@ export function parseS3FileAssetId(documentId: string): S3FileAssetIdParts {
   }
 
   const [, assetId, extension] = match
+
   return {type: S3AssetType.FILE, assetId, extension}
 }
 
@@ -152,6 +153,7 @@ export function parseS3FileAssetFilename(filename: string): S3FileAssetIdParts {
   }
 
   const [, assetId, extension] = match
+
   return parseS3FileAssetId(`${S3AssetType.FILE}-${assetId}-${extension.toLowerCase()}`)
 }
 
@@ -172,6 +174,7 @@ export function parseS3ImageAssetFilename(filename: string): S3ImageAssetIdParts
   }
 
   const [, assetId, width, height, extension] = match
+
   return parseS3ImageAssetId(
     `${S3AssetType.IMAGE}-${assetId}-${width}x${height}-${extension.toLowerCase()}`,
   )
@@ -194,6 +197,7 @@ export function parseS3VideoAssetFilename(filename: string): S3VideoAssetIdParts
   }
 
   const [, assetId, width, height, extension] = match
+
   return parseS3VideoAssetId(
     `${S3AssetType.VIDEO}-${assetId}-${width}x${height}-${extension.toLowerCase()}`,
   )
@@ -218,6 +222,7 @@ export function parseS3AssetFilename(filename: string): S3AssetIdParts {
   }
 
   const match = s3ImageAssetFilenamePattern.exec(file)
+
   if (match) {
     const extension = match[4].toLowerCase()
 

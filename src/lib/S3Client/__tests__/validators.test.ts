@@ -10,7 +10,7 @@ describe('validateAssetType', () => {
   })
 
   it('throws for unsupported asset types', () => {
-    expect(() => validateAssetType('video' as any)).toThrow(
+    expect(() => validateAssetType('video' as never)).toThrow(
       'Invalid asset type: video. Must be one of s3File, s3Image, s3Video',
     )
   })

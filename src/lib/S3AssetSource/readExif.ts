@@ -8,6 +8,7 @@ function readFileAsArrayBuffer(
 ): Observable<string | ArrayBuffer | null> {
   return new Observable((observer) => {
     const reader = new window.FileReader()
+
     reader.onerror = (err) => observer.error(err)
     reader.onload = () => {
       observer.next(reader.result)

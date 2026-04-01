@@ -3,10 +3,13 @@
 import {Observable, Subject, Subscription} from 'rxjs'
 import {first, mergeMap} from 'rxjs/operators'
 
+type WithMaxConcurrencyArg = string | number | boolean | null | undefined | object
+
 const DEFAULT_CONCURRENCY = 4
 
 function remove<T>(array: Array<T>, item: T): Array<T> {
   const index = array.indexOf(item)
+
   if (index > -1) {
     array.splice(index, 1)
   }
@@ -24,6 +27,7 @@ const createThrottler = <T>(concurrency: number = DEFAULT_CONCURRENCY) => {
         return scheduleAndWait$(observable).subscribe(observer)
       }
       const subscription = observable.subscribe(observer)
+
       currentSubscriptions.push(subscription)
       return () => {
         remove(currentSubscriptions, subscription)
@@ -48,10 +52,11 @@ const createThrottler = <T>(concurrency: number = DEFAULT_CONCURRENCY) => {
   return request
 }
 
-export const withMaxConcurrency = <A extends any[], R>(
+export const withMaxConcurrency = <A extends WithMaxConcurrencyArg[], R>(
   func: (...args: A) => Observable<R>,
   concurrency: number = DEFAULT_CONCURRENCY,
 ): ((...args: A) => Observable<R>) => {
   const throttler = createThrottler<R>(concurrency)
+
   return (...args: A) => throttler(func(...args))
 }

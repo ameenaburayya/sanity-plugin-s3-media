@@ -101,11 +101,15 @@ export const S3FileInputAsset: FC<S3FileInputAssetProps> = (props) => {
     !(isVideoField ? isS3VideoSource(value) : isS3FileSource(value))
 
   if (hasInvalidAssetSource) {
-    return <InvalidFileWarning onClearValue={clearField} />
+    return (
+      <div data-testid="s3-file-input-asset">
+        <InvalidFileWarning onClearValue={clearField} />
+      </div>
+    )
   }
 
   return (
-    <>
+    <div data-testid="s3-file-input-asset">
       {isStale && (
         <Box marginBottom={2}>
           <UploadWarning onClearStale={onClearUploadStatus} />
@@ -178,6 +182,6 @@ export const S3FileInputAsset: FC<S3FileInputAssetProps> = (props) => {
           </UploadTargetCard>
         )}
       </ChangeIndicator>
-    </>
+    </div>
   )
 }

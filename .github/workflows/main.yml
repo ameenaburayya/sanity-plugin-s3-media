@@ -30,7 +30,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
       - name: Lint
-        run: pnpm lint:all
+        run: pnpm lint:ci
 
   test:
     runs-on: ubuntu-latest
@@ -43,7 +43,7 @@ jobs:
       - name: Build Workspace Packages
         run: pnpm -r --filter './packages/**' --if-present --sort run build
       - name: Test
-        run: pnpm test:coverage:all
+        run: pnpm test:ci
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-report

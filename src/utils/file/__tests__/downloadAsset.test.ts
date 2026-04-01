@@ -1,7 +1,4 @@
-/* @vitest-environment jsdom */
-
-import {describe, expect, it, vi} from 'vitest'
-
+// @vitest-environment jsdom
 import {downloadAsset} from '../downloadAsset'
 
 const ensureObjectUrlApis = () => {
@@ -53,10 +50,12 @@ describe('downloadAsset', () => {
     await downloadAsset('https://cdn.example.com/assets/abc.mp4')
 
     expect(createObjectURLSpy).toHaveBeenCalledTimes(1)
+    expect(revokeObjectURLSpy).toHaveBeenCalledTimes(1)
     expect(revokeObjectURLSpy).toHaveBeenCalledWith('blob://download')
     expect(clickSpy).toHaveBeenCalledTimes(1)
 
     const anchor = appendSpy.mock.calls[0][0] as HTMLAnchorElement
+
     expect(anchor.href).toBe('blob://download')
     expect(anchor.download).toBe('my video.mp4')
   })
@@ -66,6 +65,7 @@ describe('downloadAsset', () => {
 
     const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(vi.fn())
     const appendSpy = vi.spyOn(document.body, 'appendChild')
+
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob://download-plain')
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(vi.fn())
 
@@ -82,6 +82,7 @@ describe('downloadAsset', () => {
 
     expect(clickSpy).toHaveBeenCalledTimes(1)
     const anchor = appendSpy.mock.calls[0][0] as HTMLAnchorElement
+
     expect(anchor.download).toBe('invoice.pdf')
   })
 
@@ -90,6 +91,7 @@ describe('downloadAsset', () => {
 
     const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(vi.fn())
     const appendSpy = vi.spyOn(document.body, 'appendChild')
+
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob://download-unquoted')
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(vi.fn())
 
@@ -106,6 +108,7 @@ describe('downloadAsset', () => {
 
     expect(clickSpy).toHaveBeenCalledTimes(1)
     const anchor = appendSpy.mock.calls[0][0] as HTMLAnchorElement
+
     expect(anchor.download).toBe('transcript.txt')
   })
 
@@ -120,6 +123,7 @@ describe('downloadAsset', () => {
     expect(clickSpy).toHaveBeenCalledTimes(1)
 
     const anchor = appendSpy.mock.calls[0][0] as HTMLAnchorElement
+
     expect(anchor.href).toBe('https://cdn.example.com/files/report.pdf?token=1')
     expect(anchor.download).toBe('report.pdf')
   })
@@ -139,6 +143,7 @@ describe('downloadAsset', () => {
 
     expect(clickSpy).toHaveBeenCalledTimes(1)
     const anchor = appendSpy.mock.calls[0][0] as HTMLAnchorElement
+
     expect(anchor.download).toBe('download')
   })
 })

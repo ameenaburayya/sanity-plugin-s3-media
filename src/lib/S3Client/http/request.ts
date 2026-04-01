@@ -22,9 +22,11 @@ export function defineHttpRequest(config: HttpRequestConfig = {}): Requester {
       tap((event) => {
         if (event.type === 'response') {
           const warn = event.headers['x-sanity-warning']
+
           if (!warn) return
 
           const warnings = Array.isArray(warn) ? warn : [warn]
+
           warnings.forEach((msg) => {
             if (!msg || seen[msg]) return
 

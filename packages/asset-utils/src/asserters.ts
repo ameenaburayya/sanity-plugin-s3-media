@@ -75,6 +75,7 @@ export function isS3AssetId(documentId: string): boolean {
  */
 export function isS3AssetObjectStub(stub: unknown): stub is S3AssetObjectStub {
   const item = stub as S3AssetObjectStub
+
   return isObject(item) && Boolean(item.asset) && typeof item.asset === 'object'
 }
 
@@ -90,6 +91,7 @@ export function isInProgressUpload(
   stub: unknown,
 ): stub is S3ImageUploadStub | S3FileUploadStub | S3VideoUploadStub {
   const item = stub as S3ImageUploadStub | S3FileUploadStub | S3VideoUploadStub
+
   return isObject(item) && Boolean(item._upload) && !('asset' in item)
 }
 

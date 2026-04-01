@@ -37,10 +37,15 @@ describe('defineHttpRequest', () => {
     const request = defineHttpRequest()
 
     const responsePromise = lastValueFrom(request({url: 'https://api.example.com/items'}))
+
     await vi.advanceTimersByTimeAsync(1000)
     await responsePromise
 
     expect(fetch).toHaveBeenCalledTimes(2)
+    expect(fetch).toHaveBeenCalledWith(
+      'https://api.example.com/items',
+      expect.objectContaining({method: 'GET'}),
+    )
     expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 300000)
     expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 1000)
   })
@@ -57,6 +62,11 @@ describe('defineHttpRequest', () => {
     ).rejects.toThrow('HTTP 429')
 
     expect(fetch).toHaveBeenCalledTimes(1)
+    expect(fetch).toHaveBeenCalledWith(
+      'https://api.example.com/items',
+      expect.objectContaining({method: 'GET'}),
+    )
+    expect(setTimeoutSpy).toHaveBeenCalledTimes(1)
     expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 2000)
   })
 
@@ -102,9 +112,8 @@ describe('defineHttpRequest', () => {
   })
 
   it('ignores warnings matching string and regex ignore patterns', async () => {
-    vi.stubGlobal('fetch', vi.fn())
-
-    ;(fetch as any)
+    const fetchMock = vi
+      .fn()
       .mockResolvedValueOnce(
         createFetchResponse(200, 'OK', {
           'x-sanity-warning': 'please ignore-this warning',
@@ -121,9 +130,11 @@ describe('defineHttpRequest', () => {
         }),
       )
 
+    vi.stubGlobal('fetch', fetchMock)
+
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
     const request = defineHttpRequest({
-      ignoreWarnings: ['ignore-this', /warn-\d+/, {unsupported: true} as any],
+      ignoreWarnings: ['ignore-this', /warn-\d+/, {unsupported: true} as never],
     })
 
     await lastValueFrom(request({url: 'https://api.example.com/ignore-1'}))

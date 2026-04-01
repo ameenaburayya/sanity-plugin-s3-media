@@ -16,12 +16,14 @@ export const Progress: FC<ProgressProps> = (props) => {
 
   return (
     <Box
+      data-testid="progress-wrapper"
       style={{
         opacity: isFinished ? 0 : 1,
         transition: `opacity ${animationDuration}ms linear`,
       }}
     >
       <Box
+        data-testid="progress-bar"
         style={{
           height: '1px',
           background: 'rgba(255, 255, 255, 0.5)',

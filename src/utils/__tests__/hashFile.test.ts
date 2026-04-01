@@ -10,6 +10,7 @@ describe('hashFile', () => {
 
   it('hashes a file buffer using SHA-1 and returns hex output', async () => {
     const digest = vi.fn().mockResolvedValue(Uint8Array.from([0, 15, 255]).buffer)
+
     vi.stubGlobal('crypto', {subtle: {digest}})
 
     const file = new File([Uint8Array.from([1, 2, 3])], 'doc.bin', {

@@ -23,6 +23,7 @@ function isAbsoluteUrl(value: string): boolean {
  */
 export function buildS3FilePath(documentId: string): string {
   const {assetId, extension} = parseS3FileAssetId(documentId)
+
   return `${assetId}.${extension}`
 }
 
@@ -47,6 +48,7 @@ export function buildS3FileUrl(documentId: string, options: S3UrlBuilderOptions)
  */
 export function buildS3ImagePath(documentId: string): string {
   const {assetId, width, height, extension} = parseS3ImageAssetId(documentId)
+
   return `${assetId}-${width}x${height}.${extension}`
 }
 
@@ -71,6 +73,7 @@ export function buildS3ImageUrl(documentId: string, options: S3UrlBuilderOptions
  */
 export function buildS3VideoPath(documentId: string): string {
   const {assetId, width, height, extension} = parseS3VideoAssetId(documentId)
+
   return `${assetId}-${width}x${height}.${extension}`
 }
 

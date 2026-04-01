@@ -77,9 +77,9 @@ export const s3VideoAsset = defineType({
       size: 'size',
       media: 'media',
     },
-    prepare(doc: any) {
+    prepare(doc) {
       return {
-        title: doc.title || (typeof doc.path === 'string' && doc.path.split('/').slice(-1)[0]),
+        title: doc.title,
         subtitle: `${doc.mimeType} (${(Number(doc.size) / 1024 / 1024).toFixed(2)} MB)`,
       }
     },

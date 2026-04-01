@@ -40,7 +40,7 @@ function stubFileReader(
         }
   }
 
-  vi.stubGlobal('window', {FileReader: FileReaderMock} as any)
+  vi.stubGlobal('window', {FileReader: FileReaderMock})
 }
 
 describe('readExif', () => {
@@ -51,6 +51,7 @@ describe('readExif', () => {
   it('reads EXIF data from a sliced file buffer', async () => {
     const arrayBuffer = new ArrayBuffer(8)
     const readAsArrayBuffer = vi.fn()
+
     stubFileReader('success', arrayBuffer, readAsArrayBuffer)
 
     exifMock.mockReturnValue({orientation: 1})
@@ -68,13 +69,16 @@ describe('readExif', () => {
 
   it('suppresses warnings for known EXIF failures', async () => {
     const arrayBuffer = new ArrayBuffer(8)
+
     stubFileReader('success', arrayBuffer)
     exifMock.mockImplementation(() => {
       throw new Error('No exif data')
     })
 
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    const result = await firstValueFrom(readExif({slice: () => arrayBuffer} as unknown as File))
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const file = {slice: () => arrayBuffer}
+
+    const result = await firstValueFrom(readExif(file as unknown as File))
 
     expect(result).toEqual({})
     expect(warnSpy).not.toHaveBeenCalled()
@@ -82,13 +86,16 @@ describe('readExif', () => {
 
   it('warns for unexpected EXIF parser failures', async () => {
     const arrayBuffer = new ArrayBuffer(8)
+
     stubFileReader('success', arrayBuffer)
     exifMock.mockImplementation(() => {
       throw new Error('Corrupted EXIF payload')
     })
 
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    const result = await firstValueFrom(readExif({slice: () => arrayBuffer} as unknown as File))
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const file = {slice: () => arrayBuffer}
+
+    const result = await firstValueFrom(readExif(file as unknown as File))
 
     expect(result).toEqual({})
     expect(warnSpy).toHaveBeenCalledWith(
@@ -98,9 +105,10 @@ describe('readExif', () => {
 
   it('handles file-reader failures and returns empty metadata', async () => {
     const fileReaderError = new Error('Reader failed')
+
     stubFileReader('error', fileReaderError)
 
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
     const result = await firstValueFrom(
       readExif({slice: () => new ArrayBuffer(8)} as unknown as File),
     )

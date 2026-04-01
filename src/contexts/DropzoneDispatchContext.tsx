@@ -26,6 +26,7 @@ export const DropzoneDispatchProvider: FC<PropsWithChildren<DropzoneDispatchProv
 
 export const useDropzoneActions = () => {
   const context = useContext(DropzoneDispatchContext)
+
   if (context === undefined) {
     throw new Error('useDropzoneActions must be used within an DropzoneDispatchProvider')
   }

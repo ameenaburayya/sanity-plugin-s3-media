@@ -11,7 +11,7 @@ type Props = {
   src: string
 }
 
-export const Image: any = styled.img<Props>`
+export const Image = styled.img<Props>`
   --checkerboard-color: ${(props) =>
     props.$scheme ? getSchemeColor(props.$scheme, 'bg2') : 'inherit'};
 

@@ -2,7 +2,6 @@ import {ChevronDownIcon, ImageIcon, SearchIcon} from '@sanity/icons'
 import {Menu, MenuButton} from '@sanity/ui'
 import {startCase} from 'lodash'
 import {type FC, useCallback} from 'react'
-import {useTranslation} from 'sanity'
 
 import type {S3AssetSource} from '../../types'
 import {Button} from './Button'
@@ -17,7 +16,6 @@ type BrowserButtonProps = {
 
 export const BrowserButton: FC<BrowserButtonProps> = (props) => {
   const {assetSources, readOnly, id, setSelectedAssetSource} = props
-  const {t} = useTranslation()
 
   const handleSelectAssetFromSource = useCallback(
     (assetSource: S3AssetSource) => {
@@ -32,14 +30,7 @@ export const BrowserButton: FC<BrowserButtonProps> = (props) => {
     return (
       <MenuButton
         id={`${id}_assetFileButton`}
-        button={
-          <Button
-            mode="bleed"
-            text={t('inputs.file.multi-browse-button.text')}
-            icon={SearchIcon}
-            iconRight={ChevronDownIcon}
-          />
-        }
+        button={<Button mode="bleed" text="Browse" icon={SearchIcon} iconRight={ChevronDownIcon} />}
         menu={
           <Menu>
             {assetSources.map((assetSource) => {
@@ -60,7 +51,7 @@ export const BrowserButton: FC<BrowserButtonProps> = (props) => {
 
   return (
     <Button
-      text={t('inputs.file.browse-button.text')}
+      text="Browse"
       icon={SearchIcon}
       mode="bleed"
       onClick={() => handleSelectAssetFromSource(assetSources[0])}

@@ -1,17 +1,16 @@
-import {
-  CLEANUP_EVENT,
-  createInitialUploadEvent,
-  createInitialUploadPatches,
-  createUploadEvent,
-} from '../upload'
+import type {FormPatch} from 'sanity'
+import {set as sanitySet} from 'sanity'
 
-const setMock = vi.hoisted(() => vi.fn((value, path) => ({type: 'set', value, path})))
-const unsetMock = vi.hoisted(() => vi.fn((path) => ({type: 'unset', path})))
+import {CLEANUP_EVENT, createInitialUploadEvent, createInitialUploadPatches, createUploadEvent} from '../upload'
 
-vi.mock('sanity', () => ({
-  set: setMock,
-  unset: unsetMock,
-}))
+type SanityPatchMock = {
+  set: (...args: [unknown, string[]]) => {type: string; value?: unknown; path: string[]}
+  unset: (...args: [string[]]) => {type: string; path: string[]}
+}
+
+const {set: setMock} = (globalThis as {
+  __sanityMock: SanityPatchMock
+}).__sanityMock
 
 describe('upload utility helpers', () => {
   it('creates upload progress events', () => {
@@ -20,9 +19,11 @@ describe('upload utility helpers', () => {
       patches: [],
     })
 
-    expect(createUploadEvent([{type: 'set'} as any])).toEqual({
+    const typedPatch: FormPatch = sanitySet('test-value', [])
+
+    expect(createUploadEvent([typedPatch])).toEqual({
       type: 'uploadProgress',
-      patches: [{type: 'set'}],
+      patches: [typedPatch],
     })
   })
 
@@ -40,6 +41,7 @@ describe('upload utility helpers', () => {
     const file = new File(['x'], 'doc.txt', {type: 'text/plain'})
 
     const patches = createInitialUploadPatches(file)
+
     expect(setMock).toHaveBeenCalledWith(
       {
         progress: 2,

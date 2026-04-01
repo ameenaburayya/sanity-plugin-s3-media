@@ -56,7 +56,7 @@ const CardContainer = styled(Flex)<{$picked?: boolean; theme: Theme; $updating?:
 
     border: ${$picked
       ? `1px solid ${theme.sanity.color.spot.orange} !important`
-      : '1px solid inherit'};
+      : '1px solid transparent'};
 
     ${!$updating &&
     css`
@@ -153,13 +153,18 @@ const BaseCardAsset: FC<CardAssetProps> = (props) => {
       <CardContainer direction="column" $picked={picked} $updating={item.updating}>
         {/* Image */}
         <Box
+          data-testid="card-asset-preview"
           flex={1}
           style={{
             cursor: selected ? 'default' : 'pointer',
             position: 'relative',
           }}
         >
-          <div onClick={handleAssetClick} style={{height: '100%', opacity: opacityPreview}}>
+          <div
+            data-testid="card-asset-preview-click-target"
+            onClick={handleAssetClick}
+            style={{height: '100%', opacity: opacityPreview}}
+          >
             {/* File icon */}
             {(isS3FileAsset(asset) || isS3VideoAsset(asset)) && (
               <FileIcon asset={asset} extension={asset.extension} width="80px" />
@@ -183,6 +188,7 @@ const BaseCardAsset: FC<CardAssetProps> = (props) => {
           {selected && !updating && (
             <Flex
               align="center"
+              data-testid="card-asset-selected-icon"
               justify="center"
               style={{
                 height: '100%',
@@ -203,6 +209,7 @@ const BaseCardAsset: FC<CardAssetProps> = (props) => {
           {updating && (
             <Flex
               align="center"
+              data-testid="card-asset-spinner"
               justify="center"
               style={{
                 height: '100%',
@@ -220,6 +227,7 @@ const BaseCardAsset: FC<CardAssetProps> = (props) => {
         {/* Footer */}
         <ContextActionContainer
           align="center"
+          data-testid="card-asset-footer-action"
           onClick={handleContextActionClick}
           paddingX={1}
           $scheme={scheme}
@@ -254,6 +262,7 @@ const BaseCardAsset: FC<CardAssetProps> = (props) => {
         {/* Error button */}
         {error && (
           <Card
+            data-testid="card-asset-error"
             tone="critical"
             padding={3}
             style={{

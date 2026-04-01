@@ -1,16 +1,16 @@
 /* eslint-disable consistent-return */
 import {Observable} from 'rxjs'
 
-import type {Any, HttpRequestEvent} from '../types'
+import type {HttpRequestEvent, JsonValue,ResponseEvent} from '../types'
 import {ClientError, ServerError} from './errors'
 
-interface FetchOptions extends globalThis.RequestInit {
+interface FetchOptions extends Omit<globalThis.RequestInit, 'body'> {
   url?: string
   timeout?: number
   retries?: number
   retryDelay?: number
   maxRetries?: number
-  body?: any
+  body?: JsonValue
 }
 
 export const createFetchClient = () => {
@@ -51,10 +51,10 @@ export const createFetchClient = () => {
           clearTimeout(timeoutId)
 
           // Parse JSON response
-          const body = await response.json().catch(() => ({}))
+          const body = (await response.json().catch(() => ({} as JsonValue))) as JsonValue
 
           // Emit response event
-          const event: Any = {
+          const event: ResponseEvent = {
             type: 'response',
             method: options.method || 'GET',
             statusCode: response.status,
@@ -71,6 +71,7 @@ export const createFetchClient = () => {
 
             if (shouldRetry) {
               const delay = (options.retryDelay || 1000) * Math.pow(2, attemptNumber)
+
               await new Promise((resolve) => setTimeout(resolve, delay))
               return execute(attemptNumber + 1)
             }
@@ -82,6 +83,7 @@ export const createFetchClient = () => {
 
             if (response.status === 429 && attemptNumber < maxRetries) {
               const delay = (options.retryDelay || 1000) * Math.pow(2, attemptNumber)
+
               await new Promise((resolve) => setTimeout(resolve, delay))
               return execute(attemptNumber + 1)
             }

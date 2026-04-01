@@ -29,6 +29,7 @@ const notificationsSlice = createSlice({
   reducers: {
     add(state, action: PayloadAction<Notification>) {
       const {asset, status, title} = action.payload
+
       state.items.push({
         asset,
         status,
@@ -46,6 +47,7 @@ export const notificationsAssetsDeleteCompleteEpic: Epic = (action$) =>
     mergeMap((action) => {
       const {assetIds} = action.payload
       const deletedCount = assetIds.length
+
       return of(
         notificationsSlice.actions.add({
           status: 'info',
@@ -61,6 +63,7 @@ export const notificationsAssetsDeleteErrorEpic: Epic = (action$) =>
     mergeMap((action) => {
       const {assetIds} = action.payload
       const count = assetIds.length
+
       return of(
         notificationsSlice.actions.add({
           status: 'error',
@@ -79,6 +82,7 @@ export const notificationsAssetsDeleteSkippedEpic: Epic = (action$) =>
     mergeMap((action) => {
       const {assetIds, reason} = action.payload
       const count = assetIds.length
+
       return of(
         notificationsSlice.actions.add({
           status: 'warning',
@@ -95,6 +99,7 @@ export const notificationsAssetsUploadCompleteEpic: Epic = (action$) =>
       const {results} = action.payload
 
       const count = Object.keys(results).length
+
       return of(
         notificationsSlice.actions.add({
           status: 'info',

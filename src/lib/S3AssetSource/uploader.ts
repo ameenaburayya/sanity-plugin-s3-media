@@ -31,6 +31,7 @@ class S3Uploader implements AssetSourceUploader {
     const isDone =
       this.files.length > 0 &&
       this.files.every((file) => ['complete', 'error', 'aborted'].includes(file.status))
+
     if (isDone) {
       this.emit({type: 'all-complete', files: this.files})
       this.reset()
@@ -98,6 +99,7 @@ class S3Uploader implements AssetSourceUploader {
               },
               error: (error) => {
                 let _err: Error
+
                 if (error instanceof Error) {
                   _err = error
                 } else {
@@ -124,6 +126,7 @@ class S3Uploader implements AssetSourceUploader {
   abort(file?: AssetSourceUploadFile): void {
     if (file) {
       const target = this.files.find((f) => f.id === file.id)
+
       if (target && ['pending', 'uploading'].includes(target.status)) {
         this.updateFile(target.id, {status: 'aborted'})
       }
@@ -142,6 +145,7 @@ class S3Uploader implements AssetSourceUploader {
   }
   updateFile(fileId: string, data: {progress?: number; status?: string; error?: Error}): void {
     const target = this.files.find((f) => f.id === fileId)
+
     if (target) {
       if (data.error) {
         target.error = data.error

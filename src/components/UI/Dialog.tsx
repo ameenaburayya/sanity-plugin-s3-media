@@ -8,7 +8,6 @@ import {
   Text,
 } from '@sanity/ui'
 import {type ComponentProps, forwardRef, type HTMLProps, type ReactNode, type Ref} from 'react'
-import {useTranslation} from 'sanity'
 
 type DialogProps = Pick<
   UIDialogProps,
@@ -65,8 +64,6 @@ export const Dialog = forwardRef(function Dialog(
   }: DialogProps & Pick<HTMLProps<HTMLDivElement>, 'onDragEnter' | 'onDrop'>,
   ref: Ref<HTMLDivElement>,
 ) {
-  const {t} = useTranslation()
-
   return (
     <UIDialog
       {...props}
@@ -87,7 +84,7 @@ export const Dialog = forwardRef(function Dialog(
               <UIButton
                 mode="bleed"
                 padding={2}
-                text={t('common.dialog.cancel-button.text')}
+                text="Cancel"
                 tone="default"
                 onClick={props.onClose}
                 data-testid="cancel-button"
@@ -98,7 +95,7 @@ export const Dialog = forwardRef(function Dialog(
               <UIButton
                 mode="default"
                 padding={2}
-                text={t('common.dialog.confirm-button.text')}
+                text="Confirm"
                 tone="critical"
                 data-testid="confirm-button"
                 {...footer.confirmButton}

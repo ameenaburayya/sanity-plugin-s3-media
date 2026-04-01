@@ -1,3 +1,5 @@
+import type {S3AssetDocument} from 'sanity-plugin-s3-media-types'
+
 import {UPLOADS_ACTIONS} from '../actions'
 
 describe('UPLOADS_ACTIONS.uploadComplete', () => {
@@ -17,7 +19,7 @@ describe('UPLOADS_ACTIONS.uploadComplete', () => {
           width: 120,
         },
       },
-    } as any
+    } as unknown as S3AssetDocument
 
     expect(UPLOADS_ACTIONS.uploadComplete({asset})).toEqual({
       payload: {asset},

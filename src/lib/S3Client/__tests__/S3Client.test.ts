@@ -2,6 +2,7 @@ import {of} from 'rxjs'
 
 import {AssetsClient, ObservableAssetsClient} from '../assets/AssetsClient'
 import {ObservableS3Client, S3Client} from '../S3Client'
+import type {HttpRequest} from '../types'
 
 const baseConfig = {
   bucketRegion: 'us-east-1',
@@ -11,7 +12,7 @@ const baseConfig = {
   secret: 'very-secret',
 }
 
-const createHttpRequest = () => {
+const createHttpRequest = (): HttpRequest => {
   return vi.fn(() =>
     of({
       type: 'response',
@@ -19,8 +20,8 @@ const createHttpRequest = () => {
       statusCode: 200,
       statusMessage: 'OK',
       headers: {},
-    } as any),
-  )
+    }),
+  ) as unknown as HttpRequest
 }
 
 describe('ObservableS3Client', () => {
@@ -28,6 +29,7 @@ describe('ObservableS3Client', () => {
     const client = new ObservableS3Client(createHttpRequest(), baseConfig)
 
     const config = client.config()
+
     config.bucketKey = 'mutated-locally'
 
     expect(client.config().bucketKey).toBe('media-bucket')

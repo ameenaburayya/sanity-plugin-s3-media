@@ -22,6 +22,7 @@ export const UploadDestinationPicker: FC<UploadDestinationPickerProps> = (props)
       const target = event.currentTarget as HTMLElement
       const sourceName = target.getAttribute('data-asset-source-name') as string
       const assetSource = assetSources.find((source) => source.name === sourceName)
+
       if (assetSource && onSelectAssetSource) {
         onSelectAssetSource(assetSource)
       }
@@ -58,6 +59,7 @@ export const UploadDestinationPicker: FC<UploadDestinationPickerProps> = (props)
         <Stack space={2}>
           {assetSourcesWithUpload.map((assetSource) => {
             const Icon = assetSource.icon
+
             return (
               <Button
                 key={assetSource.name}

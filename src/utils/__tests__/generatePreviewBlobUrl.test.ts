@@ -21,7 +21,8 @@ const setupPreviewDom = ({
       value instanceof File ? 'blob://large-image' : 'blob://preview-image',
     )
   const revokeObjectURL = vi.fn()
-  vi.stubGlobal('window', {URL: {createObjectURL, revokeObjectURL}} as any)
+
+  vi.stubGlobal('window', {URL: {createObjectURL, revokeObjectURL}})
 
   const drawImage = vi.fn()
   const getContext = vi.fn(() => {
@@ -41,7 +42,8 @@ const setupPreviewDom = ({
   }
 
   const createElement = vi.fn(() => canvas)
-  vi.stubGlobal('document', {createElement} as any)
+
+  vi.stubGlobal('document', {createElement} as unknown as Pick<Document, 'createElement'>)
 
   class ImageMock {
     static lastInstance: ImageMock | null = null
@@ -55,11 +57,18 @@ const setupPreviewDom = ({
     }
 
     set src(_value: string) {
+      this.#srcValue = _value
       this.onload?.()
     }
+
+    get src() {
+      return this.#srcValue
+    }
+
+    #srcValue = ''
   }
 
-  vi.stubGlobal('Image', ImageMock as any)
+  vi.stubGlobal('Image', ImageMock as unknown as typeof Image)
 
   return {
     createObjectURL,
@@ -115,13 +124,14 @@ describe('generatePreviewBlobUrl$', () => {
 
   it('warns and throws when canvas context setup fails', async () => {
     const error = new Error('2D context unavailable')
+
     setupPreviewDom({
       imageWidth: 180,
       imageHeight: 90,
       throwOnGetContext: error,
     })
 
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
     const file = new File(['image'], 'hero.png', {type: 'image/png'})
 
     await expect(firstValueFrom(generatePreviewBlobUrl$(file))).rejects.toThrow(

@@ -5,13 +5,14 @@ import {useFormValue} from 'sanity'
 
 import {useKeyPress} from '../../hooks'
 import type {S3AssetSourceComponentProps} from '../../types'
-import {MediaBrowser} from '..'
+import {MediaBrowser} from '../MediaBrowser'
 
 const useRootPortalElement = () => {
   const [container] = useState(() => document.createElement('div'))
 
   useEffect(() => {
     container.classList.add('media-portal')
+    container.setAttribute('data-testid', 'media-portal')
 
     document.body.appendChild(container)
     return () => {

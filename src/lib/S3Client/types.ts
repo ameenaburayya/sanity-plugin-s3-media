@@ -2,6 +2,9 @@ import type {Observable} from 'rxjs'
 
 import type {UploadEvent} from '../../types'
 
+type JsonPrimitive = string | number | boolean | null
+export type JsonValue = JsonPrimitive | { [key: string]: JsonValue } | JsonValue[]
+
 /** @public */
 export interface ResponseEvent {
   type: 'response'
@@ -9,6 +12,8 @@ export interface ResponseEvent {
   statusCode: number
   statusMessage?: string
   headers: Record<string, string>
+  body?: JsonValue
+  url?: string
 }
 
 /** @public */
@@ -22,8 +27,8 @@ export interface RequestOptions {
   tag?: string
   headers?: Record<string, string>
   method?: string
-  query?: any
-  body?: any
+  query?: Record<string, JsonValue>
+  body?: JsonValue
   signal?: AbortSignal
   maxRetries?: number
 }
@@ -32,7 +37,7 @@ export interface RequestOptions {
 export type Requester = (options: RequestOptions) => Observable<HttpRequestEvent>
 
 /** @internal */
-export type Any = any
+export type Any = JsonValue
 
 /** @public */
 export interface S3ClientConfig {
@@ -64,7 +69,7 @@ export interface InitializedClientConfig extends S3ClientConfig {
   timeout?: number
   withCredentials?: boolean
   proxy?: string
-  fetch?: any
+  fetch?: typeof fetch
 }
 
 /** @public */
@@ -76,8 +81,15 @@ export type HttpRequest = (
 /** @public */
 export interface ErrorProps {
   message: string
-  response: any
+  response: {
+    body: JsonValue
+    statusCode: number
+    headers: Record<string, string>
+    statusMessage: string | null
+    method: string
+    url: string
+  }
   statusCode: number
-  responseBody: any
-  details: any
+  responseBody: string | JsonValue
+  details: JsonValue
 }

@@ -1,28 +1,52 @@
 import {Observable, of} from 'rxjs'
+import type {
+  AssetSourceUploadEvent,
+  SanityClient,
+  SchemaType,
+} from 'sanity'
+import type {Mock} from 'vitest'
 
+import {type S3Client} from '../../S3Client'
 import {createS3Uploader} from '../uploader'
 
 const uuidMock = vi.hoisted(() => vi.fn())
-const isTypeMock = vi.hoisted(() =>
-  vi.fn(
-    (schemaType: {name?: string}, schemaTypeName: string) => schemaType?.name === schemaTypeName,
-  ),
-)
 
 vi.mock('@sanity/uuid', () => ({
   uuid: uuidMock,
 }))
 
-vi.mock('sanity', async () => {
-  const actual = await vi.importActual<typeof import('sanity')>('sanity')
+type SanityTypeMock = {
+  _isType: Mock
+}
 
-  return {
-    ...actual,
-    _isType: isTypeMock,
-  }
-})
+const {_isType: isTypeMock} = (globalThis as {__sanityMock: SanityTypeMock}).__sanityMock
 
 describe('createS3Uploader', () => {
+  type MockSanityClient = Pick<SanityClient, 'observable'>
+  type MockS3Client = Pick<S3Client, 'observable'>
+
+  const createSanityClient = (props: {
+    fetch: unknown
+    create: unknown
+  }): MockSanityClient =>
+    ({
+      observable: {
+        fetch: props.fetch,
+        create: props.create,
+      },
+    }) as unknown as MockSanityClient
+
+  const createS3Client = (props: {
+    uploadAsset: unknown
+  }): MockS3Client =>
+    ({
+      observable: {
+        assets: {
+          uploadAsset: props.uploadAsset,
+        },
+      },
+    }) as unknown as MockS3Client
+
   const buildDeps = () => {
     const fetch = vi.fn(() => of(null))
     const create = vi.fn(() =>
@@ -40,8 +64,13 @@ describe('createS3Uploader', () => {
     const uploadAsset = vi.fn(() => of({type: 'response'}))
 
     return {
-      sanityClient: {observable: {fetch, create}},
-      s3Client: {observable: {assets: {uploadAsset}}},
+      sanityClient: createSanityClient({
+        fetch,
+        create,
+      }),
+      s3Client: createS3Client({
+        uploadAsset,
+      }),
       fetch,
       create,
       uploadAsset,
@@ -49,14 +78,17 @@ describe('createS3Uploader', () => {
   }
 
   const makeUploader = (overrides?: {
-    sanityClient?: Record<string, unknown>
-    s3Client?: Record<string, unknown>
+    sanityClient?: unknown
+    s3Client?: unknown
   }) => {
     const deps = buildDeps()
-    const sanityClient = (overrides?.sanityClient as any) || deps.sanityClient
-    const s3Client = (overrides?.s3Client as any) || deps.s3Client
+    const sanityClient = overrides?.sanityClient || deps.sanityClient
+    const s3Client = overrides?.s3Client || deps.s3Client
 
-    const Uploader = createS3Uploader({sanityClient, s3Client} as any)
+    const Uploader = createS3Uploader({
+      sanityClient: sanityClient as unknown as SanityClient,
+      s3Client: s3Client as unknown as S3Client,
+    })
 
     return {uploader: new Uploader(), deps}
   }
@@ -73,17 +105,17 @@ describe('createS3Uploader', () => {
     const {uploader} = makeUploader()
     const file = new File(['x'], 'missing.txt', {type: 'text/plain'})
 
-    expect(() => uploader.upload([file], undefined as any)).toThrow(
+    expect(() => uploader.upload([file], undefined)).toThrow(
       'No schema type provided for file upload',
     )
 
-    expect(() => uploader.upload([file], {onChange: vi.fn()} as any)).toThrow(
+    expect(() => uploader.upload([file], {onChange: vi.fn()})).toThrow(
       'No schema type provided for file upload',
     )
 
-    expect(() => uploader.upload([file], {schemaType: {name: 's3File'}} as any)).toThrow(
-      'No onChange provided for file upload',
-    )
+    expect(() =>
+      uploader.upload([file], {schemaType: {name: 's3File'} as SchemaType}),
+    ).toThrow('No onChange provided for file upload')
   })
 
   it('handles successful upload lifecycle and emits all-complete', async () => {
@@ -91,12 +123,12 @@ describe('createS3Uploader', () => {
 
     const {uploader, deps} = makeUploader()
     const onChange = vi.fn()
-    const events: any[] = []
+    const events: AssetSourceUploadEvent[] = []
 
     uploader.subscribe((event) => events.push(event))
 
     uploader.upload([new File(['ok'], 'photo.pdf', {type: 'application/pdf'})], {
-      schemaType: {name: 's3File', options: {storeOriginalFilename: false}} as any,
+      schemaType: {name: 's3File', options: {storeOriginalFilename: false}} as SchemaType,
       onChange,
     })
 
@@ -139,11 +171,12 @@ describe('createS3Uploader', () => {
       },
     })
 
-    const events: any[] = []
+    const events: AssetSourceUploadEvent[] = []
+
     uploader.subscribe((event) => events.push(event))
 
     uploader.upload([new File(['bad'], 'broken.pdf', {type: 'application/pdf'})], {
-      schemaType: {name: 's3File'} as any,
+      schemaType: {name: 's3File'} as SchemaType,
       onChange: vi.fn(),
     })
 
@@ -153,12 +186,14 @@ describe('createS3Uploader', () => {
 
     expect(deps.fetch).toHaveBeenCalled()
 
-    const statusEvent = events.find((event) => event.type === 'status' && event.status === 'error')
-    expect(statusEvent.file.error).toBeInstanceOf(Error)
-    expect(statusEvent.file.error.message).toBe('Unknown error')
+    const statusEvent = events.find((event) => event.type === 'status' && event.status === 'error') as (AssetSourceUploadEvent & {type: 'status'; file: {error?: Error}}) | undefined
 
-    const errorEvent = events.find((event) => event.type === 'error')
-    expect(errorEvent.files).toEqual([])
+    expect(statusEvent!.file.error).toBeInstanceOf(Error)
+    expect(statusEvent!.file.error!.message).toBe('Unknown error')
+
+    const errorEvent = events.find((event) => event.type === 'error') as (AssetSourceUploadEvent & {type: 'error'; files: unknown[]}) | undefined
+
+    expect(errorEvent!.files).toEqual([])
   })
 
   it('preserves Error instances from upload failures', async () => {
@@ -179,11 +214,12 @@ describe('createS3Uploader', () => {
       },
     })
 
-    const events: any[] = []
+    const events: AssetSourceUploadEvent[] = []
+
     uploader.subscribe((event) => events.push(event))
 
     uploader.upload([new File(['bad'], 'broken-again.pdf', {type: 'application/pdf'})], {
-      schemaType: {name: 's3File'} as any,
+      schemaType: {name: 's3File'} as SchemaType,
       onChange: vi.fn(),
     })
 
@@ -191,16 +227,18 @@ describe('createS3Uploader', () => {
       expect(events.some((event) => event.type === 'status' && event.status === 'error')).toBe(true)
     })
 
-    const statusEvent = events.find((event) => event.type === 'status' && event.status === 'error')
-    expect(statusEvent.file.error).toBeInstanceOf(Error)
-    expect(statusEvent.file.error.message).toBe('explicit upload failure')
+    const statusEvent = events.find((event) => event.type === 'status' && event.status === 'error') as (AssetSourceUploadEvent & {type: 'status'; file: {error?: Error}}) | undefined
+
+    expect(statusEvent!.file.error).toBeInstanceOf(Error)
+    expect(statusEvent!.file.error!.message).toBe('explicit upload failure')
   })
 
   it('aborts a single file and then aborts all remaining files', () => {
     uuidMock.mockReturnValueOnce('file-1').mockReturnValueOnce('file-2')
 
     const {uploader} = makeUploader()
-    const events: any[] = []
+    const events: AssetSourceUploadEvent[] = []
+
     uploader.subscribe((event) => events.push(event))
 
     const files = uploader.upload(
@@ -208,7 +246,7 @@ describe('createS3Uploader', () => {
         new File(['a'], 'first.txt', {type: 'text/plain'}),
         new File(['b'], 'second.txt', {type: 'text/plain'}),
       ],
-      {schemaType: {name: 'unsupportedType'} as any, onChange: vi.fn()},
+      {schemaType: {name: 'unsupportedType'} as SchemaType, onChange: vi.fn()},
     )
 
     uploader.abort(files[0])
@@ -219,6 +257,7 @@ describe('createS3Uploader', () => {
     expect(uploader.getFiles()).toEqual([])
 
     const abortEvents = events.filter((event) => event.type === 'abort')
+
     expect(abortEvents).toHaveLength(2)
     expect(events).toEqual(
       expect.arrayContaining([expect.objectContaining({type: 'all-complete'})]),
@@ -231,7 +270,7 @@ describe('createS3Uploader', () => {
     const {uploader} = makeUploader()
 
     uploader.upload([new File(['c'], 'queued.txt', {type: 'text/plain'})], {
-      schemaType: {name: 'unsupportedType'} as any,
+      schemaType: {name: 'unsupportedType'} as SchemaType,
       onChange: vi.fn(),
     })
 
@@ -257,17 +296,19 @@ describe('createS3Uploader', () => {
     uuidMock.mockReturnValue('file-progress')
 
     const {uploader} = makeUploader()
-    const events: any[] = []
+    const events: AssetSourceUploadEvent[] = []
+
     uploader.subscribe((event) => events.push(event))
 
     uploader.upload([new File(['d'], 'progress.txt', {type: 'text/plain'})], {
-      schemaType: {name: 'unsupportedType'} as any,
+      schemaType: {name: 'unsupportedType'} as SchemaType,
       onChange: vi.fn(),
     })
 
     uploader.updateFile('file-progress', {progress: 0.3})
 
     const progressEvent = events.find((event) => event.type === 'progress' && event.progress === 30)
+
     expect(progressEvent).toEqual(
       expect.objectContaining({
         type: 'progress',
@@ -313,11 +354,11 @@ describe('createS3Uploader', () => {
     })
 
     uploader.upload([new File(['a'], 'a.txt', {type: 'text/plain'})], {
-      schemaType: {name: 's3File'} as any,
+      schemaType: {name: 's3File'} as SchemaType,
       onChange: vi.fn(),
     })
     uploader.upload([new File(['b'], 'b.txt', {type: 'text/plain'})], {
-      schemaType: {name: 's3File'} as any,
+      schemaType: {name: 's3File'} as SchemaType,
       onChange: vi.fn(),
     })
 

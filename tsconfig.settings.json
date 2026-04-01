@@ -23,6 +23,6 @@
 
     // Don't emit by default, pkg-utils will ignore this when generating .d.ts files
     "noEmit": true,
-    "types": ["vitest/globals"]
+    "types": ["vitest/globals", "@testing-library/jest-dom"]
   }
 }

@@ -25,17 +25,24 @@ import type {S3Asset, S3AssetType} from 'sanity-plugin-s3-media-types'
 
 import {getOrderTitle} from '../../config/orders'
 import {ORDER_OPTIONS} from '../../constants'
+import type {JsonValue} from '../../lib/S3Client/types'
 import type {AssetItem, BrowserView, Epic, HttpError, Order, RootReducerState} from '../../types'
 import {constructFilter} from '../../utils'
 import {searchActions} from '../search'
 import {UPLOADS_ACTIONS} from '../uploads/actions'
 
+type DeleteErrorResponse = {
+  error?: {
+    items?: Array<{error: ItemError}>
+  }
+}
 type ItemError = {
   description: string
   id: string
   referencingIDs: string[]
   type: string // 'documentHasExistingReferencesError'
 }
+type QueryParams = Record<string, JsonValue>
 
 const buildFileName = (asset: S3Asset): string => {
   if (isS3ImageAsset(asset)) {
@@ -116,6 +123,7 @@ const assetsSlice = createSlice({
 
       assetIds?.forEach((id) => {
         const deleteIndex = state.allIds.indexOf(id)
+
         if (deleteIndex >= 0) {
           state.allIds.splice(deleteIndex, 1)
         }
@@ -127,9 +135,8 @@ const assetsSlice = createSlice({
     deleteError(state, action: PayloadAction<{assetIds: string[]; error: ClientError}>) {
       const {assetIds, error} = action.payload
 
-      const itemErrors: ItemError[] = error?.response?.body?.error?.items?.map(
-        (item: any) => item.error,
-      )
+      const responseError = error?.response?.body as DeleteErrorResponse | undefined
+      const itemErrors: ItemError[] = responseError?.error?.items?.map(({error: item}) => item) || []
 
       assetIds?.forEach((id) => {
         state.byIds[id].updating = false
@@ -140,6 +147,7 @@ const assetsSlice = createSlice({
     },
     deleteRequest(state, action: PayloadAction<{assets: S3Asset[]; closeDialogId?: string}>) {
       const {assets} = action.payload
+
       assets.forEach((asset) => {
         state.byIds[asset?._id].updating = true
       })
@@ -150,6 +158,7 @@ const assetsSlice = createSlice({
     },
     deleteSkipped(state, action: PayloadAction<{assetIds: string[]; reason: string}>) {
       const {assetIds, reason} = action.payload
+
       assetIds.forEach((assetId) => {
         if (state.byIds[assetId]) {
           state.byIds[assetId].updating = false
@@ -180,11 +189,12 @@ const assetsSlice = createSlice({
     },
     fetchError(state, action: PayloadAction<HttpError>) {
       const error = action.payload
+
       state.fetching = false
       state.fetchingError = error
     },
     fetchRequest: {
-      reducer: (state, _action: PayloadAction<{params: Record<string, any>; query: string}>) => {
+      reducer: (state, _action: PayloadAction<{params: QueryParams; query: string}>) => {
         state.fetching = true
         delete state.fetchingError
       },
@@ -194,7 +204,7 @@ const assetsSlice = createSlice({
         selector = ``,
         sort = groq`order(_updatedAt desc)`,
       }: {
-        params?: Record<string, any>
+        params?: QueryParams
         queryFilter: string
         replace?: boolean
         selector?: string
@@ -248,6 +258,7 @@ const assetsSlice = createSlice({
     },
     listenerCreateQueueComplete(state, action: PayloadAction<{assets: S3Asset[]}>) {
       const {assets} = action.payload
+
       assets?.forEach((asset) => {
         if (state.byIds[asset?._id]?.asset) {
           state.byIds[asset._id].asset = asset
@@ -259,8 +270,10 @@ const assetsSlice = createSlice({
     },
     listenerDeleteQueueComplete(state, action: PayloadAction<{assetIds: string[]}>) {
       const {assetIds} = action.payload
+
       assetIds?.forEach((assetId) => {
         const deleteIndex = state.allIds.indexOf(assetId)
+
         if (deleteIndex >= 0) {
           state.allIds.splice(deleteIndex, 1)
         }
@@ -272,6 +285,7 @@ const assetsSlice = createSlice({
     },
     listenerUpdateQueueComplete(state, action: PayloadAction<{assets: S3Asset[]}>) {
       const {assets} = action.payload
+
       assets?.forEach((asset) => {
         if (state.byIds[asset?._id]?.asset) {
           state.byIds[asset._id].asset = asset
@@ -334,6 +348,7 @@ const assetsSlice = createSlice({
     },
     updateComplete(state, action: PayloadAction<{asset: S3Asset; closeDialogId?: string}>) {
       const {asset} = action.payload
+
       state.byIds[asset._id].updating = false
       state.byIds[asset._id].asset = asset
     },
@@ -341,6 +356,7 @@ const assetsSlice = createSlice({
       const {asset, error} = action.payload
 
       const assetId = asset?._id
+
       state.byIds[assetId].error = error.message
       state.byIds[assetId].updating = false
     },
@@ -349,10 +365,11 @@ const assetsSlice = createSlice({
       action: PayloadAction<{
         asset: S3Asset
         closeDialogId?: string
-        formData: Record<string, any>
+        formData: Record<string, JsonValue>
       }>,
     ) {
       const assetId = action.payload?.asset?._id
+
       state.byIds[assetId].updating = true
     },
     viewSet(state, action: PayloadAction<{view: BrowserView}>) {
@@ -445,6 +462,7 @@ export const assetsFetchEpic: Epic = (action$, state$, {sanityClient}) =>
             items,
             // totalCount
           } = result
+
           return of(assetsActions.fetchComplete({assets: items}))
         }),
         catchError((error: ClientError) =>
@@ -477,9 +495,9 @@ export const assetsFetchPageIndexEpic: Epic = (action$, state$) =>
         searchQuery: state.search.query,
       })
 
-      const params = {
+      const params: QueryParams = {
         ...(documentId ? {documentId} : {}),
-        documentAssetIds,
+        ...(documentAssetIds ? {documentAssetIds} : {}),
       }
 
       return of(
@@ -509,6 +527,7 @@ export const assetsFetchAfterDeleteAllEpic: Epic = (action$, state$) =>
     switchMap(([_action, state]) => {
       if (state.assets.allIds.length === 0) {
         const nextPageIndex = Math.floor(state.assets.allIds.length / state.assets.pageSize)
+
         return of(assetsActions.loadPageIndex({pageIndex: nextPageIndex}))
       }
 
@@ -546,6 +565,7 @@ export const assetsListenerCreateQueueEpic: Epic = (action$) =>
     filter((actions) => actions.length > 0),
     mergeMap((actions) => {
       const assets = actions?.map((action) => action.payload.asset)
+
       return of(assetsActions.listenerCreateQueueComplete({assets}))
     }),
   )
@@ -557,6 +577,7 @@ export const assetsListenerDeleteQueueEpic: Epic = (action$) =>
     filter((actions) => actions.length > 0),
     mergeMap((actions) => {
       const assetIds = actions?.map((action) => action.payload.assetId)
+
       return of(assetsActions.listenerDeleteQueueComplete({assetIds}))
     }),
   )
@@ -568,6 +589,7 @@ export const assetsListenerUpdateQueueEpic: Epic = (action$) =>
     filter((actions) => actions.length > 0),
     mergeMap((actions) => {
       const assets = actions?.map((action) => action.payload.asset)
+
       return of(assetsActions.listenerUpdateQueueComplete({assets}))
     }),
   )
@@ -606,10 +628,10 @@ export const assetsUpdateEpic: Epic = (action$, state$, {sanityClient}) =>
               .setIfMissing({opt: {}})
               .setIfMissing({'opt.media': {}})
               .set(formData)
-              .commit(),
+              .commit<S3Asset>(),
           ),
         ),
-        mergeMap((updatedAsset: any) =>
+        mergeMap((updatedAsset: S3Asset) =>
           of(
             assetsActions.updateComplete({
               asset: updatedAsset,
@@ -645,6 +667,7 @@ export const selectAssetById = createSelector(
   ],
   (byIds, assetId) => {
     const asset = byIds[assetId]
+
     return asset ? asset : undefined
   },
 )

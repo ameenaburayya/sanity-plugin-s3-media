@@ -1,7 +1,6 @@
 import {CopyIcon, DownloadIcon, ResetIcon} from '@sanity/icons'
 import {MenuDivider, useToast} from '@sanity/ui'
 import {type FC, type MouseEventHandler, type ReactNode, useCallback} from 'react'
-import {useTranslation} from 'sanity'
 
 import {downloadAsset} from '../../utils'
 import {MenuItem} from './MenuItem'
@@ -18,7 +17,6 @@ export const ActionsMenu: FC<ActionsMenuProps> = (props) => {
   const {onReset, readOnly, browse, url, upload} = props
 
   const {push: pushToast} = useToast()
-  const {t} = useTranslation()
 
   const handleCopyURL = useCallback(() => {
     void navigator.clipboard.writeText(url || '')
@@ -26,9 +24,9 @@ export const ActionsMenu: FC<ActionsMenuProps> = (props) => {
     pushToast({
       closable: true,
       status: 'success',
-      title: t('inputs.files.common.actions-menu.notification.url-copied'),
+      title: 'The URL is copied to the clipboard',
     })
-  }, [url, pushToast, t])
+  }, [url, pushToast])
 
   return (
     <>
@@ -38,27 +36,15 @@ export const ActionsMenu: FC<ActionsMenuProps> = (props) => {
 
       {url && <MenuDivider />}
 
-      {url && (
-        <MenuItem
-          icon={DownloadIcon}
-          text={t('inputs.files.common.actions-menu.download.label')}
-          onClick={() => downloadAsset(url)}
-        />
-      )}
-      {url && (
-        <MenuItem
-          icon={CopyIcon}
-          text={t('inputs.files.common.actions-menu.copy-url.label')}
-          onClick={handleCopyURL}
-        />
-      )}
+      {url && <MenuItem icon={DownloadIcon} text="Download" onClick={() => downloadAsset(url)} />}
+      {url && <MenuItem icon={CopyIcon} text="Copy URL" onClick={handleCopyURL} />}
 
       <MenuDivider />
 
       <MenuItem
         tone="critical"
         icon={ResetIcon}
-        text={t('inputs.files.common.actions-menu.clear-field.label')}
+        text="Clear field"
         onClick={onReset}
         disabled={readOnly}
       />

@@ -363,6 +363,7 @@ const BaseTableRowAsset: FC<TableRowAssetProps> = (props) => {
             <WithReferringDocuments id={id}>
               {({isLoading, referringDocuments}) => {
                 const uniqueDocuments = getUniqueDocuments(referringDocuments)
+
                 return isLoading ? (
                   <>-</>
                 ) : (

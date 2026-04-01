@@ -26,6 +26,7 @@ export const OrderSelect: FC = () => {
           {ORDER_OPTIONS?.map((item, index) => {
             if (item) {
               const selected = order.field === item.field && order.direction === item.direction
+
               return (
                 <MenuItem
                   disabled={selected}

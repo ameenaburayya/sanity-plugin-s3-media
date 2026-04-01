@@ -1,3 +1,5 @@
+import type {FileLike} from 'sanity'
+
 import {accepts} from '../accepts'
 import {imageUrlToBlob} from '../imageUrlToBlob'
 import {isObject} from '../isObject'
@@ -16,22 +18,27 @@ describe('isObject', () => {
 
 describe('accepts', () => {
   it('fails open when file or accepted types are missing', () => {
-    expect(accepts(undefined as any, 'image/png')).toBe(true)
-    expect(accepts({name: 'file.txt', type: 'text/plain'} as any, undefined as any)).toBe(true)
+    expect(accepts(undefined as never, 'image/png')).toBe(true)
+    expect(accepts({name: 'file.txt', type: 'text/plain'} as FileLike, undefined as never)).toBe(
+      true,
+    )
   })
 
   it('accepts file extensions', () => {
-    const file = {name: 'photo.JPG', type: 'image/jpeg'} as any
+    const file = {name: 'photo.JPG', type: 'image/jpeg'} as FileLike
+
     expect(accepts(file, '.jpg,.png')).toBe(true)
   })
 
   it('accepts wildcard mime types', () => {
-    const file = {name: 'photo.png', type: 'image/png'} as any
+    const file = {name: 'photo.png', type: 'image/png'} as FileLike
+
     expect(accepts(file, 'image/*')).toBe(true)
   })
 
   it('rejects unsupported types', () => {
-    const file = {name: 'doc.pdf', type: 'application/pdf'} as any
+    const file = {name: 'doc.pdf', type: 'application/pdf'} as FileLike
+
     expect(accepts(file, 'image/*')).toBe(false)
   })
 })

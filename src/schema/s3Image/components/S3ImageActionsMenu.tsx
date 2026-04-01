@@ -8,7 +8,7 @@ import {
   useGlobalKeyDown,
 } from '@sanity/ui'
 import {type FC, type ReactNode, useCallback, useEffect, useState} from 'react'
-import {ContextMenuButton, useTranslation} from 'sanity'
+import {ContextMenuButton} from 'sanity'
 import {styled} from 'styled-components'
 
 const MenuActionsWrapper = styled(Inline)`
@@ -19,7 +19,11 @@ const MenuActionsWrapper = styled(Inline)`
 
 export const S3ImageActionsMenuWaitPlaceholder = () => (
   <MenuActionsWrapper padding={2}>
-    <Skeleton style={{width: '25px', height: '25px'}} animated />
+    <Skeleton
+      data-testid="image-actions-placeholder"
+      style={{width: '25px', height: '25px'}}
+      animated
+    />
   </MenuActionsWrapper>
 )
 
@@ -78,10 +82,9 @@ export const S3ImageActionsMenu: FC<S3ImageActionsMenuProps> = (props) => {
     }
   }, [isMenuOpen, menuElement])
 
-  const {t} = useTranslation()
   return (
     <TooltipDelayGroupProvider delay={{open: 400}}>
-      <MenuActionsWrapper data-buttons space={1} padding={2}>
+      <MenuActionsWrapper data-buttons space={1} padding={2} data-testid="s3-image-actions-menu">
         <Popover
           id="image-actions-menu"
           content={<Menu ref={setMenuElement}>{children}</Menu>}
@@ -90,7 +93,7 @@ export const S3ImageActionsMenu: FC<S3ImageActionsMenuProps> = (props) => {
           constrainSize
         >
           <ContextMenuButton
-            aria-label={t('inputs.image.actions-menu.options.aria-label')}
+            aria-label="Open image options menu"
             mode="ghost"
             onClick={handleClick}
             ref={setOptionsButtonRef}

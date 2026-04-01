@@ -41,6 +41,7 @@ export function getS3IdFromString(str: string): string {
   }
 
   const filename = tryGetS3UrlFilename(str)
+
   if (!filename) {
     throw new UnresolvableError(str)
   }
@@ -171,6 +172,7 @@ export function getS3AssetExtension(src: S3AssetSource): string {
   }
 
   const assetId = getS3AssetDocumentId(src)
+
   return parseS3AssetId(assetId).extension
 }
 
@@ -212,6 +214,7 @@ export function tryGetS3AssetExtension(src: S3AssetSource): string | undefined {
  */
 export function isS3FileSource(src: unknown): src is S3FileSource {
   const assetId = tryGetS3AssetDocumentId(src as S3AssetSource)
+
   return assetId ? assetId.startsWith(`${S3AssetType.FILE}-`) : false
 }
 
@@ -224,6 +227,7 @@ export function isS3FileSource(src: unknown): src is S3FileSource {
  */
 export function isS3ImageSource(src: unknown): src is S3ImageSource {
   const assetId = tryGetS3AssetDocumentId(src as S3AssetSource)
+
   return assetId ? assetId.startsWith(`${S3AssetType.IMAGE}-`) : false
 }
 
@@ -236,6 +240,7 @@ export function isS3ImageSource(src: unknown): src is S3ImageSource {
  */
 export function isS3VideoSource(src: unknown): src is S3VideoSource {
   const assetId = tryGetS3AssetDocumentId(src as S3AssetSource)
+
   return assetId ? assetId.startsWith(`${S3AssetType.VIDEO}-`) : false
 }
 
@@ -255,6 +260,7 @@ export function getS3ImageDimensionsFromSource(src: S3ImageSource): {
   }
 
   const {width, height} = parseS3ImageAssetId(getS3AssetDocumentId(src))
+
   return {width, height}
 }
 
@@ -274,5 +280,6 @@ export function getS3VideoDimensionsFromSource(src: S3VideoSource): {
   }
 
   const {width, height} = parseS3VideoAssetId(getS3AssetDocumentId(src))
+
   return {width, height}
 }

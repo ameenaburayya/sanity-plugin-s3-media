@@ -2,7 +2,6 @@ import {ChevronDownIcon, UploadIcon} from '@sanity/icons'
 import {Menu, MenuButton, type MenuButtonProps, MenuGroup, type MenuGroupProps} from '@sanity/ui'
 import {startCase, uniqueId} from 'lodash'
 import {type ChangeEvent, type FC, type JSX, type MouseEvent, useCallback, useMemo} from 'react'
-import {useTranslation} from 'sanity'
 
 import type {S3AssetSource} from '../../types'
 import {Button, MenuItem} from '../UI'
@@ -36,7 +35,6 @@ export const UploadDropDownMenu: FC<UploadDropDownMenuProps> = (props) => {
     readOnly,
     renderAsMenuGroup = false,
   } = props
-  const {t} = useTranslation()
 
   const uniqId = useMemo(() => uniqueId(), [])
   const uploadsDisabled = readOnly || directUploads === false
@@ -53,11 +51,13 @@ export const UploadDropDownMenu: FC<UploadDropDownMenuProps> = (props) => {
     (event: MouseEvent) => {
       const assetSourceName = event.currentTarget.getAttribute(ASSET_SOURCE_DATA_ATTRIBUTE)
       const assetSource = assetSources.find((source) => source.name === assetSourceName)
+
       if (!assetSource) {
         return
       }
       const element = document.getElementById(createAssetSourceInputId(assetSource))
       // Test for document.activeElement to avoid clicking the button twice
+
       if (element && document.activeElement !== element) {
         element.click()
       }
@@ -69,6 +69,7 @@ export const UploadDropDownMenu: FC<UploadDropDownMenuProps> = (props) => {
     (menuItemContent: JSX.Element) => {
       const assetSourceName = menuItemContent.props[ASSET_SOURCE_DATA_ATTRIBUTE]
       const assetSource = assetSources.find((source) => source.name === assetSourceName)
+
       if (!assetSource) {
         return menuItemContent
       }
@@ -101,6 +102,7 @@ export const UploadDropDownMenu: FC<UploadDropDownMenuProps> = (props) => {
     (event: ChangeEvent<HTMLInputElement>) => {
       const assetSourceName = event.target.dataset.assetSourceName
       const assetSource = assetSources.find((source) => source.name === assetSourceName)
+
       if (!assetSource) {
         return
       }
@@ -116,11 +118,13 @@ export const UploadDropDownMenu: FC<UploadDropDownMenuProps> = (props) => {
   const fileInputs = useMemo(() => {
     return assetSources.map((assetSource) => {
       const _id = createAssetSourceInputId(assetSource)
+
       return (
         <input
           key={_id}
           accept={accept}
           capture={capture}
+          data-testid={`upload-file-input-${assetSource.name}`}
           id={_id}
           data-asset-source-name={assetSource.name}
           multiple={multiple}
@@ -139,11 +143,7 @@ export const UploadDropDownMenu: FC<UploadDropDownMenuProps> = (props) => {
     if (renderAsMenuGroup) {
       return (
         <>
-          <MenuGroup
-            icon={UploadIcon}
-            text={t('input.files.common.upload-placeholder.file-input-button.text')}
-            popover={MENU_GROUP_POPOVER}
-          >
+          <MenuGroup icon={UploadIcon} text="Upload" popover={MENU_GROUP_POPOVER}>
             {menuItems}
           </MenuGroup>
           {fileInputs}
@@ -161,7 +161,7 @@ export const UploadDropDownMenu: FC<UploadDropDownMenuProps> = (props) => {
               iconRight={ChevronDownIcon}
               mode="bleed"
               disabled={uploadsDisabled}
-              text={t('input.files.common.upload-placeholder.file-input-button.text')}
+              text="Upload"
             />
           }
           menu={<Menu>{menuItems}</Menu>}

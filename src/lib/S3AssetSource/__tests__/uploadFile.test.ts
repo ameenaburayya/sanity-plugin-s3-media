@@ -1,21 +1,36 @@
 import {lastValueFrom, of} from 'rxjs'
 import {toArray} from 'rxjs/operators'
+import type {SanityClient} from 'sanity'
 import {S3AssetType} from 'sanity-plugin-s3-media-types'
+import {mockS3FileAsset} from 'test/fixtures'
 
+import type {S3Client} from '../../S3Client'
 import {uploadFile} from '../uploadFile'
 
-const setMock = vi.hoisted(() => vi.fn((value, path) => ({type: 'set', value, path})))
-const unsetMock = vi.hoisted(() => vi.fn((path) => ({type: 'unset', path})))
+type MockSanityClient = Pick<SanityClient, 'observable'>
+type MockS3Client = Pick<S3Client, 'observable'>
 
-vi.mock('sanity', async () => {
-  const actual = await vi.importActual<typeof import('sanity')>('sanity')
+const createSanityClient = (overrides: {
+  fetch: unknown
+  create: unknown
+}): MockSanityClient =>
+  ({
+    observable: {
+      fetch: overrides.fetch,
+      create: overrides.create,
+    },
+  }) as unknown as MockSanityClient
 
-  return {
-    ...actual,
-    set: setMock,
-    unset: unsetMock,
-  }
-})
+const createS3Client = (overrides: {
+  uploadAsset: unknown
+}): MockS3Client =>
+  ({
+    observable: {
+      assets: {
+        uploadAsset: overrides.uploadAsset,
+      },
+    },
+  }) as unknown as MockS3Client
 
 describe('uploadFile', () => {
   it('emits initial, progress, completion, and cleanup events', async () => {
@@ -29,12 +44,9 @@ describe('uploadFile', () => {
     }
 
     const createdAsset = {
+      ...mockS3FileAsset,
       _id: 's3File-createdasset-pdf',
-      _type: 's3FileAsset',
       assetId: 'createdasset',
-      extension: 'pdf',
-      mimeType: 'application/pdf',
-      sha1hash: 'createdasset',
       size: 4,
     }
 
@@ -45,8 +57,8 @@ describe('uploadFile', () => {
     const events = await lastValueFrom(
       uploadFile({
         file,
-        sanityClient: {observable: {fetch, create}} as any,
-        s3Client: {observable: {assets: {uploadAsset}}} as any,
+        sanityClient: createSanityClient({fetch, create}) as unknown as SanityClient,
+        s3Client: createS3Client({uploadAsset}) as unknown as S3Client,
         options: {storeOriginalFilename: false},
       }).pipe(toArray()),
     )

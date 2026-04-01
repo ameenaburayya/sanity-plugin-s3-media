@@ -11,6 +11,7 @@ export const selectCombinedItems = createSelector(
     const assetItems = assetIds.map((id) => ({id, type: 'asset'}) as CardAssetData)
     const uploadItems = uploadIds.map((id) => ({id, type: 'upload'}) as CardUploadData)
     const combinedItems: (CardAssetData | CardUploadData)[] = [...uploadItems, ...assetItems]
+
     return combinedItems
   },
 )

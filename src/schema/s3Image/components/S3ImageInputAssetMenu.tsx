@@ -3,7 +3,7 @@ import {get, startCase} from 'lodash'
 import {type FC, type ReactNode, useCallback, useMemo} from 'react'
 import {useObservable} from 'react-rx'
 import {type Observable} from 'rxjs'
-import {type Reference, useTranslation} from 'sanity'
+import {type Reference} from 'sanity'
 import {S3AssetType, type S3ImageAsset} from 'sanity-plugin-s3-media-types'
 
 import {ActionsMenu, FileInputMenuItem, MenuItem, UploadDropDownMenu} from '../../../components'
@@ -48,8 +48,6 @@ const S3ImageInputAssetMenuWithReferenceAsset: FC<S3ImageInputAssetMenuWithRefer
   const {directUploads} = useS3MediaOptionsContext()
   const {buildAssetUrl} = useS3MediaContext()
 
-  const {t} = useTranslation()
-
   const documentId = reference?._ref
   const observable = useMemo(() => observeAsset(documentId), [documentId, observeAsset])
   const asset = useObservable(observable)
@@ -78,6 +76,7 @@ const S3ImageInputAssetMenuWithReferenceAsset: FC<S3ImageInputAssetMenuWithRefer
   const url = buildAssetUrl({assetId: _id, assetType: S3AssetType.IMAGE})
 
   let uploadMenuItem: ReactNode = null
+
   switch (assetSourcesWithUpload.length) {
     case 0:
       uploadMenuItem = null
@@ -89,7 +88,7 @@ const S3ImageInputAssetMenuWithReferenceAsset: FC<S3ImageInputAssetMenuWithRefer
           onSelect={handleSelectFilesFromAssetSourceSingle}
           accept={accept}
           data-asset-source-name={assetSourcesWithUpload[0].name}
-          text={t('inputs.files.common.actions-menu.upload.label')}
+          text="Upload"
           disabled={readOnly || directUploads === false}
         />
       )
@@ -149,8 +148,6 @@ export const S3ImageInputAssetMenu: FC<S3ImageInputAssetMenuProps> = (props) => 
     setMenuOpen,
     value,
   } = props
-  const {t} = useTranslation()
-
   const accept = useMemo(() => get(schemaType, 'options.accept', 'image/*'), [schemaType])
 
   const asset = value?.asset
@@ -163,7 +160,7 @@ export const S3ImageInputAssetMenu: FC<S3ImageInputAssetMenuProps> = (props) => 
     assetSources && assetSources.length === 0 ? null : (
       <MenuItem
         icon={SearchIcon}
-        text={t('inputs.image.browse-menu.text')}
+        text="Select"
         onClick={() => {
           setMenuOpen(false)
           handleSelectImageFromAssetSource(assetSources[0])
@@ -171,6 +168,7 @@ export const S3ImageInputAssetMenu: FC<S3ImageInputAssetMenuProps> = (props) => 
         disabled={readOnly}
       />
     )
+
   if (assetSources && assetSources.length > 1) {
     browseMenuItem = assetSources.map((assetSource) => {
       return (

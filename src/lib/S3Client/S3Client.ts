@@ -57,6 +57,7 @@ export class ObservableS3Client {
    */
   withConfig(newConfig?: Partial<S3ClientConfig>): ObservableS3Client {
     const thisConfig = this.config()
+
     return new ObservableS3Client(this.#httpRequest, {
       ...thisConfig,
       ...newConfig,
@@ -131,6 +132,7 @@ export class S3Client {
    */
   withConfig(newConfig?: Partial<S3ClientConfig>): S3Client {
     const thisConfig = this.config()
+
     return new S3Client(this.#httpRequest, {
       ...thisConfig,
       ...newConfig,

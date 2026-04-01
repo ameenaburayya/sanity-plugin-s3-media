@@ -1,10 +1,7 @@
-name: CI & Release
+name: CI
 
 on:
   pull_request:
-    branches:
-      - main
-  push:
     branches:
       - main
 
@@ -38,7 +35,6 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    needs: build
     steps:
       - uses: actions/checkout@v4
         with:
@@ -55,33 +51,3 @@ jobs:
             coverage
             packages/**/coverage
           if-no-files-found: error
-
-  release:
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - lint
-      - test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    permissions:
-      contents: write
-      pull-requests: write
-      id-token: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: ./.github/actions/setup
-      - name: Build Internal Types Package
-        run: pnpm --filter sanity-plugin-s3-media-types run build
-      - name: Update npm for trusted publishing (OIDC)
-        run: npm install -g npm@latest
-      - name: Create Release PR or Publish to npm
-        uses: changesets/action@v1
-        with:
-          version: pnpm version-packages
-          publish: pnpm release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN || secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: ${{ github.event.repository.visibility == 'public' && 'true' || 'false' }}

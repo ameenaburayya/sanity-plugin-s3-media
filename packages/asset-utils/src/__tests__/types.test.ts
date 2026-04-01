@@ -1,3 +1,4 @@
+import type {S3ImageAsset, S3VideoAsset} from 'sanity-plugin-s3-media-types'
 import {expectTypeOf} from 'vitest'
 
 import type {
@@ -6,12 +7,17 @@ import type {
   S3AssetSource,
   S3AssetStringSource,
   S3FileAssetIdParts,
+  S3FileObjectStub,
   S3FileSource,
   S3ImageDimensions,
+  S3ImageObjectStub,
   S3ImageSource,
+  S3ImageUploadStub,
   S3UrlType,
   S3VideoDimensions,
+  S3VideoObjectStub,
   S3VideoSource,
+  S3VideoUploadStub,
   SafeFunction,
 } from '../types'
 
@@ -30,10 +36,16 @@ describe('types', () => {
       assetId: string
       extension: string
     }>()
-    expectTypeOf<S3AssetObjectStub>().toMatchObjectType<{asset: unknown}>()
+    expectTypeOf<S3AssetObjectStub>().toMatchTypeOf<
+      S3FileObjectStub | S3ImageObjectStub | S3VideoObjectStub
+    >()
     expectTypeOf<S3AssetSource>().toEqualTypeOf<S3ImageSource | S3VideoSource | S3FileSource>()
-    expectTypeOf<S3ImageSource>().toExtend<Reference | {asset?: unknown}>()
-    expectTypeOf<S3VideoSource>().toExtend<Reference | {asset?: unknown}>()
+    expectTypeOf<S3ImageSource>().toMatchTypeOf<
+      Reference | S3ImageAsset | S3ImageObjectStub | S3ImageUploadStub
+    >()
+    expectTypeOf<S3VideoSource>().toMatchTypeOf<
+      Reference | S3VideoAsset | S3VideoObjectStub | S3VideoUploadStub
+    >()
     expectTypeOf<S3ImageDimensions>().toMatchObjectType<{
       _type: 's3ImageDimensions'
       width: number

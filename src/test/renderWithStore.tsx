@@ -1,6 +1,6 @@
 import {configureStore} from '@reduxjs/toolkit'
 import {LayerProvider, studioTheme, ThemeProvider, ToastProvider} from '@sanity/ui'
-import {render, type RenderOptions} from '@testing-library/react'
+import {render, type RenderOptions, type RenderResult} from '@testing-library/react'
 import {type FC, type PropsWithChildren, type ReactElement} from 'react'
 import {Provider} from 'react-redux'
 import {ChangeIndicatorsTracker} from 'sanity'
@@ -19,6 +19,10 @@ type Options = Omit<RenderOptions, 'wrapper'> & {
   openDropzone?: () => void
   options?: S3MediaPluginOptions
   preloadedState?: Partial<RootReducerState>
+}
+
+type RenderWithStoreResult = RenderResult & {
+  store: ReturnType<typeof createTestStore>
 }
 
 const buildInitialState = (preloadedState?: Partial<RootReducerState>): RootReducerState => {
@@ -75,7 +79,7 @@ export const createTestStore = (preloadedState?: Partial<RootReducerState>) =>
       }),
   })
 
-export const renderWithStore = (ui: ReactElement, options: Options = {}) => {
+export const renderWithStore = (ui: ReactElement, options: Options = {}): RenderWithStoreResult => {
   const {
     onSelect,
     openDropzone = () => undefined,

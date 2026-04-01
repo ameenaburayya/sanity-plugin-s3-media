@@ -15,6 +15,12 @@ const mockS3FileAsset = {_type: 's3FileAsset' as const}
 const mockS3ImageAsset = {_type: 's3ImageAsset' as const}
 const mockS3VideoAsset = {_type: 's3VideoAsset' as const}
 
+type S3AssetLike = Parameters<typeof isS3FileAsset>[0]
+
+const typedMockS3FileAsset = mockS3FileAsset as unknown as S3AssetLike
+const typedMockS3ImageAsset = mockS3ImageAsset as unknown as S3AssetLike
+const typedMockS3VideoAsset = mockS3VideoAsset as unknown as S3AssetLike
+
 describe('asserters', () => {
   it('checks basic reference shapes', () => {
     expect(isReference({_ref: 's3File-abc-pdf'})).toBe(true)
@@ -41,13 +47,13 @@ describe('asserters', () => {
   })
 
   it('checks asset document _type guards', () => {
-    expect(isS3FileAsset(mockS3FileAsset)).toBe(true)
-    expect(isS3FileAsset(mockS3ImageAsset)).toBe(false)
+    expect(isS3FileAsset(typedMockS3FileAsset)).toBe(true)
+    expect(isS3FileAsset(typedMockS3ImageAsset)).toBe(false)
 
-    expect(isS3ImageAsset(mockS3ImageAsset)).toBe(true)
-    expect(isS3ImageAsset(mockS3VideoAsset)).toBe(false)
+    expect(isS3ImageAsset(typedMockS3ImageAsset)).toBe(true)
+    expect(isS3ImageAsset(typedMockS3VideoAsset)).toBe(false)
 
-    expect(isS3VideoAsset(mockS3VideoAsset)).toBe(true)
-    expect(isS3VideoAsset(mockS3FileAsset)).toBe(false)
+    expect(isS3VideoAsset(typedMockS3VideoAsset)).toBe(true)
+    expect(isS3VideoAsset(typedMockS3FileAsset)).toBe(false)
   })
 })

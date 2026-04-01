@@ -252,24 +252,20 @@ describe('S3MediaTool', () => {
   })
 
   describe('asset edit dialog', () => {
-    it(
-      'opens asset details dialog when asset preview is clicked',
-      async () => {
-        observableFetchMock.mockReturnValue(of({items: [mockS3ImageAsset]}))
-        renderWithStore(<S3MediaTool />)
+    it('opens asset details dialog when asset preview is clicked', async () => {
+      observableFetchMock.mockReturnValue(of({items: [mockS3ImageAsset]}))
+      renderWithStore(<S3MediaTool />)
 
-        await waitFor(() => {
-          expect(screen.getByText('hero.jpg')).toBeInTheDocument()
-        })
+      await waitFor(() => {
+        expect(screen.getByText('hero.jpg')).toBeInTheDocument()
+      })
 
-        await user.click(screen.getByTestId('card-asset-preview-click-target'))
+      await user.click(screen.getByTestId('card-asset-preview-click-target'))
 
-        await waitFor(() => {
-          expect(screen.getByText('Asset details')).toBeInTheDocument()
-        })
-      },
-      10_000,
-    )
+      await waitFor(() => {
+        expect(screen.getByText('Asset details')).toBeInTheDocument()
+      })
+    })
 
     it('shows references section and delete button in asset edit dialog', async () => {
       observableFetchMock.mockReturnValue(of({items: [mockS3ImageAsset]}))
